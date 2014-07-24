@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+import os
 try:
     from PIL import Image
 except:
@@ -21,7 +22,7 @@ def get_53x53_bits(im=None):
     return res
 
 def get_55x55_bits(im=None):
-    im = im or Image.open('bkg.png')
+    im = im or Image.open(os.path.join(os.path.dirname(__file__), 'bkg.png'))
     res = []
     for y in range(55):
         line = []
