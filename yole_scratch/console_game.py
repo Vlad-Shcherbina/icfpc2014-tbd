@@ -47,7 +47,9 @@ try:
             quit_game = False
             while True:
                 c = stdscr.getch()
-                if c == 27:
+                if c in (27,   # ESC
+                         113,  # 'q'
+                        ):
                     quit_game = True
                     break
                 if c in DIRECTION_KEYS:
