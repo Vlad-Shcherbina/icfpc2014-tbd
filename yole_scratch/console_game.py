@@ -1,17 +1,25 @@
+import random
 import curses
 import logging
 import sys
 
 import sys
 sys.path.append('../production')
-from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
+from game import GhostAI, Map, LambdaMan
+from game import InteractiveLambdaManAI, set_interactive_lambda_man_direction
 
 logging.basicConfig(level=logging.DEBUG, filename='debug.log')
 
 DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_LEFT]
 
-lman_ai = InteractiveLambdaManAI()
+
+#### Game spec
 map_file = "../data/maps/default_map.txt"
+lman_ai = "interactive"
+ghost_ais = ['py:GhostAI_Shortest', 'ghc:fickle.ghc']
+####
+
+
 if len(sys.argv) > 1:
     map_file = sys.argv[len(sys.argv) - 1]
 
@@ -23,9 +31,8 @@ ghost_ais = [
     'ghc:flipper.ghc',
 ]
 
-import random
+# TODO(vlad): make everything deterministic
 random.seed()
-ghost_ais = ['py:GhostAI_Shortest']
 
 map = Map(lines, ghost_ais, lman_ai)
 
@@ -55,7 +62,8 @@ try:
                     quit_game = True
                     break
                 if c in DIRECTION_KEYS:
-                    lman_ai.direction = DIRECTION_KEYS.index(c)
+                    set_interactive_lambda_man_direction(
+                        DIRECTION_KEYS.index(c))
                     break
                 stdscr.addstr(map.height()+1, 0, "Unknown key " + str(c) + "  ")
                 stdscr.refresh()

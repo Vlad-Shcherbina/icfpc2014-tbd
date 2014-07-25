@@ -58,6 +58,13 @@ def ghost_ai_from_spec(ghost_spec, map, index):
         assert False, type
 
 
+def lambda_man_ai_from_spec(lm_spec):
+    if lm_spec == 'interactive':
+        return InteractiveLambdaManAI()
+    else:
+        assert False, lm_spec
+
+
 class GhostAI:
     def __init__(self, map, index, code):
         self.vm = GHC(code, map, index)
@@ -71,12 +78,16 @@ class LambdaManAI(object):
         raise NotImplementedError()
 
 
-class InteractiveLambdaManAI(LambdaManAI):
-    def __init__(self):
-        self.direction = None
+interactive_lambda_man_direction = None
 
+def set_interactive_lambda_man_direction(d):
+    global interactive_lambda_man_direction
+    interactive_lambda_man_direction = d
+
+class InteractiveLambdaManAI(LambdaManAI):
     def get_move(self):
-        return self.direction
+        assert interactive_lambda_man_direction is not None
+        return interactive_lambda_man_direction
 
 
 class Actor(object):
@@ -215,7 +226,7 @@ class FruitSpawnpoint(Actor):
             self.expired = True
 
 class Map:
-    def __init__(self, lines, ghost_specs, lman_ai):
+    def __init__(self, lines, ghost_specs, lm_spec):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
@@ -231,6 +242,7 @@ class Map:
             for x, c in enumerate(line):
                 contents = MAP_TILES.index(c)
                 if contents == LAMBDAMAN:
+                    lman_ai = lambda_man_ai_from_spec(lm_spec)
                     lman = LambdaMan(self, x, y, lman_ai)
                     self.lambdamen.append(lman)
                     self.schedule(lman)
