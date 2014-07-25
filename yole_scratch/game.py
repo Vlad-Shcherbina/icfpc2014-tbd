@@ -55,20 +55,12 @@ class Map:
                 contents = MAP_TILES.index(c)
                 if contents == LAMBDAMAN:
                     self.lambdamen.append(LambdaMan(x, y))
-                    contents = EMPTY
                 elif contents == GHOST:
                     index = len(self.ghosts)
                     ai = ghost_ais[len(self.ghosts) % len(ghost_ais)]
                     self.ghosts.append(Ghost(self, index, ai, x, y))
-                    contents = EMPTY
                 line_cells.append(contents)
             self.cells.append(line_cells)
 
     def at(self, x, y):
-        for lman in self.lambdamen:
-            if lman.x == x and lman.y == y:
-                return LAMBDAMAN
-        for ghost in self.ghosts:
-            if ghost.x == x and ghost.y == y:
-                return GHOST
         return self.cells[y][x]
