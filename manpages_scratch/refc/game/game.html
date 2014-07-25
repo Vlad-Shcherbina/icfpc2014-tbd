@@ -59,8 +59,9 @@
     var board = state.board
     var boardJson = (JSON.stringify(board))
     var newline = "\n"
-    console.log(boardJson)
     $("#maze").html(boardJson . replace(/],/g, "]," + newline) 
+                              . replace(/12/g, "=")
+                              . replace(/11/g, "=")
                               . replace(/10/g, "=")
                               . replace(/0/g, "#")
                               . replace(/1/g, " ")
@@ -68,11 +69,10 @@
                               . replace(/3/g, "o")
                               . replace(/4/g, "%")
                               . replace(/5/g, "\\")
-                              . replace(/6/g, "?")
+                              . replace(/6/g, "\\")
                               . replace(/[7-9]/g, "=") 
                               . replace(/[,\[\]]/g, "") 
                               )
-
     return board
   }
 
@@ -198,7 +198,7 @@ RTN
 #######################
 </textarea>
             <div id="ghosts">
-<textarea class="twrap g" placeholder = "Ghost program 1">
+<textarea class="twrap g" id="g1ai" placeholder = "Ghost program 1">
 mov a,255  
 mov b,0    
 mov c,255  
@@ -218,9 +218,9 @@ int 6
 inc [b]    
 hlt    
 </textarea>
-              <textarea class="twrap g" placeholder = "Ghost program 2"></textarea>
-              <textarea class="twrap g" placeholder = "Ghost program 3"></textarea>
-              <textarea class="twrap g" placeholder = "Ghost program 4"></textarea>
+              <textarea class="twrap g" id="g2ai" placeholder = "Ghost program 2"></textarea>
+              <textarea class="twrap g" id="g3ai" placeholder = "Ghost program 3"></textarea>
+              <textarea class="twrap g" id="g4ai" placeholder = "Ghost program 4"></textarea>
             </div>
           </div>
         <div id="buttons">
