@@ -188,7 +188,7 @@ class FruitSpawnpoint(Actor):
             self.expired = True
 
 class Map:
-    def __init__(self, lines, ghost_ghc_codes, lman_ai, log_file=None):
+    def __init__(self, lines, ghost_ghc_codes, lman_ai):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
