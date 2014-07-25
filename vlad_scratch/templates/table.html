@@ -1,0 +1,52 @@
+<style>
+td {
+    border: 1px solid black;
+}
+</style>
+
+{% macro render_result(result) -%}
+<div>
+    <b>{{ result.score }}</b> <br>
+    {{ result.ticks }} ticks
+    <!-- because jinja2 marcii are strange {{kwargs}} -->
+</div>
+{%- endmacro %}
+
+<form>
+Path to json file with results:
+<input type="text" value="{{ results_filename }}" name="results_filename">
+<input type="submit" value="Ok">
+</form>
+<hr>
+
+{% if results %}
+    <table>
+    <tr>
+    <th></th>
+    {% for ghosts in ghostss %}
+        <th>
+        <ul>
+        {% for ghost in ghosts %}
+          <li>{{ ghost }}</li>
+        {% endfor %}
+        </ul>
+        </th>
+    {% endfor %}
+    </tr>
+    {% for map in maps %}
+    <tr>
+        <th>
+            <a href="https://github.com/Vlad-Shcherbina/icfpc2014-tbd/blob/master/data/maps/{{ map }}">{{ map }}</a>
+        </th>
+        {% for ghosts in ghostss %}
+        {% set cell_results = by_map_and_ghosts[map, ghosts] %}
+        <td>
+            {% for result in cell_results %}
+                {% call render_result(result) %} {% endcall %}
+            {% endfor %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </table>
+{% endif %}

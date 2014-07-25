@@ -1,0 +1,23 @@
+[
+{
+    "map": "default_map.txt",
+    "pacman_spec": "human",
+    "ghost_specs": ["do_nothing_ghost"],
+    "score": 42,
+    "ticks": 1000
+},
+{
+    "map": "default_map.txt",
+    "pacman_spec": "human",
+    "ghost_specs": ["real_ghost_ai"],
+    "score": 0,
+    "ticks": 1
+},
+{
+    "map": "some_other_map.txt",
+    "pacman_spec": "human",
+    "ghost_specs": ["ghost1", "ghost2"],
+    "score": 10,
+    "ticks": 10
+}
+]
