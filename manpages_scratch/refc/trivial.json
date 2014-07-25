@@ -1,0 +1,1 @@
+{"map":"####\n#\\o#\n#=.#\n####","lambda":"LDC 0\nLDF 4\nCONS\nRTN\nLDC 0\nLDC 1\nCONS\nRTN\n","g1ai":"mov a,255"}
