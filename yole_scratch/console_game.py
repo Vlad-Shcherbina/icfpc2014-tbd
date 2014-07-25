@@ -24,8 +24,11 @@ def GhostAI_GHC(filename):
     code = open(filename).read()
     return lambda map, index: GhostAI(map, index, code)
 
-# TODO(vlad): instantiate ghost AIs from specs, not directly
-ghost_ais = [GhostAI_GHC('../data/ghosts/fickle.ghc')]
+ghost_ais = [
+    GhostAI_GHC('../data/ghosts/fickle.ghc'),
+    GhostAI_GHC('../data/ghosts/miner.ghc'),
+    GhostAI_GHC('../data/ghosts/flipper.ghc')
+]
 
 #ghost_ais = [GhostAI_Py]
 
