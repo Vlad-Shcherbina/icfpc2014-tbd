@@ -238,7 +238,7 @@ class Map:
                     index = len(self.ghosts)
                     ai_index = len(self.ghosts) % len(ghost_specs)
                     ai = ghost_ai_from_spec(
-                        ghost_specs[ai_index], map=self, index=ai_index)
+                        ghost_specs[ai_index], map=self, index=index)
                     ghost = Ghost(self, index, ai, x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)
