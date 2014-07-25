@@ -4,6 +4,7 @@ from sys import argv
 
 from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
 
+
 logging.basicConfig(level=logging.DEBUG, filename='debug.log')
 
 DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_LEFT]

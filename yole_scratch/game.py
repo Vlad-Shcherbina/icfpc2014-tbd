@@ -1,3 +1,5 @@
+import logging
+
 import sys
 sys.path.append('../popoffka_scratch')
 from ghc import GHC
@@ -186,7 +188,7 @@ class FruitSpawnpoint(Actor):
             self.expired = True
 
 class Map:
-    def __init__(self, lines, ghost_ghc_codes, lman_ai):
+    def __init__(self, lines, ghost_ghc_codes, lman_ai, log_file=None):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
@@ -196,6 +198,7 @@ class Map:
         self.ghosts_eaten = 0
         self.fruits = 0
         self.fright_end = None
+        self.logger = logging.getLogger(__name__)
         for y, line in enumerate(lines):
             line_cells = []
             for x, c in enumerate(line):
@@ -252,6 +255,7 @@ class Map:
 
     def schedule(self, actor):
         actor.next_move = self.current_tick + actor.speed
+        self.logger.debug("Scheduling %s at %d", actor, actor.next_move)
         i = 0
         while i < len(self.move_queue) and self.move_queue[i].next_move < actor.next_move:
             i += 1
