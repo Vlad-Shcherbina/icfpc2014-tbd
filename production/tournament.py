@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class Result(object):
     __slots__ = [
         'map',  # path relative to data/maps
-        'pacman_spec',
+        'lm_spec',
         'ghost_specs',  # list
         'score',
         'ticks',
@@ -25,7 +25,7 @@ class Result(object):
     def to_json(self):
         return dict(
             map=self.map,
-            pacman_spec=self.pacman_spec,
+            lm_spec=self.lm_spec,
             ghost_specs=self.ghost_specs,
             score=self.score,
             ticks=self.ticks)
@@ -43,11 +43,11 @@ def play(result):
     with open(os.path.join('../data/maps', result.map)) as fin:
         lines = [line.strip('\n') for line in fin]
 
-    assert not result.pacman_spec.startswith('interactive:')
+    assert not result.lm_spec.startswith('interactive:')
 
     logger.info('match between {} and {} on {}'.format(
-        result.pacman_spec, result.ghost_specs, result.map))
-    map = game.Map(lines, result.ghost_specs, result.pacman_spec)
+        result.lm_spec, result.ghost_specs, result.map))
+    map = game.Map(lines, result.ghost_specs, result.lm_spec)
     while not map.game_over():
         map.step()
 
@@ -64,7 +64,7 @@ def play_tournament(maps, lm_specs, ghost_team_specs):
             for ghost_team in ghost_team_specs:
                 result = Result()
                 result.map = map
-                result.pacman_spec = lm_spec
+                result.lm_spec = lm_spec
                 result.ghost_specs = ghost_team
                 play(result)
                 results.append(result)
