@@ -131,3 +131,4 @@ class GccTest(TestCase):
         RTN""")
         machine.run()
         self.assertEquals(machine.data_stack, [42])
+

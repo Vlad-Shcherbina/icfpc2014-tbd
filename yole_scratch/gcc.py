@@ -81,9 +81,7 @@ class GccMachine:
         self.data_stack.append(GccClosure(arg, self.current_frame))
 
     def ap(self, arg):
-        closure = self.data_stack.pop()
-        if not isinstance(closure, GccClosure):
-            raise Exception("TAG_MISMATCH")
+        closure = self.pop_closure()
         callee_frame = GccFrame(closure.frame, arg)
         for i in range(arg-1, -1, -1):
             callee_frame.values[i] = self.data_stack.pop()
@@ -117,6 +115,12 @@ class GccMachine:
             raise Exception("TAG_MISMATCH")
         return result
 
+    def pop_closure(self):
+        closure = self.data_stack.pop()
+        if not isinstance(closure, GccClosure):
+            raise Exception("TAG_MISMATCH")
+        return closure
+
     def add_instruction(self, name, args):
         fn = getattr(GccMachine, name)
         args = [self] + args
@@ -145,7 +149,7 @@ def parse_gcc(code):
         line = line.strip()
         if not line:
             continue
-        fields = line.split(' ')
+        fields = line.split()
         instruction = fields[0].lower()
         args = map(int, fields[1:])
         machine.add_instruction(instruction, args)
