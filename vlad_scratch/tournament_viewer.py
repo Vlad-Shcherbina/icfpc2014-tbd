@@ -23,9 +23,12 @@ def table():
     args = flask.request.args
     results_filename = args.get('results_filename')
 
-    with open(results_filename) as fin:
-        results = json.load(fin)
-    results = map(tournament.Result.from_json, results)
+    if results_filename:
+        with open(results_filename) as fin:
+            results = json.load(fin)
+        results = map(tournament.Result.from_json, results)
+    else:
+        results = []
 
     maps = sorted(set(result.map for result in results))
     ghostss = sorted(set(tuple(result.ghost_specs) for result in results))

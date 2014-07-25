@@ -85,5 +85,5 @@ class GhostAI_Shortest(GhostAI_Py):
             ghc.set_direction(RIGHT if dx > 0 else LEFT)
         else:
             ghc.set_direction(DOWN if dy > 0 else UP)
-        logger.info("ghost %d @ (%d, %d) to (%d, %d) chose %d",
-                    index, x, y, man_x, man_y, ghc.direction)
+        logger.debug("ghost %d @ (%d, %d) to (%d, %d) chose %d",
+                     index, x, y, man_x, man_y, ghc.direction)
