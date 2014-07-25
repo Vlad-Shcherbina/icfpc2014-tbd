@@ -192,6 +192,10 @@ class Map:
             ghost.vitality = STANDARD
         self.fright_end = None
 
+    def reset_ghosts(self):
+        for ghost in self.ghosts:
+            ghost.reset()
+
     def fruit_score(self):
         l = self.level()
         if l >= len(FRUIT_SCORES):
@@ -211,8 +215,7 @@ class Map:
                         self.ghosts_eaten += 1
                     elif ghost.vitality == STANDARD:
                         lman.eaten()
-                        for ghost in self.ghosts:
-                            ghost.reset()
+                        self.reset_ghosts()
 
     def ghost_eaten_score(self):
         if self.ghosts_eaten >= len(GHOSTS_EATEN_SCORES):
