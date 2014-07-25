@@ -1,7 +1,5 @@
 import logging
 
-import sys
-sys.path.append('../popoffka_scratch')
 from ghc import GHC
 
 UP = 0

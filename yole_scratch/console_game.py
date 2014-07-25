@@ -2,6 +2,8 @@ import curses
 import logging
 from sys import argv
 
+import sys
+sys.path.append('../production')
 from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
 
 
