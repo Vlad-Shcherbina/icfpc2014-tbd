@@ -68,6 +68,20 @@ class GccMachine:
     def cdr(self):
         self.data_stack.append(self.pop_cons()[1])
 
+    def sel(self, arg_true, arg_false):
+        x = self.pop_int()
+        self.control_stack.append(self.ip+1)
+        if x == 0:
+            return arg_false
+        else:
+            return arg_true
+
+    def join(self):
+        ip = self.control_stack.pop()
+        if type(ip) != int:
+            raise Exception("CONTROL_MISMATCH")
+        return ip
+
     def dum(self, arg):
         self.current_frame = GccFrame(self.current_frame, arg)
 

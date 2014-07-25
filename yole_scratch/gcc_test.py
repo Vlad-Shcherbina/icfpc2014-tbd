@@ -132,3 +132,28 @@ class GccTest(TestCase):
         machine.run()
         self.assertEquals(machine.data_stack, [42])
 
+    def test_sel(self):
+        machine = parse_gcc("""
+ldc 0
+sel 3 5
+rtn
+ldc 2
+join
+ldc 42
+join
+""")
+        machine.run()
+        self.assertEquals(machine.data_stack, [42])
+
+    def test_sel_false(self):
+        machine = parse_gcc("""
+ldc 2
+sel 3 5
+rtn
+ldc 42
+join
+ldc 1
+join
+""")
+        machine.run()
+        self.assertEquals(machine.data_stack, [42])
