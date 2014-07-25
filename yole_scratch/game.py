@@ -142,7 +142,9 @@ class Ghost(Actor):
     def move(self):
         new_dir = self.ai.get_move()
         # if the VM didn't report anything, the direction stays
-        if new_dir is None:
+        # if the VM returned a 180 turn, which is an invalid move,
+        # the direction stays as well
+        if (new_dir is None) or (new_dir == OPPOSITE_DIRECTIONS[self.direction]):
             new_dir = self.direction
 
         if self.move_in_direction(new_dir):
@@ -154,10 +156,15 @@ class Ghost(Actor):
             else:
                 # then try all of them
                 for new_dir in xrange(4):
+                    # we only move in the opposite direction if that's the only option
+                    if new_dir == OPPOSITE_DIRECTIONS[self.direction]:
+                        continue
                     if self.move_in_direction(new_dir):
                         self.direction = new_dir
                         return
-                # if none succeeded, well, nothing happens
+                # if none succeeded, we can at least try moving in the opposite dir
+                if self.move_in_direction(OPPOSITE_DIRECTIONS[self.direction]):
+                    self.direction = OPPOSITE_DIRECTIONS[self.direction]
 
 
     def frighten(self):
