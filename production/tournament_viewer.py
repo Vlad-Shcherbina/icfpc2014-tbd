@@ -1,5 +1,6 @@
 import json
 import collections
+import base64
 
 import flask
 import jinja2
@@ -11,6 +12,12 @@ web_app = flask.Flask(__name__)
 
 template_loader = jinja2.FileSystemLoader('templates')
 web_app.jinja_loader = template_loader
+
+
+@web_app.template_filter('data_uri')
+def data_uri(s, mime='text/plain'):
+    assert isinstance(s, basestring), type(s)
+    return 'data:{};base64,{}'.format(mime, base64.b64encode(s))
 
 
 @web_app.route('/')

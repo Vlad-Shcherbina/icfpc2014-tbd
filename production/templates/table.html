@@ -11,7 +11,12 @@ th {
 {% macro render_result(result) -%}
 <div>
     <b>{{ result.score }}</b> <br>
-    {{ result.ticks }} ticks
+    {{ result.ticks }} ticks <br>
+    <a href="{{ (
+        'python visualizer.py --map={} --lm="{}" '.format(
+            result.map, result.lm_spec) +
+        ' '.join(result.ghost_specs))
+        | data_uri }}">replay</a>
     <!-- because jinja2 marcii are strange {{kwargs}} -->
 </div>
 {%- endmacro %}
