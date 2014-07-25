@@ -73,6 +73,11 @@ def play_tournament(maps, lm_specs, ghost_team_specs):
     return results
 
 
+def save_results(results, filename):
+    with open(filename, 'w') as fout:
+        json.dump(map(Result.to_json, results), fout, indent=2)
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
 
@@ -89,8 +94,7 @@ def main():
             ['ghc:miner.ghc'],
         ])
 
-    with open('../data/some_results.json', 'w') as fout:
-        json.dump(map(Result.to_json, results), fout, indent=2)
+    save_results(results, '../data/some_results.json')
 
 
 if __name__ == '__main__':
