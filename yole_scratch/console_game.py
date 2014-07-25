@@ -17,17 +17,10 @@ if len(sys.argv) > 1:
 
 lines = [line.strip('\n') for line in open(map_file).readlines()]
 
-sys.path.append('../rumata_scratch')
-from ghost_ai import GhostAI_Py
-
-def GhostAI_GHC(filename):
-    code = open(filename).read()
-    return lambda map, index: GhostAI(map, index, code)
-
 ghost_ais = [
-    GhostAI_GHC('../data/ghosts/fickle.ghc'),
-    GhostAI_GHC('../data/ghosts/miner.ghc'),
-    GhostAI_GHC('../data/ghosts/flipper.ghc')
+    'ghc:fickle.ghc',
+    'ghc:miner.ghc',
+    'ghc:flipper.ghc',
 ]
 
 #ghost_ais = [GhostAI_Py]
