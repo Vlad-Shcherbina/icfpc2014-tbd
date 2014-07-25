@@ -3,6 +3,8 @@ import os
 
 from ghc import GHC
 import ghost_ai
+import lm_ai
+
 
 UP = 0
 RIGHT = 1
@@ -47,7 +49,7 @@ FRIGHT_DURATION = 127 * 20
 
 
 def ghost_ai_from_spec(ghost_spec, map, index):
-    type, details = ghost_spec.split(':')
+    type, details = ghost_spec.split(':', 2)
     if type == 'ghc':
         with open(os.path.join('../data/ghosts', details)) as fin:
             code = fin.read()
@@ -55,12 +57,16 @@ def ghost_ai_from_spec(ghost_spec, map, index):
     elif type == 'py':
         return getattr(ghost_ai, details)(map, index)
     else:
-        assert False, type
+        assert False, ghost_spec
 
 
 def lambda_man_ai_from_spec(lm_spec):
-    if lm_spec == 'interactive':
+    type, details = lm_spec.split(':', 2)
+    if type == 'interactive':
+        assert details == ''
         return InteractiveLambdaManAI()
+    elif type == 'py':
+        return eval(details)
     else:
         assert False, lm_spec
 
@@ -74,6 +80,7 @@ class GhostAI:
 
 
 class LambdaManAI(object):
+    # TODO(vlad): pass game state
     def get_move(self):
         raise NotImplementedError()
 

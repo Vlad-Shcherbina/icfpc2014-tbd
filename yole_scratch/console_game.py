@@ -15,8 +15,12 @@ DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_L
 
 #### Game spec
 map_file = "../data/maps/default_map.txt"
-lman_ai = "interactive"
-ghost_ais = ['py:GhostAI_Shortest', 'ghc:fickle.ghc']
+lman_ai = "interactive:"
+#lman_ai = "py:lm_ai.Oscillating(frequency=5)"
+ghost_ais = [
+    'py:GhostAI_Shortest',
+    'ghc:fickle.ghc'
+]
 ####
 
 
@@ -24,12 +28,6 @@ if len(sys.argv) > 1:
     map_file = sys.argv[len(sys.argv) - 1]
 
 lines = [line.strip('\n') for line in open(map_file).readlines()]
-
-ghost_ais = [
-    'ghc:fickle.ghc',
-    'ghc:miner.ghc',
-    'ghc:flipper.ghc',
-]
 
 # TODO(vlad): make everything deterministic
 random.seed()
