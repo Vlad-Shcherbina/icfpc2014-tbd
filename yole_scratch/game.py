@@ -86,7 +86,7 @@ class LambdaMan(Actor):
 
 
 class Ghost(Actor):
-    def __init__(self, map, index, ai, ai_index, x, y):
+    def __init__(self, map, index, ai_index, ai, x, y):
         super(Ghost, self).__init__(map, x, y)
         self.map = map
         self.index = index
