@@ -1,8 +1,10 @@
 import curses
+import logging
 from sys import argv
 
 from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
 
+logging.basicConfig(level=logging.DEBUG, filename='debug.log')
 
 DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_LEFT]
 
@@ -13,7 +15,25 @@ if len(argv) > 1:
 
 lines = [line.strip('\n') for line in open(map_file).readlines()]
 
-ghost_ais = [""]
+ghost_ais = ['''mov a,255
+mov b,0
+mov c,255
+
+inc c
+jgt 7,[c],a
+
+mov a,[c]
+mov b,c
+jlt 3,c,3
+
+mov a,b
+int 0
+
+int 3
+int 6
+inc [b]
+int 8
+hlt''']
 map = Map(lines, ghost_ais, lman_ai)
 
 stdscr = curses.initscr()

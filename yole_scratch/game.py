@@ -1,3 +1,7 @@
+import sys
+sys.path.append('../popoffka_scratch')
+from ghc import GHC
+
 UP = 0
 RIGHT = 1
 DOWN = 2
@@ -40,13 +44,11 @@ FRUIT_SCORES = [100, 300, 500, 500, 700, 700, 1000, 1000, 2000, 2000, 3000, 3000
 FRIGHT_DURATION = 127 * 20
 
 class GhostAI:
-    def __init__(self, map, code):
-        self.map = map
-        self.code = code
+    def __init__(self, map, index, code):
+        self.vm = GHC(code, map, index)
 
     def get_move(self):
-        # GHC INTERPRETER GOES HERE
-        return DOWN
+        return self.vm.run()
 
 
 class LambdaManAI(object):
@@ -136,10 +138,25 @@ class Ghost(Actor):
         self.speed = GHOST_SPEEDS[self.index % len(GHOST_SPEEDS)]
 
     def move(self):
-        if self.vitality == INVISIBLE:
-            return
         new_dir = self.ai.get_move()
-        self.move_in_direction(new_dir)
+        # if the VM didn't report anything, the direction stays
+        if new_dir is None:
+            new_dir = self.direction
+
+        if self.move_in_direction(new_dir):
+            self.direction = new_dir
+        else:
+            # if the move was invalid, first try the previous direction
+            if self.move_in_direction(self.direction):
+                return
+            else:
+                # then try all of them
+                for new_dir in xrange(4):
+                    if self.move_in_direction(new_dir):
+                        self.direction = new_dir
+                        return
+                # if none succeeded, well, nothing happens
+
 
     def frighten(self):
         self.vitality = FRIGHT
@@ -190,7 +207,7 @@ class Map:
                 elif contents == GHOST:
                     index = len(self.ghosts)
                     ai_index = len(self.ghosts) % len(ghost_ghc_codes)
-                    ai = GhostAI(self, ghost_ghc_codes[ai_index])
+                    ai = GhostAI(self, index, ghost_ghc_codes[ai_index])
                     ghost = Ghost(self, index, ai, x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)

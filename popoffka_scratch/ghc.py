@@ -30,9 +30,8 @@ def parse_arg(x):
             return ('ptr', int(mid))
     assert False, '{} cant be parsed as an argument'.format(x)
 
-
 class GHC:
-    def __init__(self, asm):
+    def __init__(self, asm, gamemap, index):
         # parse code
         self.code = []
         for line in asm.split('\n'):
@@ -61,7 +60,6 @@ class GHC:
         # init memory
         self.data = bytearray(256)
         self.registers = bytearray(len(REGISTERS))
-        self.halted = False
         self.instructions = {
             'mov': self.exec_mov,
             'inc': self.exec_inc,
@@ -79,6 +77,11 @@ class GHC:
             'int': self.exec_int,
             'hlt': self.exec_hlt,
         }
+
+        self.halted = False
+        self.new_direction = None
+        self.gamemap = gamemap
+        self.index = index
 
     def _assert(self, cond, message):
         'an assertion that will halt the GHC if the condition is false'
@@ -191,48 +194,62 @@ class GHC:
     def exec_jlt(self, args):
         targ, x, y = args
         if self._get_value(x) < self._get_value(y):
-            self.pc = self._get_value(targ)
+            self.registers[PC] = self._get_value(targ)
 
     def exec_jeq(self, args):
         targ, x, y = args
         if self._get_value(x) == self._get_value(y):
-            self.pc = self._get_value(targ)
+            self.registers[PC] = self._get_value(targ)
 
     def exec_jgt(self, args):
         targ, x, y = args
         if self._get_value(x) > self._get_value(y):
-            self.pc = self._get_value(targ)
+            self.registers[PC] = self._get_value(targ)
 
     def exec_int(self, args):
         which = self._get_value(args[0])
         assert 0 <= which <= 8, 'unknown interrupt {}'.format(which)
 
-        if which != 8:
-            logging.warning('STUB INTERRUPT IMPLEMENTATION (%s)', which)
-
         if which == 0:
-            logging.debug('INT0: set dir to %s', self.registers[0])
+            if 0 <= self.registers[0] <= 3:
+                self.new_direction = self.registers[0]
+            else:
+                self.new_direction = None
         elif which == 1:
-            self.registers[0] = 1
-            self.registers[1] = 1
+            self.registers[0] = self.gamemap.lambdamen[0].x
+            self.registers[1] = self.gamemap.lambdamen[0].y
         elif which == 2:
-            self.registers[0] = 1
-            self.registers[1] = 1
+            if len(self.gamemap.lambdamen) >= 2:
+                self.registers[0] = self.gamemap.lambdamen[1].x
+                self.registers[1] = self.gamemap.lambdamen[1].y
+            else:
+                logging.debug('INT2 called when there is only one lambdaman')
+                self.registers[0] = 255
+                self.registers[1] = 255
         elif which == 3:
-            self.registers[0] = 0
+            self.registers[0] = self.index
         elif which == 4:
-            self.registers[0] = 1
-            self.registers[1] = 1
+            i = self.registers[0]
+            if i >= len(self.gamemap.ghosts): return
+            self.registers[0] = self.gamemap.ghosts[i].start_x
+            self.registers[1] = self.gamemap.ghosts[i].start_y
         elif which == 5:
-            self.registers[0] = 1
-            self.registers[1] = 1
+            i = self.registers[0]
+            if i >= len(self.gamemap.ghosts): return
+            self.registers[0] = self.gamemap.ghosts[i].x
+            self.registers[1] = self.gamemap.ghosts[i].y
         elif which == 6:
-            self.registers[0] = 1
-            self.registers[1] = 1
+            i = self.registers[0]
+            if i >= len(self.gamemap.ghosts): return
+            self.registers[0] = self.gamemap.ghosts[i].vitality
+            self.registers[1] = self.gamemap.ghosts[i].direction
         elif which == 7:
-            self.registers[0] = 0
+            x, y = self.registers[0:2]
+            self.registers[0] = self.gamemap.cells[y][x]
         elif which == 8:
-            logging.debug('outputting registers: %s', map(int, self.registers))
+            logging.debug('ghost %s outputting registers: %s %s', self.index, int(self.registers[PC]),
+                map(int, self.registers[:-1]))
+            logging.debug('ghost %s outputting data: %s', self.index, map(int, self.data[:5]))
 
 
     def exec_hlt(self, args):
@@ -249,12 +266,14 @@ class GHC:
         cycles = 0
         self.registers[PC] = 0
         self.halted = False
+        self.new_direction = None
         while not self.halted and (cycles < 1024):
             pc = self.registers[PC]
             self.execute(self.code[pc])
             if self.registers[PC] == pc:
                 self.registers[PC] = (self.registers[PC] + 1) % 256
             cycles += 1
+        return self.new_direction
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
