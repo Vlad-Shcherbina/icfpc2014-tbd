@@ -1,5 +1,5 @@
 from unittest import TestCase
-from gcc import GCCMachine
+from gcc import GCCMachine, parse_gcc
 
 
 class GCCTest(TestCase):
@@ -113,3 +113,8 @@ class GCCTest(TestCase):
         self.gcc_machine.cons()
         self.gcc_machine.cdr()
         self.assertEquals(self.gcc_machine.data_stack, [4])
+
+    def test_parser(self):
+        machine = parse_gcc("ldc 3\nldc 4\nadd")
+        machine.run()
+        self.assertEquals(machine.data_stack, [7])

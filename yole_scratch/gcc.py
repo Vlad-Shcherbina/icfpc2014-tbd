@@ -1,3 +1,6 @@
+import functools
+
+
 class GCCFrame:
     def __init__(self, parent, size):
         self.parent = parent
@@ -7,6 +10,8 @@ class GCCMachine:
     def __init__(self):
         self.data_stack = []
         self.current_frame = None
+        self.instructions = []
+        self.ip = 0
 
     def ldc(self, arg):
         self.data_stack.append(arg)
@@ -81,3 +86,30 @@ class GCCMachine:
         if type(result) != tuple:
             raise Exception("TAG_MISMATCH")
         return result
+
+    def run(self):
+        while self.ip >= 0 and self.ip < len(self.instructions):
+            next_ip = self.instructions[self.ip]()
+            if next_ip is not None:
+                self.ip = next_ip
+            else:
+                self.ip = self.ip + 1
+
+def parse_gcc(code):
+    machine = GCCMachine()
+    for line in code.splitlines():
+        semicolon = line.find(';')
+        if semicolon >= 0:
+            line = line[:semicolon]
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split(' ')
+        instruction = fields[0].lower()
+        fn = getattr(GCCMachine, instruction)
+        args = [machine] + map(int, fields[1:])
+        f = functools.partial(fn, *args)
+        f.text = line
+        machine.instructions.append(f)
+
+    return machine
