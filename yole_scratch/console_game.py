@@ -1,4 +1,5 @@
 import curses
+from sys import argv
 
 from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
 
@@ -6,7 +7,12 @@ from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
 DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_LEFT]
 
 lman_ai = InteractiveLambdaManAI()
-lines = [line.strip() for line in open("../data/maps/default_map.txt").readlines()]
+map_file = "../data/maps/default_map.txt"
+if len(argv) > 1:
+    map_file = argv[len(argv) - 1]
+
+lines = [line.strip('\n') for line in open(map_file).readlines()]
+
 ghost_ais = [""]
 map = Map(lines, ghost_ais, lman_ai)
 
