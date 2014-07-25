@@ -5,8 +5,7 @@ from game import *
 class GameTest(TestCase):
     def test_map(self):
         lines = ["####", r"#\=#", "####"]
-        ghost_ais = [""]
-        map = Map(lines, ghost_ais, InteractiveLambdaManAI())
+        map = Map(lines, [""], InteractiveLambdaManAI())
         self.assertEquals(WALL, map.at(0, 0))
         self.assertEquals(LAMBDAMAN, map.at(1, 1))
         self.assertEquals(GHOST, map.at(2, 1))
@@ -24,3 +23,13 @@ class GameTest(TestCase):
         self.assertEquals(EMPTY, map.at(2, 1))
         self.assertEquals(map.move_queue[0], lman)
         self.assertEquals(264, lman.next_move)
+
+    def test_expire_fruits(self):
+        lines = ["#####", "#%..#", "#####"]
+        map = Map(lines, [""], InteractiveLambdaManAI())
+        self.assertEquals(EMPTY, map.at(1, 1))
+        map.step()
+        self.assertEquals(FRUIT, map.at(1, 1))
+        map.step()
+        self.assertEquals(EMPTY, map.at(1, 1))
+        self.assertEquals(0, len(map.move_queue))

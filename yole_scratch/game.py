@@ -30,6 +30,7 @@ GHOST_SPEEDS = [130, 132, 134, 136]
 GHOST_FRIGHT_SPEEDS = [195, 198, 201, 204]
 
 FRUIT_SPAWN_TIMES = [127*200, 127*400]
+FRUIT_EXPIRE_TIMES = [127*280, 127*480]
 
 PILL_SCORE = 10
 POWER_PILL_SCORE = 50
@@ -68,6 +69,7 @@ class Actor(object):
         self.y = y
         self.start_x = x
         self.start_y = y
+        self.expired = False
 
     def reset(self):
         self.x = self.start_x
@@ -121,7 +123,6 @@ class LambdaMan(Actor):
 class Ghost(Actor):
     def __init__(self, map, index, ai_index, ai, x, y):
         super(Ghost, self).__init__(map, x, y)
-        self.map = map
         self.index = index
         self.direction = DOWN
         self.ai = ai
@@ -132,6 +133,8 @@ class Ghost(Actor):
         self.speed = GHOST_SPEEDS[self.ai_index]
 
     def move(self):
+        if self.vitality == INVISIBLE:
+            return
         new_dir = self.ai.get_move()
         self.move_in_direction(new_dir)
 
@@ -148,11 +151,18 @@ class Ghost(Actor):
 class FruitSpawnpoint(Actor):
     def __init__(self, map, x, y, index):
         super(FruitSpawnpoint, self).__init__(map, x, y)
+        self.index = index
         self.speed = FRUIT_SPAWN_TIMES[index]
+        self.spawned = False
 
     def move(self):
-        pass
-
+        if not self.spawned:
+            self.map.spawn(self.x, self.y, FRUIT)
+            self.spawned = True
+            self.speed = FRUIT_EXPIRE_TIMES[self.index] - FRUIT_SPAWN_TIMES[self.index]
+        else:
+            self.map.clear(self.x, self.y)
+            self.expired = True
 
 class Map:
     def __init__(self, lines, ghost_ghc_codes, lman_ai):
@@ -183,7 +193,7 @@ class Map:
                 elif contents == PILL:
                     self.pills_remaining += 1
                 elif contents == FRUIT:
-                    spawnpoint = FruitSpawnpoint(map, x, y, self.fruits)
+                    spawnpoint = FruitSpawnpoint(self, x, y, self.fruits)
                     self.fruits += 1
                     self.schedule(spawnpoint)
                     contents = EMPTY
@@ -215,6 +225,10 @@ class Map:
             self.pills_remaining -= 1
         self.cells[y][x] = EMPTY
 
+    def spawn(self, x, y, type):
+        assert self.cells[y][x] == EMPTY
+        self.cells[y][x] = type
+
     def schedule(self, actor):
         actor.next_move = self.current_tick + actor.speed
         i = 0
@@ -230,7 +244,8 @@ class Map:
             self.unfrighten_ghosts()
         actor.move()
         self.check_lman_ghost_collisions()
-        self.schedule(actor)
+        if not actor.expired:
+            self.schedule(actor)
 
     def frighten_ghosts(self):
         for ghost in self.ghosts:
