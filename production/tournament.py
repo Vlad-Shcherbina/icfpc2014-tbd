@@ -1,9 +1,7 @@
 import json
 import logging
 import os
-import sys
 
-sys.path.append('../production')
 import game
 
 
