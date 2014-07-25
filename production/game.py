@@ -2,6 +2,7 @@ import logging
 import os
 
 from ghc import GHC
+import ghost_ai
 
 UP = 0
 RIGHT = 1
@@ -51,6 +52,8 @@ def ghost_ai_from_spec(ghost_spec, map, index):
         with open(os.path.join('../data/ghosts', details)) as fin:
             code = fin.read()
         return GhostAI(map, index, code)
+    elif type == 'py':
+        return getattr(ghost_ai, details)(map, index)
     else:
         assert False, type
 

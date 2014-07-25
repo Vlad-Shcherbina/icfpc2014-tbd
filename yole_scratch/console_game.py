@@ -23,7 +23,7 @@ ghost_ais = [
     'ghc:flipper.ghc',
 ]
 
-#ghost_ais = [GhostAI_Py]
+#ghost_ais = ['py:GhostAI_Random']
 
 map = Map(lines, ghost_ais, lman_ai)
 
