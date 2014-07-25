@@ -118,3 +118,16 @@ class GCCTest(TestCase):
         machine = parse_gcc("ldc 3\nldc 4\nadd")
         machine.run()
         self.assertEquals(machine.data_stack, [7])
+
+    def test_local_gcc(self):
+        machine = parse_gcc("""
+        LDC 21
+        LDF 4
+        AP 1
+        RTN
+        LD 0 0
+        LD 0 0
+        ADD
+        RTN""")
+        machine.run()
+        self.assertEquals(machine.data_stack, [42])

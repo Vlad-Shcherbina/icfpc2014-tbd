@@ -6,12 +6,20 @@ class GCCFrame:
         self.parent = parent
         self.values = [None] * size
 
+
+class GCCClosure:
+    def __init__(self, ip, frame):
+        self.ip = ip
+        self.frame = frame
+
 class GCCMachine:
     def __init__(self):
         self.data_stack = []
         self.current_frame = None
         self.instructions = []
+        self.control_stack = []
         self.ip = 0
+        self.done = False
 
     def ldc(self, arg):
         self.data_stack.append(arg)
@@ -69,6 +77,28 @@ class GCCMachine:
     def ld(self, arg, arg2):
         self.data_stack.append(self.fetch_frame(arg).values[arg2])
 
+    def ldf(self, arg):
+        self.data_stack.append(GCCClosure(arg, self.current_frame))
+
+    def ap(self, arg):
+        closure = self.data_stack.pop()
+        if not isinstance(closure, GCCClosure):
+            raise Exception("TAG_MISMATCH")
+        callee_frame = GCCFrame(closure.frame, arg)
+        for i in range(arg-1, -1, -1):
+            callee_frame.values[i] = self.data_stack.pop()
+        self.control_stack.append((self.current_frame, self.ip+1))
+        self.current_frame = callee_frame
+        return closure.ip
+
+    def rtn(self):
+        if not self.control_stack:
+            self.done = True
+            return
+        frame, ip = self.control_stack.pop()
+        self.current_frame = frame
+        return ip
+
     def fetch_frame(self, index):
         result = self.current_frame
         for i in range(index):
@@ -90,6 +120,8 @@ class GCCMachine:
     def run(self):
         while self.ip >= 0 and self.ip < len(self.instructions):
             next_ip = self.instructions[self.ip]()
+            if self.done:
+                break
             if next_ip is not None:
                 self.ip = next_ip
             else:
