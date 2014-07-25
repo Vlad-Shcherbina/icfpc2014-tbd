@@ -1,11 +1,10 @@
 import curses
 import logging
-from sys import argv
+import sys
 
 import sys
 sys.path.append('../production')
 from game import GhostAI, Map, LambdaMan, InteractiveLambdaManAI
-
 
 logging.basicConfig(level=logging.DEBUG, filename='debug.log')
 
@@ -13,13 +12,23 @@ DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_L
 
 lman_ai = InteractiveLambdaManAI()
 map_file = "../data/maps/default_map.txt"
-if len(argv) > 1:
-    map_file = argv[len(argv) - 1]
+if len(sys.argv) > 1:
+    map_file = sys.argv[len(sys.argv) - 1]
 
 lines = [line.strip('\n') for line in open(map_file).readlines()]
 
+sys.path.append('../rumata_scratch')
+from ghost_ai import GhostAI_Py
+
+def GhostAI_GHC(filename):
+    code = open(filename).read()
+    return lambda map, index: GhostAI(map, index, code)
+
 # TODO(vlad): instantiate ghost AIs from specs, not directly
-ghost_ais = [open('../data/ghosts/fickle.ghc').read()]
+ghost_ais = [GhostAI_GHC('../data/ghosts/fickle.ghc')]
+
+#ghost_ais = [GhostAI_Py]
+
 map = Map(lines, ghost_ais, lman_ai)
 
 stdscr = curses.initscr()

@@ -127,7 +127,7 @@ class Ghost(Actor):
         super(Ghost, self).__init__(map, x, y)
         self.index = index
         self.direction = DOWN
-        self.ai = ai
+        self.ai = ai(map, index)
         self.vitality = STANDARD
         self.x = x
         self.y = y
@@ -200,7 +200,7 @@ class FruitSpawnpoint(Actor):
             self.expired = True
 
 class Map:
-    def __init__(self, lines, ghost_ghc_codes, lman_ai):
+    def __init__(self, lines, ghost_ais, lman_ai):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
@@ -221,9 +221,8 @@ class Map:
                     self.schedule(lman)
                 elif contents == GHOST:
                     index = len(self.ghosts)
-                    ai_index = len(self.ghosts) % len(ghost_ghc_codes)
-                    ai = GhostAI(self, index, ghost_ghc_codes[ai_index])
-                    ghost = Ghost(self, index, ai, x, y)
+                    ai_index = len(self.ghosts) % len(ghost_ais)
+                    ghost = Ghost(self, index, ghost_ais[ai_index], x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)
                 elif contents == PILL:
