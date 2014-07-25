@@ -39,12 +39,13 @@ FRUIT_SCORES = [100, 300, 500, 500, 700, 700, 1000, 1000, 2000, 2000, 3000, 3000
 FRIGHT_DURATION = 127 * 20
 
 class GhostAI:
-    def __init__(self, code):
+    def __init__(self, map, code):
+        self.map = map
         self.code = code
 
-    def run(self):
+    def get_move(self):
         # GHC INTERPRETER GOES HERE
-        pass
+        return DOWN
 
 
 class LambdaManAI(object):
@@ -72,6 +73,15 @@ class Actor(object):
         self.x = self.start_x
         self.y = self.start_y
 
+    def move_in_direction(self, direction):
+        new_x = self.x + DELTA_X[direction]
+        new_y = self.y + DELTA_Y[direction]
+        if self.map.at(new_x, new_y) != WALL:
+            self.x = new_x
+            self.y = new_y
+            return True
+        return False
+
 
 class LambdaMan(Actor):
     def __init__(self, map, x, y, ai):
@@ -83,11 +93,7 @@ class LambdaMan(Actor):
 
     def move(self):
         direction = self.ai.get_move()
-        new_x = self.x + DELTA_X[direction]
-        new_y = self.y + DELTA_Y[direction]
-        if self.map.at(new_x, new_y) != WALL:
-            self.x = new_x
-            self.y = new_y
+        self.move_in_direction(direction)
         self.check_collisions()
 
     def check_collisions(self):
@@ -126,7 +132,8 @@ class Ghost(Actor):
         self.speed = GHOST_SPEEDS[self.ai_index]
 
     def move(self):
-        pass
+        new_dir = self.ai.get_move()
+        self.move_in_direction(new_dir)
 
     def frighten(self):
         self.vitality = FRIGHT
@@ -148,7 +155,7 @@ class FruitSpawnpoint(Actor):
 
 
 class Map:
-    def __init__(self, lines, ghost_ais, lman_ai):
+    def __init__(self, lines, ghost_ghc_codes, lman_ai):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
@@ -168,8 +175,8 @@ class Map:
                     self.schedule(lman)
                 elif contents == GHOST:
                     index = len(self.ghosts)
-                    ai_index = len(self.ghosts) % len(ghost_ais)
-                    ai = ghost_ais[ai_index]
+                    ai_index = len(self.ghosts) % len(ghost_ghc_codes)
+                    ai = GhostAI(self, ghost_ghc_codes[ai_index])
                     ghost = Ghost(self, index, ai_index, ai, x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)

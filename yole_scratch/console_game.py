@@ -7,7 +7,7 @@ DIRECTION_KEYS = [curses.KEY_UP, curses.KEY_RIGHT, curses.KEY_DOWN, curses.KEY_L
 
 lman_ai = InteractiveLambdaManAI()
 lines = [line.strip() for line in open("../data/maps/default_map.txt").readlines()]
-ghost_ais = [GhostAI("")]
+ghost_ais = [""]
 map = Map(lines, ghost_ais, lman_ai)
 
 stdscr = curses.initscr()

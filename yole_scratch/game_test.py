@@ -5,7 +5,7 @@ from game import *
 class GameTest(TestCase):
     def test_map(self):
         lines = ["####", r"#\=#", "####"]
-        ghost_ais = [GhostAI("")]
+        ghost_ais = [""]
         map = Map(lines, ghost_ais, InteractiveLambdaManAI())
         self.assertEquals(WALL, map.at(0, 0))
         self.assertEquals(LAMBDAMAN, map.at(1, 1))
@@ -13,7 +13,7 @@ class GameTest(TestCase):
 
     def test_step(self):
         lines = ["######", r"#\.%#", "#####"]
-        ghost_ais = [GhostAI("")]
+        ghost_ais = [""]
         lman_ai = InteractiveLambdaManAI()
         lman_ai.direction = RIGHT
         map = Map(lines, ghost_ais, lman_ai)
