@@ -187,6 +187,13 @@ class FruitSpawnpoint(Actor):
 
     def move(self):
         if not self.spawned:
+            for lman in self.map.lambdamen:
+                if lman.x == self.x and lman.y == self.y:
+                    # next move has been scheduled already so the speed change
+                    # will not affect time of next move
+                    lman.eat(self.map.fruit_score())
+                    self.expired = True
+                    return
             self.map.spawn(self.x, self.y, FRUIT)
             self.spawned = True
             self.speed = FRUIT_EXPIRE_TIMES[self.index] - FRUIT_SPAWN_TIMES[self.index]
