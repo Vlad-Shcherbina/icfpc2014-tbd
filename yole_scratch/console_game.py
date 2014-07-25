@@ -23,7 +23,9 @@ ghost_ais = [
     'ghc:flipper.ghc',
 ]
 
-#ghost_ais = ['py:GhostAI_Random']
+import random
+random.seed()
+ghost_ais = ['py:GhostAI_Shortest']
 
 map = Map(lines, ghost_ais, lman_ai)
 

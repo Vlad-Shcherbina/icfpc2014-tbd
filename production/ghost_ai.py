@@ -1,4 +1,12 @@
 import random
+import logging
+
+logger = logging.getLogger(__name__)
+
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
 
 class GHC_Ints:
     def __init__(self, map, index):
@@ -60,3 +68,22 @@ class GhostAI_Random(GhostAI_Py):
 
     def fun(self, ghc):
         ghc.set_direction(random.randint(0, 3))
+
+class GhostAI_Shortest(GhostAI_Py):
+    def __init__(self, map, index):
+        super(GhostAI_Shortest, self).__init__(map, index)
+
+    def run(self, ghc):
+        index = ghc.get_index()
+        (x, y) = ghc.get_ghost_pos(index)
+        (man_x, man_y) = ghc.get_man_pos()
+        dx = man_x - x
+        dy = man_y - y
+        adx = dx if dx > 0 else -dx
+        ady = dy if dy > 0 else -dy
+        if adx > ady:
+            ghc.set_direction(RIGHT if dx > 0 else LEFT)
+        else:
+            ghc.set_direction(DOWN if dy > 0 else UP)
+        logger.info("ghost %d @ (%d, %d) to (%d, %d) chose %d",
+                    index, x, y, man_x, man_y, ghc.direction)
