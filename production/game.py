@@ -47,6 +47,8 @@ FRUIT_SCORES = [100, 300, 500, 500, 700, 700, 1000, 1000, 2000, 2000, 3000, 3000
 
 FRIGHT_DURATION = 127 * 20
 
+logger = logging.getLogger(__name__)
+
 
 def ghost_ai_from_spec(ghost_spec, map, index):
     type, details = ghost_spec.split(':', 2)
@@ -243,7 +245,6 @@ class Map:
         self.ghosts_eaten = 0
         self.fruits = 0
         self.fright_end = None
-        self.logger = logging.getLogger(__name__)
         for y, line in enumerate(lines):
             line_cells = []
             for x, c in enumerate(line):
@@ -302,7 +303,7 @@ class Map:
 
     def schedule(self, actor):
         actor.next_move = self.current_tick + actor.speed
-        self.logger.debug("Scheduling %s at %d", actor, actor.next_move)
+        logger.debug("Scheduling %s at %d", actor, actor.next_move)
         i = 0
         while i < len(self.move_queue) and self.move_queue[i].next_move < actor.next_move:
             i += 1
