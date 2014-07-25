@@ -52,3 +52,5 @@ finally:
     stdscr.keypad(0)
     curses.echo()
     curses.endwin()
+    print "Tick {0} Score {1}".format(map.current_tick,
+                                      map.lambdamen[0].score)
