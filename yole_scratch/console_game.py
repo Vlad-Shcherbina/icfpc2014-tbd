@@ -22,7 +22,7 @@ try:
         for y in range(map.height()):
             stdscr.addstr(y, 0, map.line_as_text(y))
         stdscr.addstr(map.height(), 0,
-                      "Tick {0} Score {1}".format(map.current_tick,
+                      "Tick {0} Score {1}".format(map.move_queue[0].next_move,
                                                  map.lambdamen[0].score))
         stdscr.refresh()
         next_actor = map.move_queue[0]
