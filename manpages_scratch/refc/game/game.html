@@ -1,8 +1,7 @@
 <html>
 <head>
-<link href="/static/stylesheet2.css" rel="stylesheet" type="text/css">
-<script src="/static/jquery.min.js"></script>
-<script language="javascript" src="/static/game.js"></script>
+<script src="/jquery.min.js"></script>
+<script language="javascript" src="/game.js"></script>
 
 <script type="text/javascript"> 
   // Grid dimensions in pixels
@@ -29,7 +28,6 @@
       $(".run").removeAttr("disabled")
       $("#trace").empty()
       $("#status").empty()
-      setupBoard()
       updateStatus("Program Loaded")
       updateBoard(true)
       updateState()
@@ -57,32 +55,25 @@
     return o;
   }
 
-  function setupBoard(){
-    var board = state.board
-    var y = board.length * width
-    var x = board[0].length * height
-    var maze = document.getElementById("maze")
-    maze.width = x
-    maze.height = y
-  }
-
   function updateBoard(firsttime){
     var board = state.board
-    var y = board.length
-    var x = board[0].length
+    var boardJson = (JSON.stringify(board))
+    var newline = "\n"
+    console.log(boardJson)
+    $("#maze").html(boardJson . replace(/],/g, "]," + newline) 
+                              . replace(/10/g, "=")
+                              . replace(/0/g, "#")
+                              . replace(/1/g, " ")
+                              . replace(/2/g, ".")
+                              . replace(/3/g, "o")
+                              . replace(/4/g, "%")
+                              . replace(/5/g, "\\")
+                              . replace(/6/g, "?")
+                              . replace(/[7-9]/g, "=") 
+                              . replace(/[,\[\]]/g, "") 
+                              )
 
-    var ctx = document.getElementById("maze").getContext("2d")
-    var img = document.getElementById("alltiles")
-
-    for (var j = 0; j < y; j++){
-      for (var i = 0; i < x; i ++) {
-        var tileno = board[j][i]
-        console.log(JSON.stringify(board))
-        if (tileno != 0 || firsttime) {
-          ctx.drawImage(img, tileno * width, 0, width, height, i * width, j * height, width, height)
-        }
-      }
-    }
+    return board
   }
 
   function step(){
@@ -239,8 +230,7 @@ hlt
         </div>
         <section id="sim">
           <h2> Game </h2>
-          <canvas id="maze" width="200" height="200"></canvas>
-          <img src="http://icfpcontest.org/alltiles.png" id="alltiles">
+          <pre id="maze"></pre>
           <div id = "status"> No Program Loaded </div>
           <h5> State </h5>
           <div id = "state"> 
