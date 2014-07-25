@@ -51,7 +51,7 @@ class Map:
         self.cells = []
         for y, line in enumerate(lines):
             line_cells = []
-            for x, c in line:
+            for x, c in enumerate(line):
                 contents = MAP_TILES.index(c)
                 if contents == LAMBDAMAN:
                     self.lambdamen.append(LambdaMan(x, y))
