@@ -142,7 +142,7 @@ class Ghost(Actor):
         super(Ghost, self).__init__(map, x, y)
         self.index = index
         self.direction = DOWN
-        self.ai = ai(map, index)
+        self.ai = ai
         self.vitality = STANDARD
         self.x = x
         self.y = y
