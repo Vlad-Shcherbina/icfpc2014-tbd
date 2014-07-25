@@ -156,8 +156,24 @@ class Map:
                 line_cells.append(contents)
             self.cells.append(line_cells)
 
+    def width(self):
+        return len(self.cells[0])
+
+    def height(self):
+        return len(self.cells)
+
     def at(self, x, y):
         return self.cells[y][x]
+
+    def line_as_text(self, y):
+        result = [MAP_TILES[c] for c in self.cells[y]]
+        for lman in self.lambdamen:
+            if lman.y == y:
+                result[lman.x] = '\\'
+        for ghost in self.ghosts:
+            if ghost.y == y:
+                result[ghost.x] = '='
+        return ''.join(result)
 
     def clear(self, x, y):
         c = self.at(x, y)
