@@ -3,6 +3,8 @@ RIGHT = 1
 DOWN = 2
 LEFT = 3
 OPPOSITE_DIRECTIONS = [DOWN, LEFT, UP, RIGHT]
+DELTA_X = [0, 1, 0, -1]
+DELTA_Y = [-1, 0, 1, 0]
 
 STANDARD = 0
 FRIGHT = 1
@@ -17,6 +19,9 @@ LAMBDAMAN = 5
 GHOST = 6
 
 MAP_TILES = r"# .o%\="
+
+# Map tiles to display in the UI (don't show start location of pacman and ghosts)
+MAP_TILES_VIEW = r"# .o%  "
 
 LAMBDAMAN_SPEED = 127
 LAMBDAMAN_EATING_SPEED = 137
@@ -42,6 +47,19 @@ class GhostAI:
         pass
 
 
+class LambdaManAI(object):
+    def get_move(self):
+        raise NotImplementedError()
+
+
+class InteractiveLambdaManAI(LambdaManAI):
+    def __init__(self):
+        self.direction = None
+
+    def get_move(self):
+        return self.direction
+
+
 class Actor(object):
     def __init__(self, map, x, y):
         self.map = map
@@ -56,13 +74,20 @@ class Actor(object):
 
 
 class LambdaMan(Actor):
-    def __init__(self, map, x, y):
+    def __init__(self, map, x, y, ai):
         super(LambdaMan, self).__init__(map, x, y)
         self.speed = LAMBDAMAN_SPEED
         self.score = 0
         self.lives = 3
+        self.ai = ai
 
     def move(self):
+        direction = self.ai.get_move()
+        new_x = self.x + DELTA_X[direction]
+        new_y = self.y + DELTA_Y[direction]
+        if self.map.at(new_x, new_y) != WALL:
+            self.x = new_x
+            self.y = new_y
         self.check_collisions()
 
     def check_collisions(self):
@@ -74,6 +99,8 @@ class LambdaMan(Actor):
             self.map.frighten_ghosts()
         elif c == FRUIT:
             self.eat(self.map.fruit_score())
+        else:
+            self.speed = LAMBDAMAN_SPEED
 
     def eat(self, score):
         self.map.clear(self.x, self.y)
@@ -121,7 +148,7 @@ class FruitSpawnpoint(Actor):
 
 
 class Map:
-    def __init__(self, lines, ghost_ais):
+    def __init__(self, lines, ghost_ais, lman_ai):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
@@ -136,7 +163,7 @@ class Map:
             for x, c in enumerate(line):
                 contents = MAP_TILES.index(c)
                 if contents == LAMBDAMAN:
-                    lman = LambdaMan(self, x, y)
+                    lman = LambdaMan(self, x, y, lman_ai)
                     self.lambdamen.append(lman)
                     self.schedule(lman)
                 elif contents == GHOST:
@@ -166,7 +193,7 @@ class Map:
         return self.cells[y][x]
 
     def line_as_text(self, y):
-        result = [MAP_TILES[c] for c in self.cells[y]]
+        result = [MAP_TILES_VIEW[c] for c in self.cells[y]]
         for lman in self.lambdamen:
             if lman.y == y:
                 result[lman.x] = '\\'
@@ -189,7 +216,8 @@ class Map:
         self.move_queue.insert(i, actor)
 
     def step(self):
-        actor = self.move_queue.pop()
+        actor = self.move_queue[0]
+        del self.move_queue[0]
         self.current_tick = actor.next_move
         if self.fright_end and self.current_tick >= self.fright_end:
             self.unfrighten_ghosts()
@@ -237,3 +265,10 @@ class Map:
         if self.ghosts_eaten >= len(GHOSTS_EATEN_SCORES):
             return GHOSTS_EATEN_SCORES[-1]
         return GHOSTS_EATEN_SCORES[self.ghosts_eaten]
+
+    def game_over(self):
+        if self.pills_remaining == 0:
+            return True
+        if all([lman.lives == 0 for lman in self.lambdamen]):
+            return True
+        return False
