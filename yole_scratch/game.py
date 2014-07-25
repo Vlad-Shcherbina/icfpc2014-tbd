@@ -39,6 +39,9 @@ class LambdaMan:
         self.y = y
         self.speed = LAMBDAMAN_SPEED
 
+    def move(self):
+        pass
+
 
 class Ghost:
     def __init__(self, map, index, ai, ai_index, x, y):
@@ -51,6 +54,9 @@ class Ghost:
         self.x = x
         self.y = y
         self.speed = GHOST_SPEEDS[self.ai_index]
+
+    def move(self):
+        pass
 
 
 class Map:
