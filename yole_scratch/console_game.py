@@ -18,25 +18,8 @@ if len(argv) > 1:
 
 lines = [line.strip('\n') for line in open(map_file).readlines()]
 
-ghost_ais = ['''mov a,255
-mov b,0
-mov c,255
-
-inc c
-jgt 7,[c],a
-
-mov a,[c]
-mov b,c
-jlt 3,c,3
-
-mov a,b
-int 0
-
-int 3
-int 6
-inc [b]
-int 8
-hlt''']
+# TODO(vlad): instantiate ghost AIs from specs, not directly
+ghost_ais = [open('../data/ghosts/fickle.ghc').read()]
 map = Map(lines, ghost_ais, lman_ai)
 
 stdscr = curses.initscr()
