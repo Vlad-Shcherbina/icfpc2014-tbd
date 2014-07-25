@@ -15,6 +15,8 @@ def strip_comments(code_lines):
         i = l.find(';')
         if i != -1:
             result.append(l[:i])
+        else:
+            result.append(l)
     return result
 
 import sys
