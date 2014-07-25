@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from production.game import *
+from game import *
 
 
 class GameTest(TestCase):
