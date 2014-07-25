@@ -207,7 +207,9 @@ class GHC:
         which = self._get_value(args[0])
         assert 0 <= which <= 8, 'unknown interrupt {}'.format(which)
 
-        logging.warning('STUB INTERRUPT IMPLEMENTATION (%s)', which)
+        if which != 8:
+            logging.warning('STUB INTERRUPT IMPLEMENTATION (%s)', which)
+
         if which == 0:
             logging.debug('INT0: set dir to %s', self.registers[0])
         elif which == 1:
