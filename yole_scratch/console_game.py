@@ -18,11 +18,10 @@ if len(argv) > 1:
 
 lines = [line.strip('\n') for line in open(map_file).readlines()]
 
-# TODO(vlad): instantiate ghost AIs from specs, not directly
 ghost_ais = [
-    open('../data/ghosts/fickle.ghc').read(),
-    open('../data/ghosts/miner.ghc').read(),
-    open('../data/ghosts/flipper.ghc').read(),
+    'ghc:fickle.ghc',
+    'ghc:miner.ghc',
+    'ghc:flipper.ghc',
 ]
 map = Map(lines, ghost_ais, lman_ai)
 

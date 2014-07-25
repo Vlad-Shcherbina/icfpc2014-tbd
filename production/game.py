@@ -1,4 +1,5 @@
 import logging
+import os
 
 from ghc import GHC
 
@@ -42,6 +43,17 @@ GHOSTS_EATEN_SCORES = [200, 400, 800, 1600]
 FRUIT_SCORES = [100, 300, 500, 500, 700, 700, 1000, 1000, 2000, 2000, 3000, 3000]
 
 FRIGHT_DURATION = 127 * 20
+
+
+def ghost_ai_from_spec(ghost_spec, map, index):
+    type, details = ghost_spec.split(':')
+    if type == 'ghc':
+        with open(os.path.join('../data/ghosts', details)) as fin:
+            code = fin.read()
+        return GhostAI(map, index, code)
+    else:
+        assert False, type
+
 
 class GhostAI:
     def __init__(self, map, index, code):
@@ -200,7 +212,7 @@ class FruitSpawnpoint(Actor):
             self.expired = True
 
 class Map:
-    def __init__(self, lines, ghost_ghc_codes, lman_ai):
+    def __init__(self, lines, ghost_specs, lman_ai):
         self.ghosts = []
         self.lambdamen = []
         self.cells = []
@@ -221,8 +233,9 @@ class Map:
                     self.schedule(lman)
                 elif contents == GHOST:
                     index = len(self.ghosts)
-                    ai_index = len(self.ghosts) % len(ghost_ghc_codes)
-                    ai = GhostAI(self, index, ghost_ghc_codes[ai_index])
+                    ai_index = len(self.ghosts) % len(ghost_specs)
+                    ai = ghost_ai_from_spec(
+                        ghost_specs[ai_index], map=self, index=ai_index)
                     ghost = Ghost(self, index, ai, x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)
