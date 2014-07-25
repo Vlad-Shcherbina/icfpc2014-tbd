@@ -1,18 +1,18 @@
 import functools
 
 
-class GCCFrame:
+class GccFrame:
     def __init__(self, parent, size):
         self.parent = parent
         self.values = [None] * size
 
 
-class GCCClosure:
+class GccClosure:
     def __init__(self, ip, frame):
         self.ip = ip
         self.frame = frame
 
-class GCCMachine:
+class GccMachine:
     def __init__(self):
         self.data_stack = []
         self.current_frame = None
@@ -69,7 +69,7 @@ class GCCMachine:
         self.data_stack.append(self.pop_cons()[1])
 
     def dum(self, arg):
-        self.current_frame = GCCFrame(self.current_frame, arg)
+        self.current_frame = GccFrame(self.current_frame, arg)
 
     def st(self, arg, arg2):
         self.fetch_frame(arg).values[arg2] = self.data_stack.pop()
@@ -78,13 +78,13 @@ class GCCMachine:
         self.data_stack.append(self.fetch_frame(arg).values[arg2])
 
     def ldf(self, arg):
-        self.data_stack.append(GCCClosure(arg, self.current_frame))
+        self.data_stack.append(GccClosure(arg, self.current_frame))
 
     def ap(self, arg):
         closure = self.data_stack.pop()
-        if not isinstance(closure, GCCClosure):
+        if not isinstance(closure, GccClosure):
             raise Exception("TAG_MISMATCH")
-        callee_frame = GCCFrame(closure.frame, arg)
+        callee_frame = GccFrame(closure.frame, arg)
         for i in range(arg-1, -1, -1):
             callee_frame.values[i] = self.data_stack.pop()
         self.control_stack.append((self.current_frame, self.ip+1))
@@ -117,6 +117,14 @@ class GCCMachine:
             raise Exception("TAG_MISMATCH")
         return result
 
+    def add_instruction(self, name, args):
+        fn = getattr(GccMachine, name)
+        args = [self] + args
+        f = functools.partial(fn, *args)
+        f.instruction_name = name
+        f.instruction_args = args
+        self.instructions.append(f)
+
     def run(self):
         while self.ip >= 0 and self.ip < len(self.instructions):
             next_ip = self.instructions[self.ip]()
@@ -127,8 +135,9 @@ class GCCMachine:
             else:
                 self.ip = self.ip + 1
 
+
 def parse_gcc(code):
-    machine = GCCMachine()
+    machine = GccMachine()
     for line in code.splitlines():
         semicolon = line.find(';')
         if semicolon >= 0:
@@ -138,10 +147,7 @@ def parse_gcc(code):
             continue
         fields = line.split(' ')
         instruction = fields[0].lower()
-        fn = getattr(GCCMachine, instruction)
-        args = [machine] + map(int, fields[1:])
-        f = functools.partial(fn, *args)
-        f.text = line
-        machine.instructions.append(f)
+        args = map(int, fields[1:])
+        machine.add_instruction(instruction, args)
 
     return machine

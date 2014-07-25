@@ -1,10 +1,10 @@
 from unittest import TestCase
-from gcc import GCCMachine, parse_gcc
+from gcc import GccMachine, parse_gcc
 
 
-class GCCTest(TestCase):
+class GccTest(TestCase):
     def setUp(self):
-        self.gcc_machine = GCCMachine()
+        self.gcc_machine = GccMachine()
 
     def test_ldc(self):
         self.gcc_machine.ldc(3)
