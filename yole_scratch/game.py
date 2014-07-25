@@ -121,16 +121,19 @@ class LambdaMan(Actor):
 
 
 class Ghost(Actor):
-    def __init__(self, map, index, ai_index, ai, x, y):
+    def __init__(self, map, index, ai, x, y):
         super(Ghost, self).__init__(map, x, y)
         self.index = index
         self.direction = DOWN
         self.ai = ai
-        self.ai_index = ai_index
         self.vitality = STANDARD
         self.x = x
         self.y = y
-        self.speed = GHOST_SPEEDS[self.ai_index]
+        self.speed = GHOST_SPEEDS[self.index % len(GHOST_SPEEDS)]
+
+    def reset(self):
+        super(Ghost, self).reset()
+        self.speed = GHOST_SPEEDS[self.index % len(GHOST_SPEEDS)]
 
     def move(self):
         if self.vitality == INVISIBLE:
@@ -141,6 +144,7 @@ class Ghost(Actor):
     def frighten(self):
         self.vitality = FRIGHT
         self.direction = OPPOSITE_DIRECTIONS[self.direction]
+        self.speed = GHOST_FRIGHT_SPEEDS[self.index % len(GHOST_FRIGHT_SPEEDS)]
 
     def eaten(self):
         self.vitality = INVISIBLE
@@ -187,7 +191,7 @@ class Map:
                     index = len(self.ghosts)
                     ai_index = len(self.ghosts) % len(ghost_ghc_codes)
                     ai = GhostAI(self, ghost_ghc_codes[ai_index])
-                    ghost = Ghost(self, index, ai_index, ai, x, y)
+                    ghost = Ghost(self, index, ai, x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)
                 elif contents == PILL:
@@ -292,5 +296,7 @@ class Map:
         if self.pills_remaining == 0:
             return True
         if all([lman.lives == 0 for lman in self.lambdamen]):
+            return True
+        if self.current_tick >= 127 * self.width() * self.height() * 16:
             return True
         return False
