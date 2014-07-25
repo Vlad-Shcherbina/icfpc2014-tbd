@@ -32,6 +32,24 @@ def parse_arg(x):
 
 class GHC:
     def __init__(self, asm, gamemap, index):
+        self.instructions = {
+            'mov': self.exec_mov,
+            'inc': self.exec_inc,
+            'dec': self.exec_dec,
+            'add': self.exec_add,
+            'sub': self.exec_sub,
+            'mul': self.exec_mul,
+            'div': self.exec_div,
+            'and': self.exec_and,
+            'or': self.exec_or,
+            'xor': self.exec_xor,
+            'jlt': self.exec_jlt,
+            'jeq': self.exec_jeq,
+            'jgt': self.exec_jgt,
+            'int': self.exec_int,
+            'hlt': self.exec_hlt,
+        }
+
         # parse code
         self.code = []
         for line in asm.split('\n'):
@@ -54,29 +72,12 @@ class GHC:
             else:
                 mnemonic = line
                 args = []
-
+            assert mnemonic in self.instructions, mnemonic
             self.code.append((mnemonic, args))
 
         # init memory
         self.data = bytearray(256)
         self.registers = bytearray(len(REGISTERS))
-        self.instructions = {
-            'mov': self.exec_mov,
-            'inc': self.exec_inc,
-            'dec': self.exec_dec,
-            'add': self.exec_add,
-            'sub': self.exec_sub,
-            'mul': self.exec_mul,
-            'div': self.exec_div,
-            'and': self.exec_and,
-            'or': self.exec_or,
-            'xor': self.exec_xor,
-            'jlt': self.exec_jlt,
-            'jeq': self.exec_jeq,
-            'jgt': self.exec_jgt,
-            'int': self.exec_int,
-            'hlt': self.exec_hlt,
-        }
 
         self.halted = False
         self.new_direction = None
@@ -286,7 +287,7 @@ def main():
     INT 8
     HLT
     '''
-    ghc = GHC(code)
+    ghc = GHC(code, gamemap=None, index=None)
     ghc.run()
 
 if __name__ == '__main__':
