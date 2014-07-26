@@ -96,7 +96,7 @@ def fill_with_pills(map, frac=0.5, seed=42):
 
 
 def save_map(map, filename):
-    with open(os.path.join('../twigil_scratch', filename), 'w') as fout:
+    with open(os.path.join('../data/maps', filename), 'w') as fout:
         for line in map:
             for c in line:
                 assert c in MAP_TILES
@@ -124,7 +124,7 @@ def create_map(w, h, powerpills, ghosts, pills_density):
 
 def main():
     sys.setrecursionlimit(10000)
-    create_map(w = 20, h = 20, powerpills = 20, ghosts = 10, pills_density = 0.8)
+    create_map(w = 20, h = 20, powerpills = 20, ghosts = 10, pills_density = 0.6)
 
 
 if __name__ == '__main__':
