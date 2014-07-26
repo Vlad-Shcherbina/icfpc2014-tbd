@@ -3,6 +3,7 @@ td {
     border: 1px solid black;
 }
 th {
+    border: 1px solid black;
     text-align: left;
     valign: top;
 }
@@ -31,9 +32,9 @@ Path to json file with results:
 {% if results %}
     <table>
     <tr>
-    <th></th>
+    <th>ghost team</th>
     {% for ghosts in ghostss %}
-        <th>
+        <th colspan={{ lms | length }}>
         <ul>
         {% for ghost in ghosts %}
           <li>{{ ghost }}</li>
@@ -42,18 +43,28 @@ Path to json file with results:
         </th>
     {% endfor %}
     </tr>
+    <tr>
+    <th>lm</th>
+    {% for ghosts in ghostss %}
+        {% for lm in lms %}
+            <th>{{ lm }}</th>
+        {% endfor %}
+    {% endfor %}
+    </tr>
     {% for map in maps %}
     <tr>
         <th>
             <a href="https://github.com/Vlad-Shcherbina/icfpc2014-tbd/blob/master/data/maps/{{ map }}">{{ map }}</a>
         </th>
         {% for ghosts in ghostss %}
-        {% set cell_results = by_map_and_ghosts[map, ghosts] %}
-        <td>
-            {% for result in cell_results %}
-                {% call render_result(result) %} {% endcall %}
+            {% for lm in lms %}
+            {% set cell_results = by_map_lm_ghosts[map, lm, ghosts] %}
+            <td>
+                {% for result in cell_results %}
+                    {% call render_result(result) %} {% endcall %}
+                {% endfor %}
+            </td>
             {% endfor %}
-        </td>
         {% endfor %}
     </tr>
     {% endfor %}

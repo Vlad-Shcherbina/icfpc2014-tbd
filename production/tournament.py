@@ -57,7 +57,6 @@ def play(result):
 
 
 def play_tournament(maps, lm_specs, ghost_team_specs):
-    assert len(lm_specs) == 1, 'comparing multiple LMs is not implemented yet'
     results = []
     for map in maps:
         for lm_spec in lm_specs:
@@ -85,6 +84,7 @@ def main():
             'gen/hz.txt',
         ],
         lm_specs=[
+            'py:lm_ai.Oscillating(frequency=5)',
             'py:lm_ai.NearestPill()',
         ],
         ghost_team_specs=[

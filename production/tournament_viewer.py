@@ -38,14 +38,16 @@ def table():
         results = []
 
     maps = sorted(set(result.map for result in results))
+    lms = sorted(set(result.lm_spec for result in results))
     ghostss = sorted(set(tuple(result.ghost_specs) for result in results))
+
 
     # ignore different packman_specs for now
 
-    by_map_and_ghosts = collections.defaultdict(list)
+    by_map_lm_ghosts = collections.defaultdict(list)
     for result in results:
         ghosts = tuple(result.ghost_specs)
-        by_map_and_ghosts[result.map, ghosts].append(result)
+        by_map_lm_ghosts[result.map, result.lm_spec, ghosts].append(result)
 
     return flask.render_template(
         'table.html',
