@@ -13,11 +13,13 @@ class VorberGCC(GCCInterface):
         self.__log(str(self))
 
     def __str__(self):
-        regs = 'Regs: c:{0} s:{1} d:{2} e:{3}'.format(self.reg_c, self.reg_s, self.reg_d, self.reg_e)
-        ds = 'Data: ' + str(self.data_stack)
-        cs = 'Ctrl: ' + str(self.ctrl_stack)
-        es = 'Env:  ' + str(self.env_stack)
-        result = '\n'.join((regs, ds, cs, es, 'state: ' + self.state))
+        result = ""
+        if self.verbose:
+            regs = 'Regs: c:{0} s:{1} d:{2} e:{3}'.format(self.reg_c, self.reg_s, self.reg_d, self.reg_e)
+            ds = 'Data: ' + str(self.data_stack)
+            cs = 'Ctrl: ' + str(self.ctrl_stack)
+            es = 'Env:  ' + str(self.env_stack)
+            result = '\n'.join((regs, ds, cs, es, 'state: ' + self.state))
         return result
 
     def reset(self):
