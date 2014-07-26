@@ -1,10 +1,8 @@
 #GCC implementation
-import sys
-import fileinput
-import strip_comments
 from command_enums import GCC_CMD
+from gcc_wrapper import GCCInterface 
 
-class VorberGCC:
+class VorberGCC(GCCInterface):
     def __init__(self, program, verbose=False):
         '''Specifying verbose=True enables diagnostics spam via prints''' # dude, use logging.
         self.verbose = verbose
@@ -38,7 +36,7 @@ class VorberGCC:
         self.ctrl_stack.append({'tag':'TAG_STOP'}) # to be able to stop with RTN without popping an empty stack
 
 
-    def step(self):
+    def single_step(self):
         '''
         Executes a single instruction at current %c
         '''
@@ -48,7 +46,7 @@ class VorberGCC:
         cmd = self.program[self.reg_c]
         self.__log('step {} line: {!r}'.format(self.reg_c, cmd.original_text))
         self.__process_cmd(cmd)
-    
+        
     def run(self):
         '''
         Runs the program from current position to termination
@@ -57,9 +55,23 @@ class VorberGCC:
         self.state = 'executing'
         while not self.terminal_state:
             self.__log(str(self))
-            self.step()
+            self.single_step()
         self.__log(str(self))
 
+    # GCCInterface methods
+    
+    def marshall_int(self, i):
+        return {'tag': 'int', 'value': i}
+    
+    def marshall_cons(self, car, cdr):
+        return {'tag': 'cons', 'value': (car, cdr)}
+    
+    def initialize(self, world_state, undocumented):
+        '''world_state must be an opaque handle constructed via marshall_* methods.
+        returns (ai_state, step_function)'''
+    
+    def step(self, ai_state, world_state):
+        '''returns ai_state, move. Move is an already decoded integer.'''
         
     #Following methods are intended for internal use only
         
