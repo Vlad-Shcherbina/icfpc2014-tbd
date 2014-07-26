@@ -1,6 +1,8 @@
 #GCC implementation
+import sys
+sys.path.append('../production')
 from command_enums import GCC_CMD
-from gcc_wrapper import GCCInterface 
+from gcc_wrapper import GCCInterface
 
 class VorberGCC(GCCInterface):
     def __init__(self, program, verbose=False):
@@ -10,7 +12,7 @@ class VorberGCC(GCCInterface):
         self.reset()
         self.state = 'loaded'
         self.__log(str(self))
-  
+
     def __str__(self):
         regs = 'Regs: c:{0} s:{1} d:{2} e:{3}'.format(self.reg_c, self.reg_s, self.reg_d, self.reg_e)
         ds = 'Data: ' + str(self.data_stack)
@@ -33,7 +35,7 @@ class VorberGCC(GCCInterface):
         self.terminal_state = False
         self.state = 'empty'
         # this should go to "run", I guess?
- 
+
 
     def single_step(self):
         '''
@@ -45,7 +47,7 @@ class VorberGCC(GCCInterface):
         cmd = self.program[self.reg_c]
         self.__log('step {} line: {!r}'.format(self.reg_c, cmd.original_text))
         self.__process_cmd(cmd)
-        
+
     def run(self):
         '''
         Runs the program from current position to termination
@@ -58,13 +60,13 @@ class VorberGCC(GCCInterface):
         self.__log(str(self))
 
     # GCCInterface methods
-    
+
     def marshall_int(self, i):
         return {'tag': 'int', 'value': i}
-    
+
     def marshall_cons(self, car, cdr):
         return {'tag': 'cons', 'value': (car, cdr)}
-    
+
     def call(self, address_or_closure, *args):
         'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
         # Implement the stuff below, OK?
@@ -78,22 +80,22 @@ class VorberGCC(GCCInterface):
             'set self.reg_c and self.reg_e from the closure'
         self.run()
         'return everything on the data stack'
-        
-        
-        
+
+
+
     #Following methods are intended for internal use only
-        
+
     def __log(self, s):
         if self.verbose:
             print s
-            
 
-           
+
+
     def __error(self, e):
         self.__log("ERROR: " + str(e))
         self.state = 'error'
         self.terminal_state = True
-        
+
     def __process_arithmetic_cmd(self, op):
         y = self.data_stack.pop()
         x = self.data_stack.pop()
@@ -104,7 +106,7 @@ class VorberGCC(GCCInterface):
         z = op(x['value'],y['value'])
         self.data_stack.append({'tag':'int', 'value':z})
         self.reg_c += 1
-        
+
     def __process_extract_cons(self, idx):
         x = self.data_stack.pop()
         self.__match_tag(x,'cons')
@@ -112,12 +114,12 @@ class VorberGCC(GCCInterface):
             return
         y = x['value'][idx]
         self.data_stack.append({'tag':'int', 'value':y})
-        self.reg_c += 1    
-        
+        self.reg_c += 1
+
     def __match_tag(self, x,tag):
         if x['tag'] != tag:
             self.__error('TAG_MISMATCH')
-            
+
     def __process_cmd(self, cmd):
         op = cmd.op
         if op == GCC_CMD.LDC:
@@ -129,7 +131,7 @@ class VorberGCC(GCCInterface):
             while n > 0:
                 fp = self.env_stack[fp['parent']]
                 n -= 1
-            if fp['frame_tag'] == 'TAG_DUM': 
+            if fp['frame_tag'] == 'TAG_DUM':
                 self.__error('FRAME_MISMATCH')
                 return
             v = fp['values'][i]
@@ -192,7 +194,7 @@ class VorberGCC(GCCInterface):
                 y = self.data_stack.pop()
                 fp['values'][i] = y
                 i -= 1
-            self.ctrl_stack.append({'tag':'WTFNOTAG!11AP', 'value':self.reg_e}) 
+            self.ctrl_stack.append({'tag':'WTFNOTAG!11AP', 'value':self.reg_e})
             self.ctrl_stack.append({'tag':'TAG_RET', 'value':self.reg_c+1})
             self.env_stack.append(fp)
             self.reg_e += 1 #len(self.env_stack) - 1
@@ -243,38 +245,14 @@ class VorberGCC(GCCInterface):
             self.terminal_state=True
         else:
             self.__error('UNKNOWN CMD: {}'.format(cmd))
-           
+
 def main():
-    code = '''
-  DUM  2        ; 2 top-level declarations
-  LDF  go       ; declare function go
-  LDF  to       ; declare function to
-  LDF  main     ; main function
-  RAP  2        ; load declarations into environment and run main
-  RTN           ; final return
-main:
-  LDC  1
-  LD   0 0      ; var go
-  AP   1        ; call go(1)
-  RTN
-to:
-  LD   0 0      ; var n
-  LDC  1
-  SUB
-  LD   1 0      ; var go
-  AP   1        ; call go(n-1)
-  RTN
-go:
-  LD   0 0      ; var n
-  LDC  1
-  ADD
-  LD   1 1      ; var to
-  AP   1        ; call to(n+1)
-  RTN'''
+    filename = '../data/lms/goto.gcc'
+    code = open(filename).read()
     from asm_parser import parse_gcc
-    program = parse_gcc(code, '<stdin>')
+    program = parse_gcc(code, source=filename)
     gcc = VorberGCC(program, verbose=True)
     gcc.run()
-    
+
 if __name__ == '__main__':
     main()
