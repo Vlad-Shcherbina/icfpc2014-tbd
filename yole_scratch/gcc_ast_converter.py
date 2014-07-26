@@ -22,11 +22,24 @@ def convert_python_to_gcc_function(program, func_def):
     else:
         func = GccFunction(None, func_def.name, args)
     for stmt in func_def.body:
-        if isinstance(stmt, Expr) or isinstance(stmt, Return):
-            func.add_instruction(convert_python_to_gcc_ast(stmt.value))
-        else:
-            raise Exception("Unsupported statement type {0}".format(stmt))
+        func.add_instruction(convert_python_to_gcc_statement(stmt))
     return func
+
+
+def convert_python_to_gcc_statement(stmt):
+    if isinstance(stmt, Expr) or isinstance(stmt, Return):
+        return convert_python_to_gcc_ast(stmt.value)
+    if isinstance(stmt, If):
+        test = convert_python_to_gcc_ast(stmt.test)
+        cond = GccConditionalBlock(test)
+        for child in stmt.body:
+            cond.true_branch.instructions.append(
+                convert_python_to_gcc_statement(child))
+        for child in stmt.orelse:
+            cond.false_branch.instructions.append(
+                convert_python_to_gcc_statement(child))
+        return cond
+    raise Exception("Unsupported statement type {0}".format(stmt))
 
 
 def convert_python_to_gcc_ast(ast):
@@ -64,5 +77,16 @@ def convert_python_to_gcc_ast(ast):
 
     if isinstance(ast, Tuple):
         return GccTuple(*[convert_python_to_gcc_ast(elt) for elt in ast.elts])
+
+    if isinstance(ast, Subscript):
+        if not isinstance(ast.slice, Slice):
+            raise Exception("Subscription must use a slice")
+        value = convert_python_to_gcc_ast(ast.value)
+        return GccTupleMember(value, ast.slice.lower.n, ast.slice.upper.n)
+
+    if isinstance(ast, Call):
+        callee = GccNameReference(ast.func.id)
+        return GccCall(callee,
+                       [convert_python_to_gcc_ast(arg) for arg in ast.args])
 
     raise Exception("Unsupported Python AST node type {0}".format(ast))

@@ -71,3 +71,39 @@ def step(state, world): return state+1, 2""")
     cons
     rtn
 """, builder.text)
+
+    def test_condition(self):
+        x = ast.parse("""
+def fetch_element(list, n):
+    if n == 0:
+        return 42
+    else:
+        return 239""")
+        tree = convert_python_to_gcc_function(None, x.body[0])
+        cond = tree.main_block.instructions[0]
+        self.assertIsInstance(cond, GccConditionalBlock)
+        self.assertEquals(42, cond.true_branch.instructions[0].value)
+        self.assertEquals(239, cond.false_branch.instructions[0].value)
+
+    def test_tuple_member(self):
+        x = ast.parse("x[1:2]")
+        tree = convert_python_to_gcc_ast(x.body[0].value)
+        self.assertIsInstance(tree, GccTupleMember)
+        self.assertEquals(1, tree.index)
+        self.assertEquals(2, tree.expected_size)
+
+    def test_call(self):
+        x = ast.parse("""
+def fetch_element(list, n):
+    if n == 0:
+        return x[0:1]
+    else:
+        return fetch_element(list, n-1)""")
+        tree = convert_python_to_gcc_function(None, x.body[0])
+        cond = tree.main_block.instructions[0]
+        call = cond.false_branch.instructions[0]
+        self.assertIsInstance(call, GccCall)
+        self.assertEquals("fetch_element", call.callee.name)
+        self.assertEquals("list", call.args[0].name)
+        self.assertIsInstance(call.args[1], GccSub)
+
