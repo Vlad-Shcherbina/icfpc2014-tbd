@@ -43,8 +43,8 @@ class GccASTTest(unittest.TestCase):
 
     def test_function(self):
         builder = GccTextBuilder()
-        body = GccFunction("body", ["x"])
-        var_ref = GccVariableReference("x")
+        body = GccFunction(None, "body", ["x"])
+        var_ref = GccNameReference("x")
         expr = GccAdd(var_ref, var_ref)
         body.add_instruction(expr)
         body.emit(builder)
@@ -53,7 +53,7 @@ class GccASTTest(unittest.TestCase):
     def test_function_reference(self):
         program = GccProgram()
         body = program.add_function("main", ["x"])
-        body.add_instruction(GccFunctionReference("step"))
+        body.add_instruction(GccNameReference("step"))
         program.add_function("step", ["x"])
         builder = GccTextBuilder()
         program.emit(builder)
@@ -70,10 +70,10 @@ class GccASTTest(unittest.TestCase):
         program = GccProgram()
 
         main = program.add_function("main", [])
-        main.add_instruction(GccCall(GccFunctionReference("body"), [GccConstant(21)]))
+        main.add_instruction(GccCall(GccNameReference("body"), [GccConstant(21)]))
 
         body = program.add_function("body", ["x"])
-        var_ref = GccVariableReference("x")
+        var_ref = GccNameReference("x")
         body.add_instruction(GccAdd(var_ref, var_ref))
 
         builder = GccTextBuilder()
@@ -95,7 +95,7 @@ class GccASTTest(unittest.TestCase):
     def test_conditional_expression(self):
         program = GccProgram()
         body = program.add_function("main", ["x"])
-        var_ref = GccVariableReference("x")
+        var_ref = GccNameReference("x")
         conditional_block = GccConditionalBlock(GccGt(var_ref, GccConstant(0)))
         conditional_block.true_branch.instructions.append(GccConstant(1))
         conditional_block.false_branch.instructions.append(GccConstant(0))
@@ -118,7 +118,7 @@ class GccASTTest(unittest.TestCase):
     def test_tuple(self):
         program = GccProgram()
         body = program.add_function("main", ["x"])
-        body.add_instruction(GccTuple(GccVariableReference("x"), GccConstant(1)))
+        body.add_instruction(GccTuple(GccNameReference("x"), GccConstant(1)))
         builder = GccTextBuilder()
         program.emit(builder)
         self.assert_code_equals("""
@@ -132,7 +132,7 @@ class GccASTTest(unittest.TestCase):
     def test_tuple_member(self):
         program = GccProgram()
         body = program.add_function("main", ["x"])
-        body.add_instruction(GccTupleMember(GccVariableReference("x"), 1, 3))
+        body.add_instruction(GccTupleMember(GccNameReference("x"), 1, 3))
         builder = GccTextBuilder()
         program.emit(builder)
         self.assert_code_equals("""

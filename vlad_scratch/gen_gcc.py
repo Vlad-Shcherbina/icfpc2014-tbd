@@ -19,13 +19,13 @@ def main():
     """))
 
     nth = program.add_function("nth", ["idx", "list"])
-    idx = GccVariableReference("idx")
-    list = GccVariableReference("list")
+    idx = GccNameReference("idx")
+    list = GccNameReference("list")
     conditional_block = GccConditionalBlock(GccEq(idx, GccConstant(0)))
     conditional_block.true_branch.instructions.append(
         GccTupleMember(list, 0, 2))
     conditional_block.false_branch.instructions.append(
-        GccCall(GccFunctionReference("nth"),
+        GccCall(GccNameReference("nth"),
             [GccSub(idx, GccConstant(1)),
              GccTupleMember(list, 1, 2)]))
     nth.add_instruction(conditional_block)
@@ -33,7 +33,7 @@ def main():
 
     body = program.add_function("step", ["cur_state", "world"])
     #body.add_instruction(GccConstant(42))  # state
-    body.add_instruction(GccTupleMember(GccVariableReference("world"), 0, 4))
+    body.add_instruction(GccTupleMember(GccNameReference("world"), 0, 4))
     body.add_instruction(GccConstant(1))  # direction
     body.add_instruction(GccInline("CONS"))
 

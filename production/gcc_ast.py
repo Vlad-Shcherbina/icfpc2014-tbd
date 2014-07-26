@@ -56,7 +56,7 @@ class GccProgram(object):
     def add_function(self, name, args):
         if name in self.function_index:
             raise Exception("duplicate function " + name)
-        result = GccFunction(name, args)
+        result = GccFunction(self, name, args)
         self.functions.append(result)
         self.function_index[name] = result
         return result
@@ -97,6 +97,11 @@ class GccEmitContext(object):
         index = self.function.args.index(name)
         return 0, index
 
+    def resolve_function(self, name):
+        if not self.function.program:
+            return None
+        return self.function.program.function_index.get(name, None)
+
     def enqueue_block(self, block, label, terminator):
         self.block_queue.append((block, label, terminator))
 
@@ -112,7 +117,8 @@ class GccEmitContext(object):
 
 
 class GccFunction():
-    def __init__(self, name, args):
+    def __init__(self, program, name, args):
+        self.program = program
         self.name = name
         self.args = args
         self.main_block = GccCodeBlock()
@@ -189,13 +195,17 @@ class GccGte(GccBinaryOp):
         super(GccGte, self).__init__(op1, op2, "cgte")
 
 
-class GccVariableReference(object):
+class GccNameReference(object):
     def __init__(self, name):
         self.name = name
 
     def emit(self, builder, context):
-        frame_index, var_index = context.resolve_variable(self.name)
-        builder.add_instruction("ld", frame_index, var_index)
+        fn = context.resolve_function(self.name)
+        if fn:
+            builder.add_instruction("ldf", "$func_{}$".format(self.name))
+        else:
+            frame_index, var_index = context.resolve_variable(self.name)
+            builder.add_instruction("ld", frame_index, var_index)
 
 
 class GccCall(object):
@@ -248,11 +258,3 @@ class GccTupleMember(object):
             builder.add_instruction("cdr")
         if self.index < self.expected_size-1:
             builder.add_instruction("car")
-
-
-class GccFunctionReference(object):
-    def __init__(self, name):
-        self.name = name
-
-    def emit(self, builder, context):
-        builder.add_instruction("ldf", "$func_{}$".format(self.name))
