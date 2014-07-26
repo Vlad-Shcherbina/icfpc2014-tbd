@@ -20,7 +20,7 @@ class GCCWrapper:
         self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented)
             
     
-    def step(self, world):
+    def get_move(self, world):
         world_state = self.marshall_world_state(world)
         self.ai_state, move = self.gcc.call(self.step_function, self.ai_state, world_state)
         return move
