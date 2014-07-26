@@ -18,6 +18,7 @@ import os
 import sys
 import copy
 
+import map_loader
 from game import GhostAI, Map, LambdaMan
 from game import InteractiveLambdaManAI, set_interactive_lambda_man_direction
 
@@ -29,7 +30,7 @@ DIRECTION_KEYS = [
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, filename='visualizer_debug.log')
+    logging.basicConfig(level=logging.INFO, filename='visualizer_debug.log')
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -46,10 +47,7 @@ def main():
         ]
         print 'no ghosts specified, using', args.ghost
 
-    with open(os.path.join('../data/maps', args.map)) as fin:
-        lines = [line.strip('\n') for line in fin]
-
-    map = Map(lines)
+    map = map_loader.load_map(args.map)
     map.set_ai_specs(args.lm, args.ghost)
 
     stdscr = curses.initscr()
@@ -78,6 +76,11 @@ def main():
                 stdscr.addstr(ghost.y, ghost.x, '=', ghost_colors[idx])
             for i, ghost_spec in enumerate(args.ghost):
                 stdscr.addstr(i, map.width() + 1, ghost_spec, ghost_colors[i])
+
+            stdscr.addstr(
+                5, map.width() + 1,
+                'pill: {}    '.format(map.remaining_power_pill_ticks()),
+                curses.color_pair(1))
 
             stdscr.addstr(map.height(), 0, "Tick {0} Score {1}   ".format(
                 map.move_queue[0].next_move, map.lambdaman.score))
