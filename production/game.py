@@ -79,7 +79,8 @@ def lambda_man_ai_from_spec(lm_spec):
             code = f.read()
         code = parse_gcc(code)
         interpreter = eval(interpreter)
-        interpreter = GCCWrapper(interpreter(code))
+        world = None # how do I get world here? Or where do I initialize GCCWrapper?
+        interpreter = GCCWrapper(interpreter(code), world, None)
         return interpreter
     else:
         assert False, lm_spec
