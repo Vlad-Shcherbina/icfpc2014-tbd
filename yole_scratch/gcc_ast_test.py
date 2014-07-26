@@ -3,18 +3,21 @@ from gcc_ast import *
 
 class GccASTTest(TestCase):
     def test_constant(self):
-        c = GccConstant(3)
         blk = GccCodeBlock()
-        c.emit(blk)
-        self.assertEquals(["ldc 3"], blk.instructions)
+        blk.instructions.append(GccConstant(3))
+        builder = GccTextBuilder()
+        blk.emit(builder, None)
+        self.assertEquals("ldc 3\n", builder.text)
 
     def test_add(self):
         c1 = GccConstant(3)
         c2 = GccConstant(4)
         expr = GccAdd(c1, c2)
         blk = GccCodeBlock()
-        expr.emit(blk)
-        self.assertEquals(["ldc 3", "ldc 4", "add"], blk.instructions)
+        blk.instructions.append(expr)
+        builder = GccTextBuilder()
+        blk.emit(builder, None)
+        self.assertEquals("ldc 3\nldc 4\nadd\n", builder.text)
 
     def test_function(self):
         builder = GccTextBuilder()
@@ -23,17 +26,30 @@ class GccASTTest(TestCase):
         expr = GccAdd(var_ref, var_ref)
         body.add_instruction(expr)
         body.emit(builder)
-        self.assertEquals("ld 0 0\nld 0 0\nadd\nrtn", builder.text)
+        self.assertEquals("ld 0 0\nld 0 0\nadd\nrtn\n", builder.text)
+
+    def test_function_reference(self):
+        program = GccProgram()
+        body = program.add_function("main", ["x"])
+        body.add_instruction(GccFunctionReference("step"))
+        program.add_function("step", ["x"])
+        builder = GccTextBuilder()
+        program.emit(builder)
+        self.assertEquals("""ldf 2
+rtn
+rtn
+""", builder.text)
+
 
     def test_function_call(self):
         program = GccProgram()
 
+        main = program.add_function("main", [])
+        main.add_instruction(GccCall(GccFunctionReference("body"), [GccConstant(21)]))
+
         body = program.add_function("body", ["x"])
         var_ref = GccVariableReference("x")
         body.add_instruction(GccAdd(var_ref, var_ref))
-
-        main = program.add_function("main", [])
-        main.add_instruction(GccCall(GccFunctionReference("body"), [GccConstant(21)]))
 
         builder = GccTextBuilder()
         program.emit(builder)
@@ -45,7 +61,8 @@ rtn
 ld 0 0
 ld 0 0
 add
-rtn""", builder.text)
+rtn
+""", builder.text)
 
     def test_conditional_expression(self):
         program = GccProgram()
@@ -58,44 +75,36 @@ rtn""", builder.text)
         builder = GccTextBuilder()
         program.emit(builder)
         self.assertEquals("""ld 0 0
+ldc 0
 gt
-sel 4 6
+sel 5 7
 rtn
 ldc 1
 join
 ldc 0
-join""", builder.text)
+join
+""", builder.text)
 
     def test_tuple(self):
         program = GccProgram()
         body = program.add_function("main", ["x"])
-        body.add_instruction(GccTuple(GccVariableReference("x"), GccConstant(0)))
+        body.add_instruction(GccTuple(GccVariableReference("x"), GccConstant(1)))
         builder = GccTextBuilder()
         program.emit(builder)
         self.assertEquals("""ld 0 0
 ldc 1
 cons
-rtn""", builder.text)
+rtn
+""", builder.text)
 
     def test_tuple_member(self):
         program = GccProgram()
         body = program.add_function("main", ["x"])
-        body.add_instruction(GccTupleMember(GccVariableReference("x"), 1, 2))
+        body.add_instruction(GccTupleMember(GccVariableReference("x"), 1, 3))
         builder = GccTextBuilder()
         program.emit(builder)
         self.assertEquals("""ld 0 0
 cdr
 car
-rtn""", builder.text)
-
-    def test_function_reference(self):
-        program = GccProgram()
-        body = program.add_function("main", ["x"])
-        body.add_instruction(GccFunctionReference("step"))
-        program.add_function("step", ["x"])
-        builder = GccTextBuilder()
-        program.emit(builder)
-        self.assertEquals("""ldf 2
 rtn
-rtn""", builder.text)
-
+""", builder.text)
