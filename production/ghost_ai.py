@@ -179,6 +179,7 @@ class GhostAI_Pink(GhostAI_Original):
     'chases a tile 4 tiles ahead of pacman'
 
     def __init__(self):
+        super(GhostAI_Pink, self).__init__()
         self.old_x = 0
 
     def character(self, ghc):

@@ -10,8 +10,8 @@ class DummyGCCInterface(GCCInterface):
 class GCCWrapperTest(TestCase):
     def setUp(self):
         super(GCCWrapperTest, self).setUp()
-        self.map = Map(["#####", "#\.=#", "#####"],
-                       ["ghc:miner.ghc"], "interactive:")
+        self.map = Map(["#####", "#\.=#", "#####"])
+        self.map.set_ai_specs("interactive:", ["ghc:miner.ghc"])
         self.wrapper = GCCWrapper(DummyGCCInterface())
 
     def test_encode_map(self):

@@ -267,7 +267,7 @@ class FruitSpawnpoint(Actor):
 
 
 class Map:
-    def __init__(self, lines, ghost_specs, lm_spec):
+    def __init__(self, lines):
         self.ghosts = []
         self.lambdaman = None
         self.cells = []
@@ -304,6 +304,8 @@ class Map:
                 line_cells.append(contents)
             self.cells.append(line_cells)
 
+    def set_ai_specs(self, lm_spec, ghost_specs):
+        # TODO: change to assert
         if self.lambdaman:
             lman_ai = lambda_man_ai_from_spec(lm_spec)
             self.lambdaman.ai = lman_ai

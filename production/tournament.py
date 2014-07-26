@@ -55,7 +55,8 @@ class Result(object):
 def play(result):
     result = copy.copy(result)
     'Take partially filled result, fill in game outcome.'
-    map = map_loader.load_map(result.map, result.ghost_specs, result.lm_spec)
+    map = map_loader.load_map(result.map)
+    map.set_ai_specs(result.lm_spec, result.ghost_specs)
 
     assert not result.lm_spec.startswith('interactive:')
 

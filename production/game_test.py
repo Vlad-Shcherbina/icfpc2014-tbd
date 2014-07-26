@@ -6,7 +6,8 @@ from game import *
 class GameTest(TestCase):
     def test_map(self):
         lines = ["####", r"#\=#", "####"]
-        map = Map(lines, ["ghc:miner.ghc"], "interactive:")
+        map = Map(lines)
+        map.set_ai_specs("interactive:", ["ghc:miner.ghc"])
         self.assertEquals(WALL, map.at(0, 0))
         self.assertEquals(LAMBDAMAN, map.at(1, 1))
         self.assertEquals(GHOST, map.at(2, 1))
@@ -16,7 +17,8 @@ class GameTest(TestCase):
         ghost_ais = ["ghc:miner.ghc"]
         lman_ai = "interactive:"
         set_interactive_lambda_man_direction(RIGHT)
-        map = Map(lines, ghost_ais, lman_ai)
+        map = Map(lines)
+        map.set_ai_specs(lman_ai, ghost_ais)
         map.step()
         lman = map.lambdaman
         self.assertEquals(2, lman.x)
@@ -27,7 +29,8 @@ class GameTest(TestCase):
 
     def test_expire_fruits(self):
         lines = ["#####", "#%..#", "#####"]
-        map = Map(lines, ["ghc:miner.ghc"], "py:lm_ai.Oscillating(frequency=5)")
+        map = Map(lines)
+        map.set_ai_specs("py:lm_ai.Oscillating(frequency=5)", ["ghc:miner.ghc"])
         self.assertEquals(EMPTY, map.at(1, 1))
         map.step()
         self.assertEquals(FRUIT, map.at(1, 1))
