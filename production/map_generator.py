@@ -52,7 +52,7 @@ def save_map(map, filename):
 
 
 def main():
-    for size in 15, 21, 35:
+    for size in 15, 21, 30:
         for block_size in 3, 5:
             for rich in [True, False]:
                 map = manhattan(size, size, block_size)
