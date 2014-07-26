@@ -60,6 +60,8 @@ def ghost_ai_from_spec(ghost_spec, map, index):
         return GhostAI(map, index, code)
     elif type == 'py':
         return getattr(ghost_ai, details)(map, index)
+    elif type == "empty":
+        return EmptyGhostAI()
     else:
         assert False, ghost_spec
 
@@ -89,6 +91,11 @@ class GhostAI:
 
     def get_move(self):
         return self.vm.run()
+
+
+class EmptyGhostAI:
+    def get_move(self):
+        return DOWN
 
 
 class LambdaManAI(object):

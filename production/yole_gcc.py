@@ -159,7 +159,8 @@ class GccMachine(GCCInterface):
     def pop_cons(self):
         result = self.data_stack.pop()
         if type(result) != tuple:
-            raise Exception("TAG_MISMATCH")
+            raise Exception("TAG_MISMATCH: Expected cons cell, found " +
+                            str(result))
         return result
 
     def pop_closure(self):
