@@ -29,6 +29,9 @@ def test_strictness():
     assert_raises(ParsingException, parse_gcc, 'label1: LDF1   0\nlabel2:')
     assert_raises(ParsingException, parse_gcc, 'label1: LDF   label2\nlabel2:')
     
+def test_regressions():
+    parse_gcc('    ldc -1')
+    
 def test_gcc():
     code = '''
   DUM  2        ; 2 top-level declarations
