@@ -11,7 +11,8 @@ th {
 
 {% macro render_result(result) -%}
 <div>
-    <b>{{ result.score }}</b> <br>
+    <b>{{ '%0.3f' | format(result.score / result.baseline_score()) }}</b>
+    ({{ result.score }}) <br>
     {{ result.ticks }} ticks <br>
     <a href="{{ (
         'python visualizer.py --map={} --lm="{}" '.format(
@@ -32,6 +33,34 @@ Path to json file with results:
 {% if results %}
     <table>
     <tr>
+        <th></th>
+        {% for lm in lms %}
+            <th>{{ lm.replace(":", ": ") }}</th>
+        {% endfor %}
+    </tr>
+    {% for ghosts in ghostss %}
+        <tr>
+        <th>
+        <ul>
+        {% for ghost in ghosts %}
+          <li>{{ ghost }}</li>
+        {% endfor %}
+        </ul>
+        </th>
+
+        {% for lm in lms %}
+            <td>{{ by_lm_ghosts[lm, ghosts] | render_aggregate_results }}</td>
+        {% endfor %}
+
+        </tr>
+    {% endfor %}
+
+    </table>
+
+    <hr>
+
+    <table>
+    <tr>
     <th>ghost team</th>
     {% for ghosts in ghostss %}
         <th colspan={{ lms | length }}>
@@ -47,7 +76,7 @@ Path to json file with results:
     <th>lm</th>
     {% for ghosts in ghostss %}
         {% for lm in lms %}
-            <th>{{ lm }}</th>
+            <th>{{ lm.replace(":", ": ") }}</th>
         {% endfor %}
     {% endfor %}
     </tr>

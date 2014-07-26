@@ -6,6 +6,7 @@ import flask
 import jinja2
 
 import tournament
+import stats
 
 
 web_app = flask.Flask(__name__)
@@ -18,6 +19,18 @@ web_app.jinja_loader = template_loader
 def data_uri(s, mime='text/plain'):
     assert isinstance(s, basestring), type(s)
     return 'data:{};base64,{}'.format(mime, base64.b64encode(s))
+
+
+@web_app.template_filter('render_aggregate_results')
+def render_aggregate_results(results):
+    #scores = [result.score for result in results]
+    score = stats.Distribution()
+    for result in results:
+        score.add_value(result.score / result.baseline_score())
+    #return '{} results'.format(len(results))
+    return flask.Markup('<b>{}</b>'.format(score.to_html()))
+    #assert isinstance(s, basestring), type(s)
+    #return 'data:{};base64,{}'.format(mime, base64.b64encode(s))
 
 
 @web_app.route('/')
@@ -45,9 +58,11 @@ def table():
     # ignore different packman_specs for now
 
     by_map_lm_ghosts = collections.defaultdict(list)
+    by_lm_ghosts = collections.defaultdict(list)
     for result in results:
         ghosts = tuple(result.ghost_specs)
         by_map_lm_ghosts[result.map, result.lm_spec, ghosts].append(result)
+        by_lm_ghosts[result.lm_spec, ghosts].append(result)
 
     return flask.render_template(
         'table.html',

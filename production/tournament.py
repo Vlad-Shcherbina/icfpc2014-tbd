@@ -33,6 +33,16 @@ class Result(object):
             score=self.score,
             ticks=self.ticks)
 
+    def baseline_score(self):
+        """Just some number to scale actual score against."""
+        # TODO: cache
+        with open(os.path.join('../data/maps', self.map)) as fin:
+            data = fin.read().strip()
+        x = game.PILL_SCORE * data.count('.') + 1.0
+        # This score is imprecise, we don't care.
+        assert x > 0
+        return x
+
     @staticmethod
     def from_json(data):
         result = Result()
