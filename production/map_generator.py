@@ -52,10 +52,16 @@ def save_map(map, filename):
 
 
 def main():
-    map = manhattan(21, 21, block_size=3)
-    place(map, r'\oo==')
-    fill_with_pills(map, 0.9)
-    save_map(map, 'hz.txt')
+    for size in 15, 21, 35:
+        for block_size in 3, 5:
+            for rich in [True, False]:
+                map = manhattan(size, size, block_size)
+                place(map, r'\oooo%=====')
+                fill_with_pills(map, 0.9 if rich else 0.3)
+                save_map(map, 'manhattan5gh_{0}x{0}_{1}x{1}_{2}.txt'.format(
+                    size,
+                    block_size,
+                    'rich' if rich else 'scarce'))
 
 
 if __name__ == '__main__':
