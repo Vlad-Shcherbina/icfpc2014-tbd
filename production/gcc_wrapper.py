@@ -1,4 +1,4 @@
-class GCCWrapper:
+class GCCInterface(object):
     def run():
         '''
         Runs the loaded code
@@ -35,7 +35,7 @@ class GCCWrapper:
         '''
         pass
 
-class gcc_wrapper:
+class GCCWrapper:
     def __init__(gcc, code, world_state, undefined):
         self.gcc = gcc
         gcc.load(code)
