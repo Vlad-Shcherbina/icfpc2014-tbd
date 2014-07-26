@@ -86,7 +86,14 @@ def fetch_element(list, n):
         self.assertEquals(239, cond.false_branch.instructions[0].value)
 
     def test_tuple_member(self):
-        x = ast.parse("x[1:2]")
+        x = ast.parse("x[1]")
+        tree = convert_python_to_gcc_ast(x.body[0].value)
+        self.assertIsInstance(tree, GccTupleMember)
+        self.assertEquals(1, tree.index)
+        self.assertEquals(3, tree.expected_size)
+
+    def test_cdr(self):
+        x = ast.parse("x[1:]")
         tree = convert_python_to_gcc_ast(x.body[0].value)
         self.assertIsInstance(tree, GccTupleMember)
         self.assertEquals(1, tree.index)
@@ -96,7 +103,7 @@ def fetch_element(list, n):
         x = ast.parse("""
 def fetch_element(list, n):
     if n == 0:
-        return x[0:1]
+        return x[0]
     else:
         return fetch_element(list, n-1)""")
         tree = convert_python_to_gcc_function(None, x.body[0])

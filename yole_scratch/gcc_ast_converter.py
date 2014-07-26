@@ -79,10 +79,17 @@ def convert_python_to_gcc_ast(ast):
         return GccTuple(*[convert_python_to_gcc_ast(elt) for elt in ast.elts])
 
     if isinstance(ast, Subscript):
-        if not isinstance(ast.slice, Slice):
-            raise Exception("Subscription must use a slice")
         value = convert_python_to_gcc_ast(ast.value)
-        return GccTupleMember(value, ast.slice.lower.n, ast.slice.upper.n)
+        if isinstance(ast.slice, Slice):
+            index = ast.slice.lower.n
+            if ast.slice.upper:
+                raise Exception("only [N:] syntax is supported")
+            # generate only a series of cdr instructions
+            return GccTupleMember(value, index, index+1)
+        else:
+            # generate cdr + car
+            index = ast.slice.value.n
+            return GccTupleMember(value, index, index+2)
 
     if isinstance(ast, Call):
         callee = GccNameReference(ast.func.id)
