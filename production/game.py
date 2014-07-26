@@ -305,12 +305,11 @@ class Map:
             self.cells.append(line_cells)
 
     def set_ai_specs(self, lm_spec, ghost_specs):
-        # TODO: change to assert
-        if self.lambdaman:
-            lman_ai = lambda_man_ai_from_spec(lm_spec)
-            self.lambdaman.ai = lman_ai
-            self.lambdaman.ai.initialize(self, None)
-            self.schedule(self.lambdaman)
+        assert self.lambdaman
+        lman_ai = lambda_man_ai_from_spec(lm_spec)
+        self.lambdaman.ai = lman_ai
+        self.lambdaman.ai.initialize(self, None)
+        self.schedule(self.lambdaman)
 
         for index, ghost in enumerate(self.ghosts):
             ai_index = index % len(ghost_specs)
