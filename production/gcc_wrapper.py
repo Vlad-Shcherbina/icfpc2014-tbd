@@ -14,12 +14,15 @@ class GCCInterface(object):
 
 
 class GCCWrapper:
-    def __init__(self, gcc, world, undocumented):
+    def __init__(self, gcc):
         assert isinstance(gcc, GCCInterface)
         self.gcc = gcc
-        world_state = self.marshall_world_state(world)
-        self.ai_state, self.step_function = gcc.initialize(world_state, undocumented)
         
+    
+    def initialize(self, world, undocumented):
+        world_state = self.marshall_world_state(world)
+        self.ai_state, self.step_function = self.gcc.initialize(world_state, undocumented)
+            
     
     def step(self, world):
         world_state = self.marshall_world_state(world)
