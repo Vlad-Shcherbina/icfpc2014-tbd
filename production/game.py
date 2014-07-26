@@ -263,6 +263,12 @@ class Map:
         self.ghosts_eaten = 0
         self.fright_end = None
         for y, line in enumerate(lines):
+            if y == 0:
+                width = len(line)
+            elif len(line) != width:
+                raise Exception("Map lines must have equal length."
+                                "Line {0} has length {1} instead of {2}".format(
+                                y, len(line), width))
             line_cells = []
             for x, c in enumerate(line):
                 contents = MAP_TILES.index(c)
@@ -300,6 +306,12 @@ class Map:
         return len(self.cells)
 
     def at(self, x, y):
+        if x < 0 or x >= self.width():
+            raise IndexError("X out of bounds (got {0}, width {1})".format(
+                x, self.width()))
+        if y < 0 or y >= self.height():
+            raise IndexError("Y out of bounds (got {0}, height {1})".format(
+                x, self.height()))
         return self.cells[y][x]
 
     def line_as_text(self, y):

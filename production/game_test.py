@@ -12,7 +12,7 @@ class GameTest(TestCase):
         self.assertEquals(GHOST, map.at(2, 1))
 
     def test_step(self):
-        lines = ["######", r"#\.%#", "#####"]
+        lines = ["#####", r"#\.%#", "#####"]
         ghost_ais = ["ghc:miner.ghc"]
         lman_ai = "interactive:"
         set_interactive_lambda_man_direction(RIGHT)
