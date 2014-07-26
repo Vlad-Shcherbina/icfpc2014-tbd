@@ -70,14 +70,25 @@ class VorberGCC(GCCInterface):
     def call(self, address_or_closure, *args):
         'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
         # Implement the stuff below, OK?
-        'reset all stacks'
+        'reset all stacks' #vorber: gcc state persists between calls, unless explicitly modified from outside
         'put args on the data stack'
+        #[00:51] <jdreske> the lambda man cpu simulator always starts with empty data stack, but usually we will have two elements on it, world and undefined, right?
+        #[00:52] <@dcoutts> jdreske: no, function args come in via the environment, not the stack
+        #
+        #so args go on env stack, not data
+        fp = {'frame_tag':'FRAME_NO_TAG', 'parent':-1, 'values':[arg for arg in args], 'size':len(args)}
         self.ctrl_stack.append({'tag':'TAG_STOP'})
         if isinstance(address_or_closure, int):
+            self.env_stack.append(fp)
+            self.reg_e = len(self.env_stack)-1
             self.reg_c = address_or_closure
         else:
             # it's a closure
             'set self.reg_c and self.reg_e from the closure'
+            self.reg_c = address_or_closure[0]
+            self.reg_e = address_or_cosure[1]
+            self.env_stack = self.env_stack[:self.reg_e+1]
+            self.env_stack[self.reg_e] = fp
         self.run()
         'return everything on the data stack'
 
@@ -247,12 +258,14 @@ class VorberGCC(GCCInterface):
             self.__error('UNKNOWN CMD: {}'.format(cmd))
 
 def main():
-    filename = '../data/lms/goto.gcc'
+    #filename = '../data/lms/goto.gcc'
+    filename = 'exampleai.gcc'
     code = open(filename).read()
     from asm_parser import parse_gcc
     program = parse_gcc(code, source=filename)
     gcc = VorberGCC(program, verbose=True)
-    gcc.run()
+    #gcc.run()
+    gcc.call(0, (0,0), (0,0))
 
 if __name__ == '__main__':
     main()
