@@ -6,7 +6,7 @@ ghoston programs consist of
 
 - GHC assembler commands, like "mov a, b"
 - nicer mnemonics for interrupts:
-    'report', 'lambdaman', 'xxx', 'myindex', 'ghoststart', 'ghostpos', 'ghoststats', 'mapq', 'debug'
+    report, lambdaman, xxx, myindex, ghoststart, ghostpos, ghoststats, mapq, debug
 - if <a> <op> <b> or ifnot <a> <op> <b> blocks, possibly with else blocks
 - while <a> <op> <b> or whilenot <a> <op> <b> blocks
 
@@ -45,6 +45,7 @@ def error(desc):
     raise Exception('error: {}'.format(desc))
 
 INTERRUPTS = ['report', 'lambdaman', 'xxx', 'myindex', 'ghoststart', 'ghostpos', 'ghoststats', 'mapq', 'debug']
+MNEMONICS = ['mov', 'inc', 'dec', 'add', 'sub', 'mul', 'div', 'and', 'or', 'xor', 'jlt', 'jeq', 'jgt', 'int', 'hlt']
 COMPARATORS = {'<': 'jlt', '=': 'jeq', '>': 'jgt'}
 SINGLE_INDENT = 4
 
@@ -52,7 +53,7 @@ def make_indent_tree(code, indent_level=0):
     i = 0
     res = []
     while i < len(code):
-        line = code[i].strip()
+        line = code[i].lower().strip()
         # remove comments & whitespace
         if ';' in line:
             line = line[:line.index(';')]
@@ -94,7 +95,7 @@ def convert_tree(tree, cmds_before=0):
 
             ifnot = line.startswith('ifnot ')
             _, a, op, b = line.split()
-            if op not in COMPARATORS: error('unknown comparison operator')
+            if op not in COMPARATORS: error('unknown comparison operator {}'.format(op))
             mnemonic = COMPARATORS[op]
 
             i += 1
@@ -135,12 +136,13 @@ def convert_tree(tree, cmds_before=0):
                 res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + 1 + len(body_code)))
                 res.extend(body_code)
         elif line.startswith('while'):
+            # while / whilenot
             if not (line.startswith('while ') or line.startswith('whilenot ')):
                 error('unknown construct "{}"'.format(line))
             whilenot = line.startswith('whilenot ')
 
             _, a, op, b = line.split()
-            if op not in COMPARATORS: error('unknown comparison operator')
+            if op not in COMPARATORS: error('unknown comparison operator {}'.format(op))
             mnemonic = COMPARATORS[op]
 
             i += 1
@@ -165,6 +167,10 @@ def convert_tree(tree, cmds_before=0):
                 res.extend(body_code)
                 res.append('jeq {t}, 0, 0'.format(t=back))
         else:
+            # some GHC mnemonic
+            if not any([line.startswith(x) for x in MNEMONICS]):
+                error('unknown mnemonic {}'.format(line))
+
             res.append(line)
             i += 1
 
