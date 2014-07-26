@@ -6,6 +6,7 @@ import multiprocessing
 import copy
 
 import game
+import map_loader
 
 
 logger = logging.getLogger(__name__)
@@ -54,14 +55,12 @@ class Result(object):
 def play(result):
     result = copy.copy(result)
     'Take partially filled result, fill in game outcome.'
-    with open(os.path.join('../data/maps', result.map)) as fin:
-        lines = [l.strip() for l in fin.read().splitlines() if l.strip()]
+    map = map_loader.load_map(result.map, result.ghost_specs, result.lm_spec)
 
     assert not result.lm_spec.startswith('interactive:')
 
     logger.info('match between {} and {} on {}'.format(
         result.lm_spec, result.ghost_specs, result.map))
-    map = game.Map(lines, result.ghost_specs, result.lm_spec)
     while not map.game_over():
         map.step()
 
