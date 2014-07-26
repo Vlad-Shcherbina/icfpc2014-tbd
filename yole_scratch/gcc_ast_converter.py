@@ -101,6 +101,8 @@ def convert_python_to_gcc_ast(ast):
             return GccTupleMember(value, index, index+2)
 
     if isinstance(ast, Call):
+        if ast.func.id == 'int':
+            return GccAtom(convert_python_to_gcc_ast(ast.args[0]))
         callee = GccNameReference(ast.func.id)
         return GccCall(callee,
                        [convert_python_to_gcc_ast(arg) for arg in ast.args])

@@ -318,3 +318,12 @@ class GccAssignment(object):
         self.value.emit(builder, context)
         frame_index, var_index = context.resolve_variable(self.name)
         builder.add_instruction("st", frame_index, var_index)
+
+
+class GccAtom(object):
+    def __init__(self, arg):
+        self.arg = arg
+
+    def emit(self, builder, context):
+        self.arg.emit(builder, context)
+        builder.add_instruction("atom")

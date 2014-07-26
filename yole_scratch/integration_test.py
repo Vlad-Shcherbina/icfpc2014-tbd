@@ -33,3 +33,8 @@ class IntegrationTest(TestCase):
         self.assertEquals(PILL, result)
         result = self.machine.call(0, self.world_state, 0, -6)
         self.assertEquals(GHOST, result)
+
+    def test_list_length(self):
+        self.prepare("default_map.txt", "list_length.py")
+        result = self.machine.call(0, self.world_state[0])
+        self.assertEquals(22, result)

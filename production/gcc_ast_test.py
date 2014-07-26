@@ -189,6 +189,14 @@ class GccASTTest(unittest.TestCase):
             rtn
             """, builder.text)
 
+    def test_atom(self):
+        blk = GccCodeBlock()
+        blk.instructions.append(GccAtom(GccConstant(3)))
+        builder = GccTextBuilder()
+        blk.emit(builder, None)
+        self.assert_code_equals("ldc 3\natom\n", builder.text)
+
+
 if __name__ == '__main__':
     import sys
     import nose
