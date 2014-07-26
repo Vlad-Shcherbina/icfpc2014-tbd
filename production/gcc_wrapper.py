@@ -28,9 +28,8 @@ class GCCWrapper:
     
     def marshall_world_state(self, world):
         # convert world_state to the list/tuple/int representation
-        world_state = world
-        # go implement the above, lol
-        
+        world_state = self.convert_world_state(world)
+
         gcc = self.gcc
         def rec(item):
             if isinstance(item, int):
@@ -52,3 +51,26 @@ class GCCWrapper:
             return curr
         return rec(world_state)
 
+    def convert_world_state(self, world):
+        return (self.encode_map(world),
+                self.encode_lman(world),
+                self.encode_ghosts(world),
+                world.remaining_fruit_ticks())
+
+    def encode_map(self, world):
+        return [self.encode_map_row(world, y) for y in range(world.height())]
+
+    def encode_map_row(self, world, y):
+        return [world.at(x, y) for x in range(world.width())]
+
+    def encode_lman(self, world):
+        lman = world.lambdamen[0]
+        return (world.remaining_power_pill_ticks(),
+                (lman.x, lman.y),
+                lman.direction,
+                lman.lives,
+                lman.score)
+
+    def encode_ghosts(self, world):
+        return [(ghost.vitality, (ghost.x, ghost.y), ghost.direction)
+                for ghost in world.ghosts]

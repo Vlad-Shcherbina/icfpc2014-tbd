@@ -144,10 +144,11 @@ class LambdaMan(Actor):
         self.score = 0
         self.lives = 3
         self.ai = ai
+        self.direction = DOWN
 
     def move(self):
-        direction = self.ai.get_move(self.map)
-        self.move_in_direction(direction)
+        self.direction = self.ai.get_move(self.map)
+        self.move_in_direction(self.direction)
         self.check_collisions()
 
     def check_collisions(self):
@@ -389,3 +390,14 @@ class Map:
         if self.current_tick >= 127 * self.width() * self.height() * 16:
             return True
         return False
+
+    def remaining_power_pill_ticks(self):
+        if not self.fright_end:
+            return 0
+        return self.fright_end - self.current_tick
+
+    def remaining_fruit_ticks(self):
+        for spawn, expire in zip(FRUIT_SPAWN_TIMES, FRUIT_EXPIRE_TIMES):
+            if spawn <= self.current_tick < expire:
+                return self.current_tick - spawn
+        return 0
