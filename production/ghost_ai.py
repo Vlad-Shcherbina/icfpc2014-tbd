@@ -2,200 +2,102 @@ import random
 import logging
 import game
 
-logger = logging.getLogger(__name__)
 
-DIRECTION_S = ['UP', 'RIGHT', 'DOWN', 'LEFT']
-
-class GHC_Ints:
-    def __init__(self, map, index):
-        self.map = map
-        self.index = index
-        self.direction = None
-
-    def set_direction(self, direction):
-        'INT 0'
-        self.direction = direction
-
-    def get_man_pos(self):
-        'INT 1', 'INT 2'
-        man = self.map.lambdaman
-        return (man.x, man.y)
-
-    def get_index(self):
-        'INT 3'
-        return self.index
-
-    def get_ghost_start_pos(self, index):
-        'INT 4'
-        ghost = self.map.ghosts[index]
-        return (ghost.start_x, ghost.start_y)
-
-    def get_ghost_pos(self, index):
-        'INT 5'
-        ghost = self.map.ghosts[index]
-        return (ghost.x, ghost.y)
-
-    def get_ghost_stat(self, index):
-        'INT 6'
-        ghost = self.map.ghosts[index]
-        return (ghost.vitality, ghost.direction)
-
-    def get_map(self, x, y):
-        'INT 7'
-        return self.map.at(x, y)
-
-    def debug(self):
-        'INT 8'
-        pass
-
-
-class GhostAI_Py(object):
+class BasePyAI(object):
 
     def initialize(self, map, index):
-        self.ghc = GHC_Ints(map, index)
+        self.map = map
+        self.index = index
+        self.ghost = map.ghosts[index]
 
     def get_move(self):
-       self.run(self.ghc)
-       return self.ghc.direction
-
-    def run(self, ghc):
-        pass
+        raise NotImplementedError()
 
 
-class GhostAI_Shortest(GhostAI_Py):
-
-    def run(self, ghc):
-        index = ghc.get_index()
-        (x, y) = ghc.get_ghost_pos(index)
-        (man_x, man_y) = ghc.get_man_pos()
-        dx = man_x - x
-        dy = man_y - y
-        adx = dx * dx
-        ady = dy * dy
-        if adx > ady:
-            ghc.set_direction(game.RIGHT if dx > 0 else game.LEFT)
-        else:
-            ghc.set_direction(game.DOWN if dy > 0 else game.UP)
-        logger.debug("ghost %d @ (%d, %d) to (%d, %d) chose %s",
-                     index, x, y, man_x, man_y,  DIRECTION_S[ghc.direction])
-
-
-class GhostAI_Original(GhostAI_Py):
+class GhostAI_Random(BasePyAI):
     def __init__(self):
         self.rng = random.Random(42)
 
-    def chase_target(self, ghc):
+    def get_move(self):
+        return self.rng.choise(game.DIRECTIONS)
+
+
+class GhostAI_Shortest(BasePyAI):
+
+    def get_move(self):
+        dx = self.map.lambdaman.x - self.ghost.x
+        dy = self.map.lambdaman.y - self.ghost.y
+        if abs(dx) > abs(dy):
+            return game.RIGHT if dx > 0 else game.LEFT
+        else:
+            return game.DOWN if dy > 0 else game.UP
+
+
+class BaseChaser(BasePyAI):
+    def __init__(self):
+        self.rng = random.Random(42)
+
+    def get_target(self):
+        raise NotImplementedError()
+
+    def chase_target(self):
         # maximum distance on a map
         score = 255 * 255 * 2
 
+        best_direction = None
+
+        target_x, target_y = self.get_target()
+
         for direction in game.DIRECTIONS:
-            if direction == self.opposite:
+            if direction == game.OPPOSITE_DIRECTIONS[self.ghost.direction]:
                 continue
 
-            next_x = self.x + game.DELTA_X[direction]
-            next_y = self.y + game.DELTA_Y[direction]
-            if ghc.get_map(next_x, next_y) == game.WALL:
+            next_x = self.ghost.x + game.DELTA_X[self.ghost.direction]
+            next_y = self.ghost.y + game.DELTA_Y[self.ghost.direction]
+            if self.map.at(next_x, next_y) == game.WALL:
                 continue
 
-            dx = next_x - self.target_x
-            dy = next_y - self.target_y
+            dx = next_x - target_x
+            dy = next_y - target_y
 
-            # considering 8 bit registers this is crap
             d = dx * dx + dy * dy
 
-            logger.debug("ghost %d @ (%d, %d) chases (%d, %d) score %d, %s %d",
-                         self.index, self.x, self.y, self.target_x, self.target_y,
-                         score, DIRECTION_S[direction], d)
-
             if score > d:
-                ghc.set_direction(direction)
+                best_direction = direction
                 score = d
-                logger.debug("ghost %d @ (%d, %d) chases (%d, %d) chose %s",
-                             self.index, self.x, self.y, self.target_x, self.target_y,
-                             DIRECTION_S[ghc.direction])
 
-    def choose_random(self, ghc):
-        valid = 0
-        valid_len = 0
-
-        for direction in game.DIRECTIONS:
-            if direction == self.opposite:
+    def choose_random(self):
+        directions = []
+        for d in game.DIRECTIONS:
+            if d == game.OPPOSITE_DIRECTIONS[self.ghost.direction]:
                 continue
-
-            next_x = self.x + game.DELTA_X[direction]
-            next_y = self.y + game.DELTA_Y[direction]
-            if ghc.get_map(next_x, next_y) == game.WALL:
+            next_x = self.ghost.x + game.DELTA_X[d]
+            next_y = self.ghost.y + game.DELTA_Y[d]
+            if self.map.at(next_x, next_y) == game.WALL:
                 continue
+            directions.append(d)
+        if not directions:
+            directions = game.DIRECTIONS
+        return self.rng.choice(directions)
 
-            logger.debug("ghost %d @ (%d, %d) has %s choice",
-                     self.index, self.x, self.y, DIRECTION_S[direction])
-            valid_len += 1
-            valid |= 1 << direction
-
-        if valid_len <= 1:
-            return
-
-        direction = 0
-        idx = self.rng.randint(1, valid_len)
-        while idx > 0:
-            while valid & 1 == 0:
-                direction += 1
-                valid >>= 1
-            idx -= 1
-
-        ghc.set_direction(direction)
-        logger.debug("ghost %d @ (%d, %d) random chose %s",
-                     self.index, self.x, self.y,
-                     DIRECTION_S[direction])
-
-    def run(self, ghc):
-        self.index = ghc.get_index()
-        (self.x, self.y) = ghc.get_ghost_pos(self.index)
-        (vitality, direction) = ghc.get_ghost_stat(self.index)
-        self.opposite = game.OPPOSITE_DIRECTIONS[direction]
-
-        if vitality == game.FRIGHT:
-            self.choose_random(ghc)
-            return
-
-        self.character(ghc)
+    def get_move(self):
+        if self.ghost.vitality == game.STANDARD:
+            return self.chase_target()
+        else:
+            return self.choose_random()
 
 
-class GhostAI_Random(GhostAI_Original):
-
-    def character(self, ghc):
-        self.choose_random(ghc)
-
-
-class GhostAI_Red(GhostAI_Original):
+class GhostAI_Red(BaseChaser):
     'simply chases pacman'
 
-    def character(self, ghc):
-        (self.target_x, self.target_y) = ghc.get_man_pos()
-        self.chase_target(ghc)
+    def get_target(self):
+        return self.map.lambdaman.x, self.map.lambdaman.y
 
 
-class GhostAI_Pink(GhostAI_Original):
-    'chases a tile 4 tiles ahead of pacman'
+class GhostAI_Pink(BaseChaser):
+    'simply chases pacman'
 
-    def __init__(self):
-        super(GhostAI_Pink, self).__init__()
-        self.old_x = 0
-
-    def character(self, ghc):
-        (man_x, man_y) = ghc.get_man_pos()
-        if self.old_x != 0:
-            dx = man_x - self.old_x
-            dy = man_y - self.old_y
-
-            logger.debug("ghost %d @ (%d, %d) tracks (%d + %d, %d + %d)",
-                         self.index, self.x, self.y,
-                         self.old_x, dx,
-                         self.old_y, dy)
-
-            self.target_x = man_x + dx * 4
-            self.target_y = man_y + dy * 4
-            self.chase_target(ghc)
-
-        self.old_x = man_x
-        self.old_y = man_y
+    def get_target(self):
+        return (
+            self.map.lambdaman.x + 4 * game.DELTA_X[self.map.lambdaman.direction],
+            self.map.lambdaman.y + 4 * game.DELTA_Y[self.map.lambdaman.direction])
