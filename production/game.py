@@ -4,7 +4,9 @@ import os
 from ghc import GHC
 import ghost_ai
 import lm_ai
-
+from asm_parser import parse_gcc
+from gcc_wrapper import GCCWrapper
+from tmp_gcc_interpreter import VorberGCC
 
 UP = 0
 RIGHT = 1
@@ -71,6 +73,14 @@ def lambda_man_ai_from_spec(lm_spec):
         return InteractiveLambdaManAI()
     elif type == 'py':
         return eval(details)
+    elif type == 'gcc_file':
+        interpreter, path = details.split(':', 2)
+        with open(path, 'r') as f:
+            code = f.read()
+        code = parse_gcc(code)
+        interpreter = eval(interpreter)
+        interpreter = GCCWrapper(interpreter(code))
+        return interpreter
     else:
         assert False, lm_spec
 

@@ -1,38 +1,38 @@
-class wrapper_to_gcc_interface:
-    def load(code):
+class GCCInterface(object):
+    def load(self, code):
         '''
         Loads the code into gcc
         '''
         pass
-    def run():
+    def run(self):
         '''
         Runs the loaded code
         '''
         pass
 
-    def pop_data_cons():
+    def pop_data_cons(self):
         '''
         Method to pop cons from data stack
         intended usage is to retrieve program result after it is finished
         '''
         pass
-    def pop_data_closure():
+    def pop_data_closure(self):
         '''
         Method to pop closure from data stack
         intended usage is to retrieve program result after it is finished
         '''
         pass
-    def set_ip(ip)
+    def set_ip(self, ip):
         '''
         Sets instruction pointer (register %c) to specified instruction
         '''
         pass
-    def set_env(e):
+    def set_env(self, e):
         '''
         Sets environment pointer
         '''
         pass
-    def add_env_cons(ep, t):
+    def add_env_cons(self, ep, t):
         '''
         Adds a 2-element tuple to environment
         ep: environment pointer
@@ -40,13 +40,12 @@ class wrapper_to_gcc_interface:
         '''
         pass
 
-class gcc_wrapper:
-    def __init__(gcc, code, world_state, undefined):
+class GCCWrapper(object):
+    def __init__(self, gcc, code):
         self.gcc = gcc
         gcc.load(code)
-        initialize(world_state, undefined)
         
-    def initialize(world_state, udefined):
+    def initialize(self, world_state, udefined):
         #prepare input params for gcc
         #it seems they should be put onto env_stack
         self.gcc.set_env(0)
