@@ -29,7 +29,7 @@ class GccASTTest(unittest.TestCase):
         blk.instructions.append(GccConstant(3))
         builder = GccTextBuilder()
         blk.emit(builder, None)
-        self.assert_code_equals("ldc 3", builder.text)
+        self.assert_code_equals("LDC 3", builder.text)
 
     def test_add(self):
         c1 = GccConstant(3)
@@ -39,7 +39,7 @@ class GccASTTest(unittest.TestCase):
         blk.instructions.append(expr)
         builder = GccTextBuilder()
         blk.emit(builder, None)
-        self.assert_code_equals("ldc 3\nldc 4\nadd\n", builder.text)
+        self.assert_code_equals("LDC 3\nLDC 4\nADD\n", builder.text)
 
     def test_function(self):
         builder = GccTextBuilder()
@@ -48,7 +48,7 @@ class GccASTTest(unittest.TestCase):
         expr = GccAdd(var_ref, var_ref)
         body.add_instruction(expr)
         body.emit(builder)
-        self.assert_code_equals("ld 0 0\nld 0 0\nadd\nrtn\n", builder.text)
+        self.assert_code_equals("LD 0 0\nLD 0 0\nADD\nRTN\n", builder.text)
 
     def test_function_reference(self):
         program = GccProgram()
@@ -59,10 +59,10 @@ class GccASTTest(unittest.TestCase):
         program.emit(builder)
         self.assert_code_equals("""
         ;$func_main$
-            ldf 2  ; $func_step$
-            rtn
+            LDF 2  ; $func_step$
+            RTN
         ;$func_step$
-            rtn
+            RTN
             """, builder.text)
 
     def test_function_call(self):
@@ -81,16 +81,16 @@ class GccASTTest(unittest.TestCase):
 
         self.assert_code_equals("""
         ;$func_main$
-            ldc 21
-            ldf 5  ; $func_body$
-            ap 1
-            ldc 0
-            rtn
+            LDC 21
+            LDF 5  ; $func_body$
+            AP 1
+            LDC 0
+            RTN
         ;$func_body$
-            ld 0 0
-            ld 0 0
-            add
-            rtn
+            LD 0 0
+            LD 0 0
+            ADD
+            RTN
             """, builder.text)
 
     def test_tail_call(self):
@@ -108,14 +108,14 @@ class GccASTTest(unittest.TestCase):
 
         self.assert_code_equals("""
         ;$func_main$
-            ldc 21
-            ldf 3  ; $func_body$
-            tap 1
+            LDC 21
+            LDF 3  ; $func_body$
+            TAP 1
         ;$func_body$
-            ld 0 0
-            ld 0 0
-            add
-            rtn
+            LD 0 0
+            LD 0 0
+            ADD
+            RTN
             """, builder.text)
 
     def test_tail_call_in_condition(self):
@@ -138,19 +138,19 @@ class GccASTTest(unittest.TestCase):
 
         self.assert_code_equals("""
         ;$func_main$
-            ldc 1
-            tsel 2 5
-            ldc 21
-            ldf 8  ; $func_body$
-            tap 1
-            ldc 32
-            ldf 8  ; $func_body$
-            tap 1
+            LDC 1
+            TSEL 2 5
+            LDC 21
+            LDF 8  ; $func_body$
+            TAP 1
+            LDC 32
+            LDF 8  ; $func_body$
+            TAP 1
         ;$func_body$
-            ld 0 0
-            ld 0 0
-            add
-            rtn
+            LD 0 0
+            LD 0 0
+            ADD
+            RTN
             """, builder.text)
 
     def test_conditional_expression(self):
@@ -165,17 +165,17 @@ class GccASTTest(unittest.TestCase):
         program.emit(builder)
         self.assert_code_equals("""
         ;$func_main$
-            ld 0 0
-            ldc 0
-            cgt
-            sel 7 9
-            ldc 1
-            add
-            rtn
-            ldc 1
-            join
-            ldc 0
-            join
+            LD 0 0
+            LDC 0
+            CGT
+            SEL 7 9
+            LDC 1
+            ADD
+            RTN
+            LDC 1
+            JOIN
+            LDC 0
+            JOIN
             """, builder.text)
 
     def test_tail_conditional_expression(self):
@@ -190,14 +190,14 @@ class GccASTTest(unittest.TestCase):
         program.emit(builder)
         self.assert_code_equals("""
         ;$func_main$
-            ld 0 0
-            ldc 0
-            cgt
-            tsel 4 6
-            ldc 1
-            rtn
-            ldc 0
-            rtn
+            LD 0 0
+            LDC 0
+            CGT
+            TSEL 4 6
+            LDC 1
+            RTN
+            LDC 0
+            RTN
             """, builder.text)
 
     def test_tuple(self):
@@ -208,10 +208,10 @@ class GccASTTest(unittest.TestCase):
         program.emit(builder)
         self.assert_code_equals("""
         ;$func_main$
-            ld 0 0
-            ldc 1
-            cons
-            rtn
+            LD 0 0
+            LDC 1
+            CONS
+            RTN
             """, builder.text)
 
     def test_tuple_member(self):
@@ -222,10 +222,10 @@ class GccASTTest(unittest.TestCase):
         program.emit(builder)
         self.assert_code_equals("""
         ;$func_main$
-            ld 0 0
-            cdr
-            car
-            rtn
+            LD 0 0
+            CDR
+            CAR
+            RTN
             """, builder.text)
 
     def test_assignment(self):
@@ -239,15 +239,15 @@ class GccASTTest(unittest.TestCase):
         program.emit(builder)
         self.assert_code_equals("""
         ;$func_main$
-            dum 1
-            ldc 42
-            st 0 0
-            ldc 239
-            st 1 0
-            ld 1 0
-            ld 0 0
-            cons
-            rtn
+            DUM 1
+            LDC 42
+            ST 0 0
+            LDC 239
+            ST 1 0
+            LD 1 0
+            LD 0 0
+            CONS
+            RTN
             """, builder.text)
 
     def test_atom(self):
@@ -255,7 +255,7 @@ class GccASTTest(unittest.TestCase):
         blk.instructions.append(GccAtom(GccConstant(3)))
         builder = GccTextBuilder()
         blk.emit(builder, None)
-        self.assert_code_equals("ldc 3\natom\n", builder.text)
+        self.assert_code_equals("LDC 3\nATOM\n", builder.text)
 
 
 if __name__ == '__main__':

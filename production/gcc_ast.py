@@ -14,7 +14,7 @@ class GccTextBuilder(object):
         return result
 
     def add_instruction(self, name, *args):
-        line = name
+        line = name.upper()
         if args:
             line += " " + " ".join(map(str, args))
         self.lines.append(line)
