@@ -66,7 +66,11 @@ class gcc_wrapper:
     def initialize(world_state, udefined):
         #prepare input params for gcc
         #it seems they should be put onto env_stack
-        gcc.run()
+        self.gcc.set_env(0)
+        self.gcc.set_env_cons(0,world_state_to_cons(world_state))
+        self.gcc.set_env_cons(0,undefined_cons(undefined))
+        #initial run to get step and ai state
+        self.gcc.run()
         #get result from data stack, resut is a closure cell
         ret = gcc.pop_data_cons()
         self.ai_state = ret[0]
@@ -86,6 +90,7 @@ class gcc_wrapper:
         self.ai_state = ret[0]
         direction = ret[1]
         return direction
-        
+    def undefined_cons(undefined):
+        return (0,0)
     def world_state_to_cons(world_state):
         pass
