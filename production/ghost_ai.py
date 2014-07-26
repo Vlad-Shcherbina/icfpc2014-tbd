@@ -157,7 +157,7 @@ class GhostAI_Original(GhostAI_Py):
         self.opposite = game.OPPOSITE_DIRECTIONS[direction]
 
         if vitality == game.FRIGHT:
-            choose_random(ghc)
+            self.choose_random(ghc)
             return
 
         self.character(ghc)

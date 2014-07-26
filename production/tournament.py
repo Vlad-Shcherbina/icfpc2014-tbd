@@ -90,6 +90,7 @@ def main():
         ghost_team_specs=[
             ['py:GhostAI_Shortest', 'ghc:fickle.ghc'],
             ['ghc:miner.ghc'],
+            ['py:GhostAI_Red', 'py:GhostAI_Pink'],
         ])
 
     save_results(results, '../data/some_results.json')
