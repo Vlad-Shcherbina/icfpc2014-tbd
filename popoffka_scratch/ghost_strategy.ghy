@@ -1,9 +1,13 @@
 ; main stuff!
+alias lastdir [127]
+alias turned [128]
 
 !myindex
 !ghoststats
 alias gdir [0]
+alias gvit [6]
 mov gdir, b
+mov gvit, a
 
 alias gx [1]
 alias gy [2]
@@ -17,16 +21,22 @@ alias ly [4]
 mov lx, a
 mov ly, b
 
+; save opposite dir in opdir
 alias opdir [5]
+mov h, pc
+jmp /opposite/
+mov opdir, g
 
-if a = 1
+if opdir = lastdir
+    mov turned, 1
+else
+    mov turned, 0
+!debug
+
+if gvit = 1
     ; if we are frightened
     mov g, gdir
 
-    ; save opposite dir in opdir
-    mov h, pc
-    jmp /opposite/
-    mov opdir, g
 
     ; try all valid directions, use any that doesn't kill us
     mov g, 0
@@ -54,6 +64,10 @@ else
     mov c, gdir
     mov d, 255
     whilenot g = 4
+        ifnot turned = 0
+            if g = gdir
+                jmp /cont/
+
         ifnot g = opdir
             mov e, gx
             mov f, gy
@@ -64,9 +78,11 @@ else
             ifnot e > d
                 mov d, e
                 mov c, g
-        inc g
+
+        inc g | cont
     mov a, c
 !report
+mov lastdir, gdir
 hlt
 
 ; dirmove is a subroutine
