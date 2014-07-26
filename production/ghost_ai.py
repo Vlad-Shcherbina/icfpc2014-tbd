@@ -50,7 +50,8 @@ class GHC_Ints:
 
 
 class GhostAI_Py(object):
-    def __init__(self, map, index):
+
+    def initialize(self, map, index):
         self.ghc = GHC_Ints(map, index)
 
     def get_move(self):
@@ -62,8 +63,6 @@ class GhostAI_Py(object):
 
 
 class GhostAI_Shortest(GhostAI_Py):
-    def __init__(self, map, index):
-        super(GhostAI_Shortest, self).__init__(map, index)
 
     def run(self, ghc):
         index = ghc.get_index()
@@ -82,8 +81,7 @@ class GhostAI_Shortest(GhostAI_Py):
 
 
 class GhostAI_Original(GhostAI_Py):
-    def __init__(self, map, index):
-        super(GhostAI_Original, self).__init__(map, index)
+    def __init__(self):
         self.rng = random.Random(42)
 
     def chase_target(self, ghc):
@@ -164,8 +162,6 @@ class GhostAI_Original(GhostAI_Py):
 
 
 class GhostAI_Random(GhostAI_Original):
-    def __init__(self, map, index):
-        super(GhostAI_Random, self).__init__(map, index)
 
     def character(self, ghc):
         self.choose_random(ghc)
@@ -173,9 +169,6 @@ class GhostAI_Random(GhostAI_Original):
 
 class GhostAI_Red(GhostAI_Original):
     'simply chases pacman'
-
-    def __init__(self, map, index):
-        super(GhostAI_Red, self).__init__(map, index)
 
     def character(self, ghc):
         (self.target_x, self.target_y) = ghc.get_man_pos()
@@ -185,8 +178,7 @@ class GhostAI_Red(GhostAI_Original):
 class GhostAI_Pink(GhostAI_Original):
     'chases a tile 4 tiles ahead of pacman'
 
-    def __init__(self, map, index):
-        super(GhostAI_Pink, self).__init__(map, index)
+    def __init__(self):
         self.old_x = 0
 
     def character(self, ghc):

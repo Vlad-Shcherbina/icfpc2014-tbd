@@ -52,14 +52,14 @@ FRIGHT_DURATION = 127 * 20
 logger = logging.getLogger(__name__)
 
 
-def ghost_ai_from_spec(ghost_spec, map, index):
+def ghost_ai_from_spec(ghost_spec):
     type, details = ghost_spec.split(':', 1)
     if type == 'ghc':
         with open(os.path.join('../data/ghosts', details)) as fin:
             code = fin.read()
-        return GhostAI(map, index, code)
+        return GhostAI(code)
     elif type == 'py':
-        return getattr(ghost_ai, details)(map, index)
+        return getattr(ghost_ai, details)()
     elif type == "empty":
         return EmptyGhostAI()
     else:
@@ -86,15 +86,21 @@ def lambda_man_ai_from_spec(lm_spec):
 
 
 class GhostAI:
-    def __init__(self, map, index, code):
-        self.vm = GHC(code, map, index)
+    def __init__(self, code):
+        self.code = code
+
+    def initialize(self, map, index):
+        self.map = map
+        self.vm = GHC(self.code, map, index)
 
     def get_move(self):
         return self.vm.run()
 
 
 class EmptyGhostAI:
-    def get_move(self):
+    def initialize(*shit):
+        pass
+    def get_move(self, *shit):
         return DOWN
 
 
@@ -146,12 +152,12 @@ class Actor(object):
 
 
 class LambdaMan(Actor):
-    def __init__(self, map, x, y, ai):
+    def __init__(self, map, x, y):
         super(LambdaMan, self).__init__(map, x, y)
         self.speed = LAMBDAMAN_SPEED
         self.score = 0
         self.lives = 3
-        self.ai = ai
+        self.ai = None
         self.direction = DOWN
 
     def move(self):
@@ -182,11 +188,11 @@ class LambdaMan(Actor):
 
 
 class Ghost(Actor):
-    def __init__(self, map, index, ai, x, y):
+    def __init__(self, map, index, x, y):
         super(Ghost, self).__init__(map, x, y)
         self.index = index
         self.direction = DOWN
-        self.ai = ai
+        self.ai = None
         self.vitality = STANDARD
         self.x = x
         self.y = y
@@ -283,15 +289,10 @@ class Map:
                 if contents == LAMBDAMAN:
                     if self.lambdaman:
                         raise Exception("can't have multiple lambdamen")
-                    lman_ai = lambda_man_ai_from_spec(lm_spec)
-                    lman = LambdaMan(self, x, y, lman_ai)
-                    self.lambdaman = lman
+                    self.lambdaman = LambdaMan(self, x, y)
                 elif contents == GHOST:
                     index = len(self.ghosts)
-                    ai_index = len(self.ghosts) % len(ghost_specs)
-                    ai = ghost_ai_from_spec(
-                        ghost_specs[ai_index], map=self, index=index)
-                    ghost = Ghost(self, index, ai, x, y)
+                    ghost = Ghost(self, index, x, y)
                     self.ghosts.append(ghost)
                     self.schedule(ghost)
                 elif contents == PILL:
@@ -304,8 +305,17 @@ class Map:
             self.cells.append(line_cells)
 
         if self.lambdaman:
+            lman_ai = lambda_man_ai_from_spec(lm_spec)
+            self.lambdaman.ai = lman_ai
             self.lambdaman.ai.initialize(self, None)
             self.schedule(self.lambdaman)
+
+        for index, ghost in enumerate(self.ghosts):
+            ai_index = index % len(ghost_specs)
+            ai = ghost_ai_from_spec(
+                ghost_specs[ai_index])
+            ai.initialize(self, index)
+            ghost.ai = ai
 
     def width(self):
         return len(self.cells[0])
