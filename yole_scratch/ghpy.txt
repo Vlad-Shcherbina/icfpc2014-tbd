@@ -1,0 +1,20 @@
+ghpy supported features
+=======================
+
+- Numeric constants
+- Arithmetic expressions: + - * /
+- Comparison operators: > >= ==
+- Function declarations
+- References to functions and function parameters
+- Function calls
+- if statements (generally need to have an 'else' clause)
+  - if you put a 'return' statement in one branch of the 'if' statement,
+    it also needs to be in the other branch too
+- cons cell construction
+  - use Python tuple syntax: (a, b)
+- cons cell access
+  - x[0] maps to 'car'
+  - x[1:] maps to 'cdr'
+  - you can also use indexes greater than 0 or 1
+    - for example, x[2] will be compiled to 'cdr cdr car'
+  - indexes must be integer constants (meaning, known at compile time)
