@@ -22,7 +22,7 @@ class GccASTTest(unittest.TestCase):
             return result
         logging.info('Expected:\n{}'.format(expected))
         logging.info('Actual:\n{}'.format(actual))
-        assert drop_ws(expected) == drop_ws(actual)
+        self.assertEquals(drop_ws(expected), drop_ws(actual))
 
     def test_constant(self):
         blk = GccCodeBlock()
@@ -99,6 +99,31 @@ class GccASTTest(unittest.TestCase):
         conditional_block = GccConditionalBlock(GccGt(var_ref, GccConstant(0)))
         conditional_block.true_branch.instructions.append(GccConstant(1))
         conditional_block.false_branch.instructions.append(GccConstant(0))
+        body.add_instruction(GccAdd(conditional_block, GccConstant(1)))
+        builder = GccTextBuilder()
+        program.emit(builder)
+        self.assert_code_equals("""
+        ;$func_main$
+            ld 0 0
+            ldc 0
+            cgt
+            sel 7 9
+            ldc 1
+            add
+            rtn
+            ldc 1
+            join
+            ldc 0
+            join
+            """, builder.text)
+
+    def test_tail_conditional_expression(self):
+        program = GccProgram()
+        body = program.add_function("main", ["x"])
+        var_ref = GccNameReference("x")
+        conditional_block = GccConditionalBlock(GccGt(var_ref, GccConstant(0)))
+        conditional_block.true_branch.instructions.append(GccConstant(1))
+        conditional_block.false_branch.instructions.append(GccConstant(0))
         body.add_instruction(conditional_block)
         builder = GccTextBuilder()
         program.emit(builder)
@@ -107,12 +132,11 @@ class GccASTTest(unittest.TestCase):
             ld 0 0
             ldc 0
             cgt
-            sel 5 7
-            rtn
+            tsel 4 6
             ldc 1
-            join
+            rtn
             ldc 0
-            join
+            rtn
             """, builder.text)
 
     def test_tuple(self):

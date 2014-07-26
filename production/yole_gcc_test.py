@@ -159,6 +159,18 @@ join
         machine.run()
         self.assertEquals(machine.data_stack, [42])
 
+    def test_tsel(self):
+        machine = GccMachine(parse_gcc("""
+ldc 0
+tsel 2 4
+ldc 2
+rtn
+ldc 42
+rtn
+"""))
+        machine.run()
+        self.assertEquals(machine.data_stack, [42])
+
     def test_call(self):
         code = open("../data/lms/miner.gcc").read()
         machine = GccMachine(parse_gcc(code))

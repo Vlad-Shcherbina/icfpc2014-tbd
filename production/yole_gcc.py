@@ -106,6 +106,13 @@ class GccMachine(GCCInterface):
         else:
             return arg_true
 
+    def tsel(self, arg_true, arg_false):
+        x = self.pop_int()
+        if x == 0:
+            return arg_false
+        else:
+            return arg_true
+
     def join(self):
         ip = self.control_stack.pop()
         if type(ip) != int:

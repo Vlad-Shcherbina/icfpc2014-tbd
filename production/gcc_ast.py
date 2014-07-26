@@ -92,6 +92,7 @@ class GccEmitContext(object):
     def __init__(self, function):
         self.function = function
         self.block_queue = []
+        self.terminated = False
 
     def resolve_variable(self, name):
         index = self.function.args.index(name)
@@ -115,6 +116,13 @@ class GccEmitContext(object):
             if terminator:
                 builder.add_instruction(terminator)
 
+    def is_tail(self, instruction):
+        last_instruction = self.function.main_block.instructions[-1]
+        if last_instruction == instruction:
+            return True
+        # TODO last instruction of conditional block brach is also a tail instruction
+        return False
+
 
 class GccFunction():
     def __init__(self, program, name, args):
@@ -129,7 +137,8 @@ class GccFunction():
     def emit(self, builder):
         context = GccEmitContext(self)
         self.main_block.emit(builder, context)
-        builder.add_instruction('rtn')
+        if not context.terminated:
+            builder.add_instruction('rtn')
         context.resolve_queue(builder)
 
 class GccInline(object):
@@ -139,6 +148,7 @@ class GccInline(object):
     def emit(self, builder, context):
         for line in self.code.strip().splitlines():
             builder.add_instruction(line.strip())
+
 
 class GccConstant(object):
     def __init__(self, value):
@@ -230,9 +240,16 @@ class GccConditionalBlock(object):
         self.condition.emit(builder, context)
         true_label = builder.allocate_label()
         false_label = builder.allocate_label()
-        context.enqueue_block(self.true_branch, true_label, "join")
-        context.enqueue_block(self.false_branch, false_label, "join")
-        builder.add_instruction("sel", true_label, false_label)
+        if context.is_tail(self):
+            instruction = "tsel"
+            terminator = "rtn"
+            context.terminated = True
+        else:
+            instruction = "sel"
+            terminator = "join"
+        context.enqueue_block(self.true_branch, true_label, terminator)
+        context.enqueue_block(self.false_branch, false_label, terminator)
+        builder.add_instruction(instruction, true_label, false_label)
 
 
 class GccTuple(object):
