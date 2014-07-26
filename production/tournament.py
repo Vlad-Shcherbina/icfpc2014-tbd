@@ -2,6 +2,8 @@ import json
 import logging
 import os
 import glob
+import multiprocessing
+import copy
 
 import game
 
@@ -40,6 +42,7 @@ class Result(object):
 
 
 def play(result):
+    result = copy.copy(result)
     'Take partially filled result, fill in game outcome.'
     with open(os.path.join('../data/maps', result.map)) as fin:
         lines = [l.strip() for l in fin.read().splitlines() if l.strip()]
@@ -55,19 +58,25 @@ def play(result):
     result.score = map.lambdaman.score
     result.ticks = map.current_tick
     logger.info('score: {}, ticks: {}'.format(result.score, result.ticks))
+    return result
 
 
-def play_tournament(maps, lm_specs, ghost_team_specs):
+def play_tournament(maps, lm_specs, ghost_team_specs, parallel=False):
     results = []
-    for map in maps:
+    for m in maps:
         for lm_spec in lm_specs:
             for ghost_team in ghost_team_specs:
                 result = Result()
-                result.map = map
+                result.map = m
                 result.lm_spec = lm_spec
                 result.ghost_specs = ghost_team
-                play(result)
                 results.append(result)
+
+    if parallel:
+        results = multiprocessing.Pool().map(play, results)
+    else:
+        results = map(play, results)
+
     return results
 
 
@@ -76,13 +85,16 @@ def save_results(results, filename):
         json.dump(map(Result.to_json, results), fout, indent=2)
 
 
-def all_maps():
+def all_maps(max_size=1000000):
     maps = []
     map_dir = '../data/maps'
     for dir, _, files in os.walk(map_dir):
-        dir = os.path.relpath(dir, map_dir)
+        rel_dir = os.path.relpath(dir, map_dir)
         for file in files:
-            maps.append(os.path.join(dir, file))
+            with open(os.path.join(dir, file)) as fin:
+                if len(fin.read().strip()) > max_size:
+                    continue
+            maps.append(os.path.join(rel_dir, file))
     return maps
 
 
@@ -94,7 +106,7 @@ def main():
         #     'gen/hz.txt',
         #     '../../twigil_scratch/map_91_91_100_10.txt',
         # ],
-        maps=all_maps(),
+        maps=all_maps(max_size=1500),
         lm_specs=[
             'py:lm_ai.Oscillating(frequency=5)',
             'py:lm_ai.NearestPill()',
@@ -105,7 +117,8 @@ def main():
             ['py:GhostAI_Shortest', 'ghc:fickle.ghc'],
             ['ghc:miner.ghc'],
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
-        ])
+        ],
+        parallel=False)
 
     save_results(results, '../data/some_results.json')
 
