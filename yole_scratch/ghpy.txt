@@ -22,3 +22,4 @@ ghpy supported features
     last one, you have to use the x[M:] syntax instead of x[M] - otherwise
     a 'car' instruction will be generated and will fail
 - 'print' for debug information
+- Assignments (you can assign to local variables and parameters)
