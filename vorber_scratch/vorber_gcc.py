@@ -1,11 +1,15 @@
 #GCC implementation
-import sys
-import fileinput
-import strip_comments
+from command_enums import GCC_CMD
+from gcc_wrapper import GCCInterface 
 
-class VorberGCC:
-    def __init__(self, verbose = False):
-        self.reset(verbose)
+class VorberGCC(GCCInterface):
+    def __init__(self, program, verbose=False):
+        '''Specifying verbose=True enables diagnostics spam via prints''' # dude, use logging.
+        self.verbose = verbose
+        self.program = program
+        self.reset()
+        self.state = 'loaded'
+        self.__log(str(self))
   
     def __str__(self):
         regs = 'Regs: c:{0} s:{1} d:{2} e:{3}'.format(self.reg_c, self.reg_s, self.reg_d, self.reg_e)
@@ -15,10 +19,9 @@ class VorberGCC:
         result = '\n'.join((regs, ds, cs, es, 'state: ' + self.state))
         return result
 
-    def reset(self, verbose = False):
+    def reset(self):
         '''
         Resets itself to initial state
-        Specifying verbose=True enables diagnostics spam via prints
         '''
         self.reg_c = 0
         self.reg_s = 0
@@ -27,39 +30,22 @@ class VorberGCC:
         self.data_stack = []
         self.ctrl_stack = []
         self.env_stack = []
-        self.program = []    
         self.terminal_state = False
         self.state = 'empty'
-        self.verbose = verbose
+        # this should go to "run", I guess?
+ 
 
-    def load(self, code_lines):
-        '''
-        Loads program from a list of lines.
-        Resets itself before loading and places TAG_STOP on ctrl_stack
-        
-        code_lines: a list of lines.
-            empty lines, comments (;<comment>) and any kinds of whitespace allowed
-        '''
-        self.reset(self.verbose)
-        self.program = filter(lambda s: len(s) > 0, map(str.strip, strip_comments.strip_comments(code_lines)))
-        self.state = 'loaded'
-        self.ctrl_stack.append({'tag':'TAG_STOP'}) # to be able to stop with RTN without popping an empty stack
-        self.__log(str(self))
-        
-    def step(self):
+    def single_step(self):
         '''
         Executes a single instruction at current %c
         '''
         if self.state == 'error':
             self.__log('step called while in error state')
             return
-        command_line = self.program[self.reg_c]
-        self.__log('step ' + str(self.reg_c) + ' line:' + command_line)
-        parts = command_line.split()
-        cmd = parts[0]
-        args = parts[1:]
-        self.__process_cmd(cmd, map(int, args))
-    
+        cmd = self.program[self.reg_c]
+        self.__log('step {} line: {!r}'.format(self.reg_c, cmd.original_text))
+        self.__process_cmd(cmd)
+        
     def run(self):
         '''
         Runs the program from current position to termination
@@ -68,9 +54,32 @@ class VorberGCC:
         self.state = 'executing'
         while not self.terminal_state:
             self.__log(str(self))
-            self.step()
+            self.single_step()
         self.__log(str(self))
 
+    # GCCInterface methods
+    
+    def marshall_int(self, i):
+        return {'tag': 'int', 'value': i}
+    
+    def marshall_cons(self, car, cdr):
+        return {'tag': 'cons', 'value': (car, cdr)}
+    
+    def call(self, address_or_closure, *args):
+        'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
+        # Implement the stuff below, OK?
+        'reset all stacks'
+        'put args on the data stack'
+        self.ctrl_stack.append({'tag':'TAG_STOP'})
+        if isinstance(address_or_closure, int):
+            self.reg_c = address_or_closure
+        else:
+            # it's a closure
+            'set self.reg_c and self.reg_e from the closure'
+        self.run()
+        'return everything on the data stack'
+        
+        
         
     #Following methods are intended for internal use only
         
@@ -109,14 +118,14 @@ class VorberGCC:
         if x['tag'] != tag:
             self.__error('TAG_MISMATCH')
             
-    def __process_cmd(self, cmd, args):
-        if cmd == 'LDC':
-            self.data_stack.append({'tag':'int', 'value':int(args[0])})
+    def __process_cmd(self, cmd):
+        op = cmd.op
+        if op == GCC_CMD.LDC:
+            self.data_stack.append({'tag': 'int', 'value': cmd.args[0]})
             self.reg_c += 1
-        elif cmd == 'LD':
+        elif op == GCC_CMD.LD:
             fp = self.env_stack[-1]
-            n = args[0]
-            i = args[1]
+            n, i = cmd.args
             while n > 0:
                 fp = self.env_stack[fp['parent']]
                 n -= 1
@@ -126,59 +135,59 @@ class VorberGCC:
             v = fp['values'][i]
             self.data_stack.append(v)
             self.reg_c += 1
-        elif cmd == 'ADD':
+        elif op == GCC_CMD.ADD:
             self.__process_arithmetic_cmd(lambda a,b:a+b)
-        elif cmd == 'SUB':
+        elif op == GCC_CMD.SUB:
             self.__process_arithmetic_cmd(lambda a,b:a-b)
-        elif cmd == 'MUL':
+        elif op == GCC_CMD.MUL:
             self.__process_arithmetic_cmd(lambda a,b:a*b)
-        elif cmd == 'DIV':
+        elif op == GCC_CMD.DIV:
             self.__process_arithmetic_cmd(lambda a,b:a/b)
-        elif cmd == 'CEQ':
+        elif op == GCC_CMD.CEQ:
             self.__process_arithmetic_cmd(lambda a,b: 1 if a==b else 0)
-        elif cmd == 'CGT':
+        elif op == GCC_CMD.CGT:
             self.__process_arithmetic_cmd(lambda a,b: 1 if a>b else 0)
-        elif cmd == 'CGTE':
+        elif op == GCC_CMD.CGTE:
             self.__process_arithmetic_cmd(lambda a,b: 1 if a>=b else 0)
-        elif cmd == 'ATOM':
+        elif op == GCC_CMD.ATOM:
             x = self.data_stack.pop()
             self.data_stack.append({'tag':'int', 'value': 1 if x['tag'] == 'int' else 0})
             self.reg_c += 1
-        elif cmd == 'CONS':
+        elif op == GCC_CMD.CONS:
             y = self.data_stack.pop()
             x = self.data_stack.pop()
             self.data_stack.append({'tag':'cons', 'value':(x,y)})
             self.reg_c += 1
-        elif cmd == 'CAR':
+        elif op == GCC_CMD.CAR:
             self.__process_extract_cons(0)
-        elif cmd == 'CDR':
+        elif op == GCC_CMD.CDR:
             self.__process_extract_cons(0)
-        elif cmd == 'SEL':
+        elif op == GCC_CMD.SEL:
             x = self.data_stack.pop()
             self.__match_tag(x, 'int')
             if self.terminal_state:
                 return
             self.ctrl_stack.append({'tag':'join', 'value':self.reg_c+1})
-            self.reg_c = args[1 if x == 0 else 0]
-        elif cmd == 'JOIN':
+            self.reg_c = cmd.args[x == 0]
+        elif op == GCC_CMD.JOIN:
             x = self.ctrl_stack.pop()
             if x['tag'] != 'join':
                 self.__error('CONTROL_MISMATCH')
                 return
             self.reg_c = x
-        elif cmd == 'LDF':
-            closure = (args[0],self.reg_e)
+        elif op == GCC_CMD.LDF:
+            closure = (cmd.args[0], self.reg_e)
             self.data_stack.append({'tag':'closure','value':closure})
             self.reg_c += 1
-        elif cmd == 'AP':
+        elif op == GCC_CMD.AP:
             x = self.data_stack.pop()
             self.__match_tag(x,'closure')
             if self.terminal_state:
                 return
             f = x['value'][0]
             e = x['value'][1]
-            fp = {'frame_tag':'FRAME_NO_TAG', 'parent':e, 'values':[{} for i in range(args[0])], 'size':args[0]}
-            i = args[0]-1
+            fp = {'frame_tag':'FRAME_NO_TAG', 'parent':e, 'values':[{} for i in range(cmd.args[0])], 'size':cmd.args[0]}
+            i = cmd.args[0]-1
             while i != -1:
                 y = self.data_stack.pop()
                 fp['values'][i] = y
@@ -188,7 +197,7 @@ class VorberGCC:
             self.env_stack.append(fp)
             self.reg_e += 1 #len(self.env_stack) - 1
             self.reg_c = f
-        elif cmd == 'RTN':
+        elif op == GCC_CMD.RTN:
             x = self.ctrl_stack.pop()
             if x['tag'] == 'TAG_STOP':
                 self.terminal_state = True
@@ -202,12 +211,12 @@ class VorberGCC:
             #therefore as soon as we get to frame y all its children are lost?
             self.env_stack = self.env_stack[:y['value']+1] #maybe popping a few times would be faster?
             self.reg_c = x['value'];
-        elif cmd == 'DUM':
-            fp = {'frame_tag':'TAG_DUM','parent':self.reg_e, 'values':[{} for i in range(args[0])], 'size':args[0]}
+        elif op == GCC_CMD.DUM:
+            fp = {'frame_tag':'TAG_DUM','parent':self.reg_e, 'values':[{} for i in range(cmd.args[0])], 'size': cmd.args[0]}
             self.env_stack.append(fp)
             self.reg_e += 1
             self.reg_c += 1
-        elif cmd == 'RAP':
+        elif op == GCC_CMD.RAP:
             x = self.data_stack.pop()
             self.__match_tag(x,'closure')
             if self.terminal_state:
@@ -217,9 +226,9 @@ class VorberGCC:
             fp = x['value'][1]
 
             ef = self.env_stack[self.reg_e]
-            if ef['frame_tag'] != 'TAG_DUM' or ef['size'] != args[0] or self.reg_e != fp:
+            if ef['frame_tag'] != 'TAG_DUM' or ef['size'] != cmd.args[0] or self.reg_e != fp:
                 self.__error('FRAME_MISMATCH')
-            i = args[0] - 1
+            i = cmd.args[0] - 1
             while i != -1:
                 y = self.data_stack.pop()
                 ef['values'][i] = y
@@ -230,14 +239,41 @@ class VorberGCC:
             ef['frame_tag'] = 'FRAME_TAG_NORMAL'
             #self.reg_e = fp #[23:43] <@dcoutts> vorber: it's excessive
             self.reg_c = f
-        elif cmd == 'STOP':
+        elif op == GCC_CMD.STOP:
             self.terminal_state=True
         else:
-            self.__error('UNKNOWN CMD')
+            self.__error('UNKNOWN CMD: {}'.format(cmd))
            
 def main():
-    gcc = VorberGCC(verbose=True)
-    gcc.load([line for line in fileinput.input()])
+    code = '''
+  DUM  2        ; 2 top-level declarations
+  LDF  go       ; declare function go
+  LDF  to       ; declare function to
+  LDF  main     ; main function
+  RAP  2        ; load declarations into environment and run main
+  RTN           ; final return
+main:
+  LDC  1
+  LD   0 0      ; var go
+  AP   1        ; call go(1)
+  RTN
+to:
+  LD   0 0      ; var n
+  LDC  1
+  SUB
+  LD   1 0      ; var go
+  AP   1        ; call go(n-1)
+  RTN
+go:
+  LD   0 0      ; var n
+  LDC  1
+  ADD
+  LD   1 1      ; var to
+  AP   1        ; call to(n+1)
+  RTN'''
+    from asm_parser import parse_gcc
+    program = parse_gcc(code, '<stdin>')
+    gcc = VorberGCC(program, verbose=True)
     gcc.run()
     
 if __name__ == '__main__':

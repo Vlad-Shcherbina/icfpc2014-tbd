@@ -3,8 +3,8 @@ import os
 
 from ghc import GHC
 import ghost_ai
-import lm_ai
-
+from asm_parser import parse_gcc
+from gcc_wrapper import GCCWrapper
 
 UP = 0
 RIGHT = 1
@@ -71,6 +71,14 @@ def lambda_man_ai_from_spec(lm_spec):
         return InteractiveLambdaManAI()
     elif type == 'py':
         return eval(details)
+    elif type == 'gcc_file':
+        interpreter, path = details.split(':', 2)
+        with open(path, 'r') as f:
+            code = f.read()
+        code = parse_gcc(code)
+        interpreter = eval(interpreter)
+        interpreter = GCCWrapper(interpreter(code))
+        return interpreter
     else:
         assert False, lm_spec
 
@@ -86,7 +94,13 @@ class GhostAI:
 class LambdaManAI(object):
     def get_move(self, map):
         raise NotImplementedError()
+    def initialize(self, map, undocumented):
+        pass
 
+# FIXME! fix dependencies 
+
+from tmp_gcc_interpreter import VorberGCC
+import lm_ai
 
 interactive_lambda_man_direction = None
 
@@ -254,7 +268,6 @@ class Map:
                     lman_ai = lambda_man_ai_from_spec(lm_spec)
                     lman = LambdaMan(self, x, y, lman_ai)
                     self.lambdamen.append(lman)
-                    self.schedule(lman)
                 elif contents == GHOST:
                     index = len(self.ghosts)
                     ai_index = len(self.ghosts) % len(ghost_specs)
@@ -272,6 +285,10 @@ class Map:
                     contents = EMPTY
                 line_cells.append(contents)
             self.cells.append(line_cells)
+        
+        for lman in self.lambdamen:
+            lman.ai.initialize(self, None)
+            self.schedule(lman)
 
     def width(self):
         return len(self.cells[0])

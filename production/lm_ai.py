@@ -1,8 +1,9 @@
 import game
 import random
+print dir(game)
 
 
-class Oscillating(object):
+class Oscillating(game.LambdaManAI):
     def __init__(self, frequency):
         assert frequency >= 1
         self.frequency = frequency
@@ -16,7 +17,7 @@ class Oscillating(object):
             return game.RIGHT
 
 
-class NearestPill(object):
+class NearestPill(game.LambdaManAI):
     def __init__(self):
         self.rng = random.Random(42)
 
