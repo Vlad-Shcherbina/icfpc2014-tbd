@@ -161,3 +161,10 @@ join
 """))
         machine.run()
         self.assertEquals(machine.data_stack, [42])
+
+    def test_call(self):
+        code = open("../data/lms/miner.gcc").read()
+        machine = GccMachine(parse_gcc(code))
+        state, step = machine.call(0, 0, 0)
+        new_state, direction = machine.call(step, state, 0)
+        self.assertEquals(2, direction)

@@ -1,5 +1,5 @@
 import functools
-
+from gcc_wrapper import GCCInterface
 
 class GccFrame:
     def __init__(self, parent, size):
@@ -12,18 +12,38 @@ class GccClosure:
         self.ip = ip
         self.frame = frame
 
-class GccMachine:
+class GccMachine(GCCInterface):
     def __init__(self, instructions=None):
         self.data_stack = []
         self.current_frame = None
         self.instructions = []
         self.control_stack = []
         self.ip = 0
-        self.done = False
         if instructions:
             for insn in instructions:
                 self.add_instruction(insn.op.lower(), insn.args)
 
+    def marshall_int(self, i):
+        return i
+
+    def marshall_cons(self, car, cdr):
+        return car, cdr
+
+    def call(self, address_or_closure, *args):
+        assert len(self.data_stack) == 0
+        if not isinstance(address_or_closure, GccClosure):
+            address_or_closure = GccClosure(address_or_closure, None)
+        callee_frame = GccFrame(address_or_closure.frame, len(args))
+        for i in range(len(args)):
+            callee_frame.values[i] = args[i]
+        self.current_frame = callee_frame
+        self.ip = address_or_closure.ip
+        self.run()
+        if self.data_stack:
+            assert len(self.data_stack) == 1
+            result = self.data_stack[0]
+            self.data_stack = []
+            return result
 
     def ldc(self, arg):
         self.data_stack.append(arg)
@@ -115,6 +135,15 @@ class GccMachine:
         self.current_frame = frame
         return ip
 
+    def rap(self, arg):
+        closure = self.pop_closure()
+        if closure.frame != self.current_frame:
+            raise Exception("FRAME_MISMATCH")
+        for i in range(arg-1, -1, -1):
+            closure.frame.values[i] = self.data_stack.pop()
+        self.control_stack.append((self.current_frame.parent, self.ip+1))
+        return closure.ip
+
     def fetch_frame(self, index):
         result = self.current_frame
         for i in range(index):
@@ -148,6 +177,7 @@ class GccMachine:
         self.instructions.append(f)
 
     def run(self):
+        self.done = False
         while self.ip >= 0 and self.ip < len(self.instructions):
             next_ip = self.instructions[self.ip]()
             if self.done:
