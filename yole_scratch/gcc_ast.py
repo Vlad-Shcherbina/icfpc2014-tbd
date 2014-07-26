@@ -5,7 +5,13 @@ class GccTextBuilder(object):
 
     @property
     def text(self):
-        return "\n".join(self.lines) + "\n"
+        result = ''
+        for i, line in enumerate(self.lines):
+            for k, v in self.labels.items():
+                if i == v:
+                    result += ';{}\n'.format(k)
+            result += '   ' + line + '\n'
+        return result
 
     def add_instruction(self, name, *args):
         line = name
@@ -19,7 +25,7 @@ class GccTextBuilder(object):
         self.labels[name] = len(self.lines)
 
     def allocate_label(self):
-        name = "$label_{0}".format(len(self.labels))
+        name = "$label_{0}$".format(len(self.labels))
         self.labels[name] = None
         return name
 
@@ -33,7 +39,10 @@ class GccTextBuilder(object):
             for name, offset in self.labels.iteritems():
                 if offset is None:
                     raise Exception("Unresolved label " + name)
-                line = line.replace(name, str(offset))
+                if name in line:
+                    line = line.replace(name, str(offset))
+                    if name.startswith('$func_'):
+                        line += '  ; {}'.format(name)
             return line
 
         self.lines = map(fixup_labels_in_line, self.lines)
@@ -54,7 +63,7 @@ class GccProgram(object):
 
     def emit(self, builder):
         for f in self.functions:
-            builder.add_label("$func_" + f.name)
+            builder.add_label("$func_{}$".format(f.name))
             f.emit(builder)
         builder.fixup_labels()
 
@@ -228,4 +237,4 @@ class GccFunctionReference(object):
         self.name = name
 
     def emit(self, builder, context):
-        builder.add_instruction("ldf", "$func_" + self.name)
+        builder.add_instruction("ldf", "$func_{}$".format(self.name))
