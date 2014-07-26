@@ -275,3 +275,12 @@ class GccTupleMember(object):
             builder.add_instruction("cdr")
         if self.index < self.expected_size-1:
             builder.add_instruction("car")
+
+
+class GccPrint(object):
+    def __init__(self, arg):
+        self.arg = arg
+
+    def emit(self, builder, context):
+        self.arg.emit(builder, context)
+        builder.add_instruction("dbug")

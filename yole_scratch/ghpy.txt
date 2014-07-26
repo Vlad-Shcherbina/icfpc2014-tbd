@@ -21,3 +21,4 @@ ghpy supported features
   - if you have a tuple of exactly N elements and you need to access the
     last one, you have to use the x[M:] syntax instead of x[M] - otherwise
     a 'car' instruction will be generated and will fail
+- 'print' for debug information

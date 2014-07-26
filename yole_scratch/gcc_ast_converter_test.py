@@ -114,3 +114,9 @@ def fetch_element(list, n):
         self.assertEquals("list", call.args[0].name)
         self.assertIsInstance(call.args[1], GccSub)
 
+    def test_print(self):
+        x = ast.parse("def f(x): print x")
+        tree = convert_python_to_gcc_function(None, x.body[0])
+        self.assertIsInstance(tree.main_block.instructions[0], GccPrint)
+
+

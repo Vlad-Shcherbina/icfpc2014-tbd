@@ -17,7 +17,7 @@ class IntegrationTest(TestCase):
         gcc_program.emit(builder)
         self.machine = GccMachine(parse_gcc(builder.text))
         self.wrapper = GCCWrapper(self.machine)
-        self.map = load_map(map_file, ["empty:"], "interactive:")
+        self.map = load_map(map_file)
         self.world_state = self.wrapper.marshall_world_state(self.map)
 
     def test_get_cell_at(self):

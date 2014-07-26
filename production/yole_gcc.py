@@ -157,6 +157,9 @@ class GccMachine(GCCInterface):
         self.control_stack.append((self.current_frame.parent, self.ip+1))
         return closure.ip
 
+    def dbug(self):
+        print str(self.data_stack.pop())
+
     def fetch_frame(self, index):
         result = self.current_frame
         for i in range(index):

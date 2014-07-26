@@ -1,4 +1,5 @@
 def get_adjacent_cell(state, dx, dy):
+    print dx
     return get_cell_at(state[0], state[1][1][0]+dx, state[1][1][1:]+dy)
 
 def get_cell_at(map, x, y):

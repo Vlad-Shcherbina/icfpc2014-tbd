@@ -39,6 +39,8 @@ def convert_python_to_gcc_statement(stmt):
             cond.false_branch.instructions.append(
                 convert_python_to_gcc_statement(child))
         return cond
+    if isinstance(stmt, Print):
+        return GccPrint(convert_python_to_gcc_ast(stmt.values[0]))
     raise Exception("Unsupported statement type {0}".format(stmt))
 
 
