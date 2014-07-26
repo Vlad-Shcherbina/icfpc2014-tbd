@@ -9,14 +9,13 @@ class BasePyAI(object):
         self.map = map
         self.index = index
         self.ghost = map.ghosts[index]
+        self.rng = random.Random(42)
 
     def get_move(self):
         raise NotImplementedError()
 
 
 class GhostAI_Random(BasePyAI):
-    def __init__(self):
-        self.rng = random.Random(42)
 
     def get_move(self):
         return self.rng.choise(game.DIRECTIONS)
@@ -34,8 +33,6 @@ class GhostAI_Shortest(BasePyAI):
 
 
 class BaseChaser(BasePyAI):
-    def __init__(self):
-        self.rng = random.Random(42)
 
     def get_target(self):
         raise NotImplementedError()
