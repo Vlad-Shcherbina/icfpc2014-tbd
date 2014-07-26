@@ -91,6 +91,10 @@ class VorberGCC(GCCInterface):
             self.env_stack[self.reg_e] = fp
         self.run()
         'return everything on the data stack'
+        #not everything, as per spec we always return a 'pair' i.e. CONS
+        ret = self.data_stack.pop()
+        #TODO: check tag
+        return ret['value']
 
 
 
