@@ -1,6 +1,6 @@
 from unittest import TestCase
 import ast
-from game import POWER_PILL, PILL
+from game import POWER_PILL, PILL, GHOST
 from gcc_ast_converter import convert_python_to_gcc_module
 from gcc_ast import GccTextBuilder
 from asm_parser import parse_gcc
@@ -26,3 +26,10 @@ class IntegrationTest(TestCase):
         self.assertEquals(PILL, result)
         result = self.machine.call(0, self.world_state[0], 1, 3)
         self.assertEquals(POWER_PILL, result)
+
+    def test_get_adjacent_cell(self):
+        self.prepare("default_map.txt", "get_adjacent_cell.py")
+        result = self.machine.call(0, self.world_state, 1, 0)
+        self.assertEquals(PILL, result)
+        result = self.machine.call(0, self.world_state, 0, -6)
+        self.assertEquals(GHOST, result)

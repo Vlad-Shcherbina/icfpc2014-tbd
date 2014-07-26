@@ -1,6 +1,12 @@
 import functools
 from gcc_wrapper import GCCInterface
 
+
+class GccException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(GccException, self).__init__(*args, **kwargs)
+
+
 class GccFrame:
     def __init__(self, parent, size):
         self.parent = parent
@@ -103,7 +109,7 @@ class GccMachine(GCCInterface):
     def join(self):
         ip = self.control_stack.pop()
         if type(ip) != int:
-            raise Exception("CONTROL_MISMATCH")
+            raise GccException("CONTROL_MISMATCH")
         return ip
 
     def dum(self, arg):
@@ -138,7 +144,7 @@ class GccMachine(GCCInterface):
     def rap(self, arg):
         closure = self.pop_closure()
         if closure.frame != self.current_frame:
-            raise Exception("FRAME_MISMATCH")
+            raise GccException("FRAME_MISMATCH")
         for i in range(arg-1, -1, -1):
             closure.frame.values[i] = self.data_stack.pop()
         self.control_stack.append((self.current_frame.parent, self.ip+1))
@@ -153,20 +159,20 @@ class GccMachine(GCCInterface):
     def pop_int(self):
         result = self.data_stack.pop()
         if type(result) != int:
-            raise Exception("TAG_MISMATCH")
+            raise GccException("TAG_MISMATCH")
         return result
 
     def pop_cons(self):
         result = self.data_stack.pop()
         if type(result) != tuple:
-            raise Exception("TAG_MISMATCH: Expected cons cell, found " +
+            raise GccException("TAG_MISMATCH: Expected cons cell, found " +
                             str(result))
         return result
 
     def pop_closure(self):
         closure = self.data_stack.pop()
         if not isinstance(closure, GccClosure):
-            raise Exception("TAG_MISMATCH")
+            raise GccException("TAG_MISMATCH")
         return closure
 
     def add_instruction(self, name, args):
@@ -180,7 +186,12 @@ class GccMachine(GCCInterface):
     def run(self):
         self.done = False
         while self.ip >= 0 and self.ip < len(self.instructions):
-            next_ip = self.instructions[self.ip]()
+            try:
+                next_ip = self.instructions[self.ip]()
+            except GccException, e:
+                raise GccException("Error at IP {0}: {1}".format(
+                    self.ip, e.message))
+
             if self.done:
                 break
             if next_ip is not None:
