@@ -1,6 +1,11 @@
 import random
 import logging
+
 import game
+from log_context import log_context
+
+
+logger = logging.getLogger(__name__)
 
 
 class BasePyAI(object):
@@ -96,3 +101,86 @@ class GhostAI_Pink(BaseChaser):
         return (
             self.map.lambdaman.x + 4 * game.DELTA_X[self.map.lambdaman.direction],
             self.map.lambdaman.y + 4 * game.DELTA_Y[self.map.lambdaman.direction])
+
+
+def in_front(actor, distance):
+    return (
+        actor.x + game.DELTA_X[actor.direction] * distance,
+        actor.y + game.DELTA_Y[actor.direction] * distance)
+
+
+def dir_to(actor1, actor2):
+    dx = actor2.x - actor1.x
+    dy = actor2.y - actor1.y
+    if abs(dx) > abs(dy):
+        return game.RIGHT if dx > 0 else game.LEFT
+    else:
+        return game.DOWN if dy > 0 else game.UP
+
+
+class Hunter(BasePyAI):
+    """ Follows trail. """
+
+    def __init__(self):
+        self.prev_lm_dir = 0
+        self.trail = []
+
+    def find_trail(self, loc):
+        for i, t in enumerate(self.trail):
+            if t[0] == loc:
+                return (i,) + t
+        lm = self.map.lambdaman
+        if loc == (lm.x, lm.y):
+            return (1000, loc, 42)
+        return (-1, (0, 0), 1)
+
+    def trace(self, dir):
+        dx = game.DELTA_X[dir]
+        dy = game.DELTA_Y[dir]
+        x = self.ghost.x
+        y = self.ghost.y
+        best_trail = (-1, (0, 0), 1)
+        while True:
+            x += dx
+            y += dy
+            if self.map.at(x, y) == game.WALL:
+                break
+            tr = self.find_trail((x, y))
+            if tr > best_trail:
+                best_trail = tr
+        rec_dir = best_trail[2]
+        if game.OPPOSITE_DIRECTIONS[dir] != rec_dir:
+            rec_dir = dir
+        return best_trail[0], rec_dir
+
+    def get_move(self):
+        with log_context('hunter#{}'.format(self.index)):
+            lm = self.map.lambdaman
+            if self.ghost.vitality != game.STANDARD:
+                logging.info('fleeing')
+                return dir_to(lm, self.ghost)
+
+            logger.info('current coords: {}'.format((self.ghost.x, self.ghost.y)))
+            logger.info('current pacman state: {}'.format((lm.x, lm.y, lm.direction)))
+
+            if lm.direction != self.prev_lm_dir:
+                self.prev_lm_dir = lm.direction
+                self.trail.append((in_front(lm, -1), lm.direction))
+                logging.info('updating trail: {}'.format(self.trail))
+
+            tr = self.find_trail((self.ghost.x, self.ghost.y))
+            if tr[0] > -1:
+                logging.info('standing on a trail {}'.format(tr))
+            best_trail = tr[0], min(tr[2], 3)
+
+            for d in game.DIRECTIONS:
+                tr = self.trace(d)
+                if tr[0] > -1:
+                    logging.info('see trail {}'.format(tr))
+                if tr > best_trail:
+                    best_trail = tr
+            if best_trail[0] > -1:
+                logging.info('following trail in dir {}'.format(best_trail[1]))
+                return best_trail[1]
+            else:
+                return dir_to(self.ghost, lm)

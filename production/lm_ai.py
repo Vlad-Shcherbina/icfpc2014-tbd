@@ -1,5 +1,9 @@
 import game
 import random
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Oscillating(game.LambdaManAI):

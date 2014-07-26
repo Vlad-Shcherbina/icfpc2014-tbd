@@ -19,8 +19,10 @@ import sys
 import copy
 
 import map_loader
+import game
 from game import GhostAI, Map, LambdaMan
 from game import InteractiveLambdaManAI, set_interactive_lambda_man_direction
+from log_context import log_context, decorate_handlers
 
 
 MAX_HISTORY_SIZE = 100
@@ -30,7 +32,14 @@ DIRECTION_KEYS = [
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, filename='visualizer_debug.log')
+    # clear old log
+    with open('visualizer_debug.log', 'w'):
+        pass
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(levelname)8s:%(name)15s: %(message)s',
+        filename='visualizer_debug.log')
+    decorate_handlers()
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -71,11 +80,15 @@ def main():
             history = history[-MAX_HISTORY_SIZE:]
             for y in range(map.height()):
                 stdscr.addstr(y, 0, map.line_as_text(y))
-            for ghost in map.ghosts:
+            for i, ghost in enumerate(map.ghosts):
                 idx = ghost.index % len(args.ghost)
-                stdscr.addstr(ghost.y, ghost.x, '=', ghost_colors[idx])
-            for i, ghost_spec in enumerate(args.ghost):
-                stdscr.addstr(i, map.width() + 1, ghost_spec, ghost_colors[i])
+                if ghost.vitality != game.INVISIBLE:
+                    stdscr.addstr(ghost.y, ghost.x, '=', ghost_colors[idx])
+                stdscr.addstr(
+                    i, map.width() + 1,
+                    '{} {}'.format(ghost.vitality, args.ghost[idx]), ghost_colors[idx])
+
+            #for i, ghost in enumerate(args.ghost):
 
             stdscr.addstr(
                 5, map.width() + 1,
@@ -120,7 +133,8 @@ def main():
                         map = history.pop()
                     continue
                 history.append(copy.deepcopy(map))
-            map.step()
+            with log_context('step'):
+                map.step()
     finally:
         curses.nocbreak()
         stdscr.keypad(0)

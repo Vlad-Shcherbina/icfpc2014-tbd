@@ -109,7 +109,8 @@ def all_maps(max_size=1000000):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARNING)
+    logger.setLevel(logging.INFO)
     results = play_tournament(
         # maps=[
         #     'default_map.txt',
@@ -128,6 +129,7 @@ def main():
             ['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
             ['py:GhostAI_Shortest'],
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
+            ['py:Hunter'],
         ],
         parallel=False)
 
