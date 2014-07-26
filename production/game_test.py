@@ -33,4 +33,8 @@ class GameTest(TestCase):
         self.assertEquals(FRUIT, map.at(1, 1))
         map.step()
         self.assertEquals(EMPTY, map.at(1, 1))
+        map.step()
+        self.assertEquals(FRUIT, map.at(1, 1))
+        map.step()
+        self.assertEquals(EMPTY, map.at(1, 1))
         self.assertEquals(0, len(map.move_queue))

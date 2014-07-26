@@ -227,14 +227,13 @@ class Ghost(Actor):
 
 
 class FruitSpawnpoint(Actor):
-    def __init__(self, map, x, y, index):
+    def __init__(self, map, x, y):
         super(FruitSpawnpoint, self).__init__(map, x, y)
-        self.index = index
-        self.speed = FRUIT_SPAWN_TIMES[index]
-        self.spawned = False
+        self.state = 0
+        self.speed = FRUIT_SPAWN_TIMES[0]
 
     def move(self):
-        if not self.spawned:
+        if self.state == 0 or self.state == 2:
             for lman in self.map.lambdamen:
                 if lman.x == self.x and lman.y == self.y:
                     # next move has been scheduled already so the speed change
@@ -243,11 +242,15 @@ class FruitSpawnpoint(Actor):
                     self.expired = True
                     return
             self.map.spawn(self.x, self.y, FRUIT)
-            self.spawned = True
-            self.speed = FRUIT_EXPIRE_TIMES[self.index] - FRUIT_SPAWN_TIMES[self.index]
+            self.speed = FRUIT_EXPIRE_TIMES[self.state/2] - FRUIT_SPAWN_TIMES[self.state/2]
         else:
             self.map.clear(self.x, self.y)
-            self.expired = True
+            if self.state == 3:
+                self.expired = True
+            else:
+                self.speed = FRUIT_SPAWN_TIMES[1] - FRUIT_EXPIRE_TIMES[0]
+        self.state += 1
+
 
 class Map:
     def __init__(self, lines, ghost_specs, lm_spec):
@@ -258,7 +261,6 @@ class Map:
         self.move_queue = []
         self.pills_remaining = 0
         self.ghosts_eaten = 0
-        self.fruits = 0
         self.fright_end = None
         for y, line in enumerate(lines):
             line_cells = []
@@ -279,8 +281,7 @@ class Map:
                 elif contents == PILL:
                     self.pills_remaining += 1
                 elif contents == FRUIT:
-                    spawnpoint = FruitSpawnpoint(self, x, y, self.fruits)
-                    self.fruits += 1
+                    spawnpoint = FruitSpawnpoint(self, x, y)
                     self.schedule(spawnpoint)
                     contents = EMPTY
                 line_cells.append(contents)
