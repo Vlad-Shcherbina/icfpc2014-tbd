@@ -1,13 +1,35 @@
-from unittest import TestCase
+import unittest
+import logging
+
 from gcc_ast import *
 
-class GccASTTest(TestCase):
+logger = logging.getLogger(__name__)
+
+
+class GccASTTest(unittest.TestCase):
+    def assert_code_equals(self, expected, actual):
+        def drop_ws(code):
+            result = []
+            for line in code.splitlines():
+                #line, _, _ = line.partition(';')
+                # ignore labels within functions,
+                # they are implementation details
+                if line.startswith(';$label_'):
+                    continue
+                line = line.strip()
+                if line:
+                    result.append(line)
+            return result
+        logging.info('Expected:\n{}'.format(expected))
+        logging.info('Actual:\n{}'.format(actual))
+        assert drop_ws(expected) == drop_ws(actual)
+
     def test_constant(self):
         blk = GccCodeBlock()
         blk.instructions.append(GccConstant(3))
         builder = GccTextBuilder()
         blk.emit(builder, None)
-        self.assertEquals("ldc 3\n", builder.text)
+        self.assert_code_equals("ldc 3", builder.text)
 
     def test_add(self):
         c1 = GccConstant(3)
@@ -17,7 +39,7 @@ class GccASTTest(TestCase):
         blk.instructions.append(expr)
         builder = GccTextBuilder()
         blk.emit(builder, None)
-        self.assertEquals("ldc 3\nldc 4\nadd\n", builder.text)
+        self.assert_code_equals("ldc 3\nldc 4\nadd\n", builder.text)
 
     def test_function(self):
         builder = GccTextBuilder()
@@ -26,7 +48,7 @@ class GccASTTest(TestCase):
         expr = GccAdd(var_ref, var_ref)
         body.add_instruction(expr)
         body.emit(builder)
-        self.assertEquals("ld 0 0\nld 0 0\nadd\nrtn\n", builder.text)
+        self.assert_code_equals("ld 0 0\nld 0 0\nadd\nrtn\n", builder.text)
 
     def test_function_reference(self):
         program = GccProgram()
@@ -35,10 +57,13 @@ class GccASTTest(TestCase):
         program.add_function("step", ["x"])
         builder = GccTextBuilder()
         program.emit(builder)
-        self.assertEquals("""ldf 2
-rtn
-rtn
-""", builder.text)
+        self.assert_code_equals("""
+        ;$func_main$
+            ldf 2  ; $func_step$
+            rtn
+        ;$func_step$
+            rtn
+            """, builder.text)
 
 
     def test_function_call(self):
@@ -54,15 +79,18 @@ rtn
         builder = GccTextBuilder()
         program.emit(builder)
 
-        self.assertEquals("""ldc 21
-ldf 4
-ap 1
-rtn
-ld 0 0
-ld 0 0
-add
-rtn
-""", builder.text)
+        self.assert_code_equals("""
+        ;$func_main$
+            ldc 21
+            ldf 4  ; $func_body$
+            ap 1
+            rtn
+        ;$func_body$
+            ld 0 0
+            ld 0 0
+            add
+            rtn
+            """, builder.text)
 
     def test_conditional_expression(self):
         program = GccProgram()
@@ -74,16 +102,18 @@ rtn
         body.add_instruction(conditional_block)
         builder = GccTextBuilder()
         program.emit(builder)
-        self.assertEquals("""ld 0 0
-ldc 0
-cgt
-sel 5 7
-rtn
-ldc 1
-join
-ldc 0
-join
-""", builder.text)
+        self.assert_code_equals("""
+        ;$func_main$
+            ld 0 0
+            ldc 0
+            cgt
+            sel 5 7
+            rtn
+            ldc 1
+            join
+            ldc 0
+            join
+            """, builder.text)
 
     def test_tuple(self):
         program = GccProgram()
@@ -91,11 +121,13 @@ join
         body.add_instruction(GccTuple(GccVariableReference("x"), GccConstant(1)))
         builder = GccTextBuilder()
         program.emit(builder)
-        self.assertEquals("""ld 0 0
-ldc 1
-cons
-rtn
-""", builder.text)
+        self.assert_code_equals("""
+        ;$func_main$
+            ld 0 0
+            ldc 1
+            cons
+            rtn
+            """, builder.text)
 
     def test_tuple_member(self):
         program = GccProgram()
@@ -103,8 +135,20 @@ rtn
         body.add_instruction(GccTupleMember(GccVariableReference("x"), 1, 3))
         builder = GccTextBuilder()
         program.emit(builder)
-        self.assertEquals("""ld 0 0
-cdr
-car
-rtn
-""", builder.text)
+        self.assert_code_equals("""
+        ;$func_main$
+            ld 0 0
+            cdr
+            car
+            rtn
+            """, builder.text)
+
+
+if __name__ == '__main__':
+    import sys
+    import nose
+    nose.run_exit(argv=sys.argv + [
+        '--verbose', '--with-doctest',
+        #'--with-coverage', '--cover-package=production',
+        '--logging-level=DEBUG'
+        ])
