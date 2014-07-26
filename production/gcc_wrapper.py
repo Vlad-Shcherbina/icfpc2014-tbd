@@ -1,6 +1,6 @@
 class GCCInterface(object):
     def call(self, address_or_closure, *args):
-        'Call a function or closure.'
+        'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
 
     def marshall_int(self, i):
         'Return an opaque handle representing i'

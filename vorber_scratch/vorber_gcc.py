@@ -66,10 +66,7 @@ class VorberGCC(GCCInterface):
         return {'tag': 'cons', 'value': (car, cdr)}
     
     def call(self, address_or_closure, *args):
-        '''Call a function.
-        
-        Put args on data stack, return the contents of data stack after the function returns
-        '''
+        'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
         # reset all stacks
         # put args on the data stack
         self.ctrl_stack.append({'tag':'TAG_STOP'})
