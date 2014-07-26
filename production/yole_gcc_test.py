@@ -1,8 +1,5 @@
-import sys
-sys.path.append('../production')
-
 from unittest import TestCase
-from gcc import GccMachine
+from yole_gcc import GccMachine
 from asm_parser import parse_gcc
 
 

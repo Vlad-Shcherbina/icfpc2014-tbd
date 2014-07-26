@@ -100,6 +100,7 @@ class LambdaManAI(object):
 # FIXME! fix dependencies
 
 from vorber_gcc import VorberGCC
+from yole_gcc import GccMachine as YoleGCC
 import lm_ai
 
 interactive_lambda_man_direction = None
