@@ -84,8 +84,10 @@ class VorberGCC(GCCInterface):
         else:
             # it's a closure
             'set self.reg_c and self.reg_e from the closure'
-            self.reg_c = address_or_closure[0]
-            self.reg_e = address_or_closure[1]
+            self.reg_c = address_or_closure['value'][0]
+            self.reg_e = address_or_closure['value'][1]
+            while len(self.env_stack) < self.reg_e+1:
+                self.env_stack.append({})
             self.env_stack = self.env_stack[:self.reg_e+1]
             self.env_stack[self.reg_e] = fp
         self.run()
