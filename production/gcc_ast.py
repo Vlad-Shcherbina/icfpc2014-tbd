@@ -116,18 +116,25 @@ class GccEmitContext(object):
     def resolve_queue(self, builder):
         while self.block_queue:
             # We can get additional blocks enqueued while generating this one.
+            self.terminated = False
             block, label, terminator = self.block_queue[0]
             del self.block_queue[0]
             builder.resolve_label(label)
             block.emit(builder, self)
-            if terminator:
+            if terminator and not self.terminated:
                 builder.add_instruction(terminator)
 
     def is_tail(self, instruction):
-        last_instruction = self.function.main_block.instructions[-1]
-        if last_instruction == instruction:
+        return self.is_block_tail(instruction, self.function.main_block)
+
+    def is_block_tail(self, instruction, block):
+        if not block.instructions: return False
+        last_insn = block.instructions[-1]
+        if last_insn == instruction:
             return True
-        # TODO last instruction of conditional block brach is also a tail instruction
+        if isinstance(last_insn, GccConditionalBlock):
+            return (self.is_block_tail(instruction, last_insn.true_branch) or
+                    self.is_block_tail(instruction, last_insn.false_branch))
         return False
 
 
@@ -250,7 +257,11 @@ class GccCall(object):
         for arg in self.args:
             arg.emit(builder, context)
         self.callee.emit(builder, context)
-        builder.add_instruction("ap", len(self.args))
+        if context.is_tail(self):
+            context.terminated = True
+            builder.add_instruction("tap", len(self.args))
+        else:
+            builder.add_instruction("ap", len(self.args))
 
 
 class GccConditionalBlock(object):

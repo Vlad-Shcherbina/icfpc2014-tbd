@@ -133,6 +133,18 @@ class GccTest(TestCase):
         machine.run()
         self.assertEquals(machine.data_stack, [42])
 
+    def test_tap(self):
+        machine = GccMachine(parse_gcc("""
+        LDC 21
+        LDF 3
+        TAP 1
+        LD 0 0
+        LD 0 0
+        ADD
+        RTN"""))
+        machine.run()
+        self.assertEquals(machine.data_stack, [42])
+
     def test_sel(self):
         machine = GccMachine(parse_gcc("""
 ldc 0

@@ -65,8 +65,35 @@ class GccASTTest(unittest.TestCase):
             rtn
             """, builder.text)
 
-
     def test_function_call(self):
+        program = GccProgram()
+
+        main = program.add_function("main", [])
+        main.add_instruction(GccCall(GccNameReference("body"), [GccConstant(21)]))
+        main.add_instruction(GccConstant(0))
+
+        body = program.add_function("body", ["x"])
+        var_ref = GccNameReference("x")
+        body.add_instruction(GccAdd(var_ref, var_ref))
+
+        builder = GccTextBuilder()
+        program.emit(builder)
+
+        self.assert_code_equals("""
+        ;$func_main$
+            ldc 21
+            ldf 5  ; $func_body$
+            ap 1
+            ldc 0
+            rtn
+        ;$func_body$
+            ld 0 0
+            ld 0 0
+            add
+            rtn
+            """, builder.text)
+
+    def test_tail_call(self):
         program = GccProgram()
 
         main = program.add_function("main", [])
@@ -82,9 +109,43 @@ class GccASTTest(unittest.TestCase):
         self.assert_code_equals("""
         ;$func_main$
             ldc 21
-            ldf 4  ; $func_body$
-            ap 1
+            ldf 3  ; $func_body$
+            tap 1
+        ;$func_body$
+            ld 0 0
+            ld 0 0
+            add
             rtn
+            """, builder.text)
+
+    def test_tail_call_in_condition(self):
+        program = GccProgram()
+
+        main = program.add_function("main", [])
+        cond = GccConditionalBlock(GccConstant(1))
+        main.add_instruction(cond)
+        cond.true_branch.instructions.append(GccCall(GccNameReference("body"),
+                                                     [GccConstant(21)]))
+        cond.false_branch.instructions.append(GccCall(GccNameReference("body"),
+                                                      [GccConstant(32)]))
+
+        body = program.add_function("body", ["x"])
+        var_ref = GccNameReference("x")
+        body.add_instruction(GccAdd(var_ref, var_ref))
+
+        builder = GccTextBuilder()
+        program.emit(builder)
+
+        self.assert_code_equals("""
+        ;$func_main$
+            ldc 1
+            tsel 2 5
+            ldc 21
+            ldf 8  ; $func_body$
+            tap 1
+            ldc 32
+            ldf 8  ; $func_body$
+            tap 1
         ;$func_body$
             ld 0 0
             ld 0 0

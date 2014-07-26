@@ -140,6 +140,14 @@ class GccMachine(GCCInterface):
         self.current_frame = callee_frame
         return closure.ip
 
+    def tap(self, arg):
+        closure = self.pop_closure()
+        callee_frame = GccFrame(closure.frame, arg)
+        for i in range(arg-1, -1, -1):
+            callee_frame.values[i] = self.data_stack.pop()
+        self.current_frame = callee_frame
+        return closure.ip
+
     def rtn(self):
         if not self.control_stack:
             self.done = True
