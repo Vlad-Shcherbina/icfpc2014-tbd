@@ -10,6 +10,8 @@ UP = 0
 RIGHT = 1
 DOWN = 2
 LEFT = 3
+
+DIRECTIONS = range(4)
 OPPOSITE_DIRECTIONS = [DOWN, LEFT, UP, RIGHT]
 DELTA_X = [0, 1, 0, -1]
 DELTA_Y = [-1, 0, 1, 0]
@@ -82,8 +84,7 @@ class GhostAI:
 
 
 class LambdaManAI(object):
-    # TODO(vlad): pass game state
-    def get_move(self):
+    def get_move(self, map):
         raise NotImplementedError()
 
 
@@ -94,7 +95,7 @@ def set_interactive_lambda_man_direction(d):
     interactive_lambda_man_direction = d
 
 class InteractiveLambdaManAI(LambdaManAI):
-    def get_move(self):
+    def get_move(self, map):
         assert interactive_lambda_man_direction is not None
         return interactive_lambda_man_direction
 
@@ -131,7 +132,7 @@ class LambdaMan(Actor):
         self.ai = ai
 
     def move(self):
-        direction = self.ai.get_move()
+        direction = self.ai.get_move(self.map)
         self.move_in_direction(direction)
         self.check_collisions()
 

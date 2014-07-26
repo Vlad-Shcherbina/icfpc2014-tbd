@@ -85,7 +85,7 @@ def main():
             'gen/hz.txt',
         ],
         lm_specs=[
-            'py:lm_ai.Oscillating(frequency=5)',
+            'py:lm_ai.NearestPill()',
         ],
         ghost_team_specs=[
             ['py:GhostAI_Shortest', 'ghc:fickle.ghc'],
