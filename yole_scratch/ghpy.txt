@@ -18,3 +18,6 @@ ghpy supported features
   - you can also use indexes greater than 0 or 1
     - for example, x[2] will be compiled to 'cdr cdr car'
   - indexes must be integer constants (meaning, known at compile time)
+  - if you have a tuple of exactly N elements and you need to access the
+    last one, you have to use the x[M:] syntax instead of x[M] - otherwise
+    a 'car' instruction will be generated and will fail
