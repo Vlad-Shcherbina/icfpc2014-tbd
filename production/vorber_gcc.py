@@ -13,11 +13,13 @@ class VorberGCC(GCCInterface):
         self.__log(str(self))
 
     def __str__(self):
-        regs = 'Regs: c:{0} s:{1} d:{2} e:{3}'.format(self.reg_c, self.reg_s, self.reg_d, self.reg_e)
-        ds = 'Data: ' + str(self.data_stack)
-        cs = 'Ctrl: ' + str(self.ctrl_stack)
-        es = 'Env:  ' + str(self.env_stack)
-        result = '\n'.join((regs, ds, cs, es, 'state: ' + self.state))
+        result = ""
+        if self.verbose:
+            regs = 'Regs: c:{0} s:{1} d:{2} e:{3}'.format(self.reg_c, self.reg_s, self.reg_d, self.reg_e)
+            ds = 'Data: ' + str(self.data_stack)
+            cs = 'Ctrl: ' + str(self.ctrl_stack)
+            es = 'Env:  ' + str(self.env_stack)
+            result = '\n'.join((regs, ds, cs, es, 'state: ' + self.state))
         return result
 
     def reset(self):
@@ -40,23 +42,27 @@ class VorberGCC(GCCInterface):
         '''
         Executes a single instruction at current %c
         '''
+        self.__log('single_step: enter')
         if self.state == 'error':
             self.__log('step called while in error state')
             return
         cmd = self.program[self.reg_c]
         self.__log('step {} line: {!r}'.format(self.reg_c, cmd.original_text))
         self.__process_cmd(cmd)
+        self.__log('single_step: exit')
 
     def run(self):
         '''
         Runs the program from current position to termination
         Termination can happen due to any error, STOP command or popping TAG_STOP during RTN
         '''
+        self.__log('run: enter')
         self.state = 'executing'
         while not self.terminal_state:
             self.__log(str(self))
             self.single_step()
         self.__log(str(self))
+        self.__log('run: exit')
 
     # GCCInterface methods
 
@@ -75,6 +81,8 @@ class VorberGCC(GCCInterface):
         #[00:52] <@dcoutts> jdreske: no, function args come in via the environment, not the stack
         #
         #so args go on env stack, not data
+        self.terminal_state = False
+        self.__log('call: ' + str(self) + '::'+str(address_or_closure))
         fp = {'frame_tag':'FRAME_NO_TAG', 'parent':-1, 'values':[arg for arg in args], 'size':len(args)}
         self.ctrl_stack.append({'tag':'TAG_STOP'})
         if isinstance(address_or_closure, int):
@@ -94,13 +102,22 @@ class VorberGCC(GCCInterface):
         'return everything on the data stack'
         #not everything, as per spec we always return a 'pair' i.e. CONS
         ret = self.data_stack.pop()
-        #TODO: check tag
-        return ret['value']
+        if (ret['tag'] != 'cons'):
+            self.__error('return value is not CONS')
+            return (0,0)
+        tret = self.__cons_to_tuple(ret)
+        self.__log('call: returning' + str(tret))
+
+        return tret
 
 
 
     #Following methods are intended for internal use only
-
+    def __cons_to_tuple(self, cons):
+        t = map(lambda v: v['value'] if v['tag'] == 'int' else v, cons['value'])
+        return (t[0],t[1])
+        
+            
     def __log(self, s):
         if self.verbose:
             print s
