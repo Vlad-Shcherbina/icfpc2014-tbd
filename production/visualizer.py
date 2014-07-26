@@ -39,7 +39,6 @@ def main():
     parser.add_argument('ghost', nargs='*', help='ghost specs')
 
     args = parser.parse_args()
-    print args
     if not args.ghost:
         args.ghost = [
             'py:GhostAI_Shortest',

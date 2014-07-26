@@ -1,6 +1,5 @@
 import game
 import random
-print dir(game)
 
 
 class Oscillating(game.LambdaManAI):

@@ -88,7 +88,6 @@ def all_maps():
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    print all_maps()
     results = play_tournament(
         # maps=[
         #     'default_map.txt',
