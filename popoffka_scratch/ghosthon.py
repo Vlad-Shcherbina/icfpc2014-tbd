@@ -8,6 +8,9 @@ ghosthon programs consist of
 - nicer mnemonics for interrupts:
     report, lambdaman, xxx, myindex, ghoststart, ghostpos, ghoststats, mapq, debug
 - aliases (e.g. alias ptr [0], alias cnstnt 42, alias importantregister a)
+- labels (by appending "| labelname" at the end of any line, but before comments),
+    later usable like "jmp /labelname/"
+- jmp <address>
 - if <a> <op> <b> or ifnot <a> <op> <b> blocks, possibly with else blocks
 - while <a> <op> <b> or whilenot <a> <op> <b> blocks
 
@@ -78,17 +81,32 @@ def make_indent_tree(code, indent_level=0):
 
     return res, len(code)
 
-def convert_tree(tree, aliases, cmds_before=0):
+def convert_tree(tree, aliases, labels, cmds_before=0):
     i = 0
     res = []
     while i < len(tree):
         line = tree[i]
         if isinstance(line, list): error('unexpected start of a block')
 
+        if '|' in line:
+            sep = line.index('|')
+            label = line[sep+1:].strip()
+            if (not label.isalpha()) or (len(label) == 1) or (label in MNEMONICS):
+                error('invalid label "{}"'.format(label))
+            if label in labels:
+                error('trying to redefine label "{}"'.format(label))
+            labels[label] = cmds_before + len(res)
+            line = line[:sep].strip()
+
+        if len(line) == 0:
+            # this can happen with a line that only has a label
+            i += 1
+            continue
+
         if line.startswith('!'):
             # interrupt
-            if line[1:] not in INTERRUPTS: error('unknown interrupt')
-            res.append('int {}'.format(INTERRUPTS.index(line[1:])))
+            if line[1:] not in INTERRUPTS: error('unknown interrupt "{}"'.format(line))
+            res.append(('int', [INTERRUPTS.index(line[1:])]))
             i += 1
         elif line.startswith('if'):
             # if / ifnot
@@ -118,26 +136,23 @@ def convert_tree(tree, aliases, cmds_before=0):
 
             if else_tree is None:
                 if ifnot:
-                    body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
-                    res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
-                        t=cmds_before + len(res) + len(body_code) + 1))
+                    body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
+                    res.append((mnemonic, [cmds_before + len(res) + len(body_code) + 1, a, b]))
                     res.extend(body_code)
                 else:
-                    res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
-                        t=cmds_before + len(res) + 2))
-                    body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
-                    res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + 1 + len(body_code)))
+                    res.append((mnemonic, [cmds_before + len(res) + 2, a, b]))
+                    body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
+                    res.append(('jeq', [cmds_before + len(res) + 1 + len(body_code), 0, 0]))
                     res.extend(body_code)
             else:
                 if ifnot:
                     body_tree, else_tree = else_tree, body_tree
 
-                else_code = convert_tree(else_tree, aliases, cmds_before=cmds_before + len(res) + 1)
-                res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
-                    t=cmds_before + len(res) + 2 + len(else_code)))
+                else_code = convert_tree(else_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
+                res.append((mnemonic, [cmds_before + len(res) + 2 + len(else_code), a, b]))
                 res.extend(else_code)
-                body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
-                res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + 1 + len(body_code)))
+                body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
+                res.append(('jeq', [cmds_before + len(res) + 1 + len(body_code), 0, 0]))
                 res.extend(body_code)
         elif line.startswith('while'):
             # while / whilenot
@@ -158,20 +173,18 @@ def convert_tree(tree, aliases, cmds_before=0):
             i += 1
 
             if whilenot:
-                body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
+                body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
                 back = len(res)
-                res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
-                    t=cmds_before + len(res) + len(body_code) + 2))
+                res.append((mnemonic, [cmds_before + len(res) + len(body_code) + 2, a, b]))
                 res.extend(body_code)
-                res.append('jeq {t}, 0, 0'.format(t=back))
+                res.append(('jeq', [back, 0, 0]))
             else:
-                body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 2)
+                body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 2)
                 back = len(res)
-                res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
-                    t=cmds_before + len(res) + 2))
-                res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + len(body_code) + 2))
+                res.append((mnemonic, [cmds_before + len(res) + 2, a, b]))
+                res.append(('jeq', [cmds_before + len(res) + len(body_code) + 2, 0, 0]))
                 res.extend(body_code)
-                res.append('jeq {t}, 0, 0'.format(t=back))
+                res.append(('jeq', [back, 0, 0]))
         elif line.startswith('alias '):
             # alias
             _, name, value = line.split()
@@ -180,41 +193,58 @@ def convert_tree(tree, aliases, cmds_before=0):
             if name in aliases: error('trying to redefine alias "{}"'.format(name))
             aliases[name] = value
             i += 1
+        elif line.startswith('jmp '):
+            # jmp
+            _, address = line.split()
+            res.append(('jeq', [address, 0, 0]))
+            i += 1
         else:
             # some GHC mnemonic
-            mnemonic = line[:line.index(' ')]
+            tokens = line.split()
+            mnemonic = tokens[0]
             if mnemonic not in MNEMONICS:
                 error('unknown GHC mnemonic "{}"'.format(mnemonic))
-            args_ = line[line.index(' ')+1:].split(',')
-            args = []
-            for a in args_:
-                a = a.strip()
-                if a in aliases:
-                    args.append(aliases[a])
-                else:
-                    args.append(a)
+            args = ''.join(tokens[1:]).split(',')
+            args = [aliases.get(x, x) for x in args]
 
-            res.append('{} {}'.format(mnemonic, ','.join(args)))
+            res.append((mnemonic, args))
             i += 1
 
+    return res
+
+def apply_labels(code, labels):
+    def transform_arg(arg):
+        if isinstance(arg, str) and arg.startswith('/') and arg.endswith('/'):
+            name = arg[1:-1]
+            if name not in labels: error('undefined label "{}"'.format(arg))
+            return labels[name]
+        return arg
+
+    res = []
+    for m, args in code:
+        args = map(transform_arg, args)
+        res.append((m, args))
     return res
 
 
 def compile_into_ghc(code):
     tree, _ = make_indent_tree(code)
-    ghc_code = convert_tree(tree, {})
-    ghc_code.append('hlt')
+    labels = {}
+    ghc_code = convert_tree(tree, {}, labels)
+    ghc_code.append(('hlt', []))
+    ghc_code = apply_labels(ghc_code, labels)
     return ghc_code
 
 def main():
     code = sys.stdin.read().splitlines()
     ghc = compile_into_ghc(code)
+    ghc = ['{} {}'.format(x, ','.join(map(str, y))) for (x, y) in ghc]
 
     # some pretty formatting
     offset = max(map(len, ghc)) + 1
     res = []
     for i, line in enumerate(ghc):
-        res.append('{}{}; {}'.format(line, ' '*(offset - len(line)), str(i).zfill(3)))
+        res.append('{} {}; {}'.format(line, ' ' * (offset - len(line)), str(i).zfill(3)))
 
     print '\n'.join(res)
 
