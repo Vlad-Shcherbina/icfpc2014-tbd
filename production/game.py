@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 def ghost_ai_from_spec(ghost_spec, map, index):
-    type, details = ghost_spec.split(':', 2)
+    type, details = ghost_spec.split(':', 1)
     if type == 'ghc':
         with open(os.path.join('../data/ghosts', details)) as fin:
             code = fin.read()
@@ -65,14 +65,14 @@ def ghost_ai_from_spec(ghost_spec, map, index):
 
 
 def lambda_man_ai_from_spec(lm_spec):
-    type, details = lm_spec.split(':', 2)
+    type, details = lm_spec.split(':', 1)
     if type == 'interactive':
         assert details == ''
         return InteractiveLambdaManAI()
     elif type == 'py':
         return eval(details)
     elif type == 'gcc_file':
-        interpreter, path = details.split(':', 2)
+        interpreter, path = details.split(':', 1)
         with open(path, 'r') as f:
             code = f.read()
         code = parse_gcc(code)
@@ -97,7 +97,7 @@ class LambdaManAI(object):
     def initialize(self, map, undocumented):
         pass
 
-# FIXME! fix dependencies 
+# FIXME! fix dependencies
 
 from vorber_gcc import VorberGCC
 import lm_ai
@@ -288,7 +288,7 @@ class Map:
                     contents = EMPTY
                 line_cells.append(contents)
             self.cells.append(line_cells)
-        
+
         if self.lambdaman:
             self.lambdaman.ai.initialize(self, None)
             self.schedule(self.lambdaman)
