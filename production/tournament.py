@@ -42,7 +42,7 @@ class Result(object):
 def play(result):
     'Take partially filled result, fill in game outcome.'
     with open(os.path.join('../data/maps', result.map)) as fin:
-        lines = [line.strip('\n') for line in fin]
+        lines = [l.strip() for l in fin.read().splitlines() if l.strip()]
 
     assert not result.lm_spec.startswith('interactive:')
 
