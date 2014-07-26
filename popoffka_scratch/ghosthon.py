@@ -174,13 +174,13 @@ def convert_tree(tree, aliases, labels, cmds_before=0):
 
             if whilenot:
                 body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
-                back = len(res)
+                back = cmds_before + len(res)
                 res.append((mnemonic, [cmds_before + len(res) + len(body_code) + 2, a, b]))
                 res.extend(body_code)
                 res.append(('mov', ['pc', back]))
             else:
                 body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 2)
-                back = len(res)
+                back = cmds_before + len(res)
                 res.append((mnemonic, [cmds_before + len(res) + 2, a, b]))
                 res.append(('mov', ['pc', cmds_before + len(res) + len(body_code) + 2]))
                 res.extend(body_code)
