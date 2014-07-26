@@ -1,12 +1,13 @@
 import sys
 
 '''
-this monstrosity converts ghoston programs into GHC assembler.
-ghoston programs consist of
+this monstrosity converts ghosthon programs into GHC assembler.
+ghosthon programs consist of
 
 - GHC assembler commands, like "mov a, b"
 - nicer mnemonics for interrupts:
     report, lambdaman, xxx, myindex, ghoststart, ghostpos, ghoststats, mapq, debug
+- aliases (e.g. alias ptr [0], alias cnstnt 42, alias importantregister a)
 - if <a> <op> <b> or ifnot <a> <op> <b> blocks, possibly with else blocks
 - while <a> <op> <b> or whilenot <a> <op> <b> blocks
 
@@ -18,20 +19,21 @@ whilenot is a bit more effective than while.
 
 blocks are indentation-delimited.
 
-here's a sample program in ghoston that counts from 1 to 10:
+here's a sample program in ghosthon that counts from 1 to 10:
 
-mov a, 1     ; this is a sample comment
-whilenot a = 11
+alias cnt [0]
+mov cnt, 1     ; this is a sample comment
+whilenot cnt = 11
     !debug
-    inc a
+    inc cnt
 
-ifnot a = 11
+ifnot cnt = 11
     ; wtf?!
-    mov a, 6
+    mov cnt, 6
     !debug
 else
     ; output some nice zeroes
-    mov a, 0
+    mov cnt, 0
     !debug
 '''
 
@@ -76,7 +78,7 @@ def make_indent_tree(code, indent_level=0):
 
     return res, len(code)
 
-def convert_tree(tree, cmds_before=0):
+def convert_tree(tree, aliases, cmds_before=0):
     i = 0
     res = []
     while i < len(tree):
@@ -96,6 +98,8 @@ def convert_tree(tree, cmds_before=0):
             ifnot = line.startswith('ifnot ')
             _, a, op, b = line.split()
             if op not in COMPARATORS: error('unknown comparison operator {}'.format(op))
+            if a in aliases: a = aliases[a]
+            if b in aliases: b = aliases[b]
             mnemonic = COMPARATORS[op]
 
             i += 1
@@ -114,25 +118,25 @@ def convert_tree(tree, cmds_before=0):
 
             if else_tree is None:
                 if ifnot:
-                    body_code = convert_tree(body_tree, cmds_before=cmds_before + len(res) + 1)
+                    body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
                     res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
                         t=cmds_before + len(res) + len(body_code) + 1))
                     res.extend(body_code)
                 else:
                     res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
                         t=cmds_before + len(res) + 2))
-                    body_code = convert_tree(body_tree, cmds_before=cmds_before + len(res) + 1)
+                    body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
                     res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + 1 + len(body_code)))
                     res.extend(body_code)
             else:
                 if ifnot:
                     body_tree, else_tree = else_tree, body_tree
 
-                else_code = convert_tree(else_tree, cmds_before=cmds_before + len(res) + 1)
+                else_code = convert_tree(else_tree, aliases, cmds_before=cmds_before + len(res) + 1)
                 res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
                     t=cmds_before + len(res) + 2 + len(else_code)))
                 res.extend(else_code)
-                body_code = convert_tree(body_tree, cmds_before=cmds_before + len(res) + 1)
+                body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
                 res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + 1 + len(body_code)))
                 res.extend(body_code)
         elif line.startswith('while'):
@@ -143,6 +147,8 @@ def convert_tree(tree, cmds_before=0):
 
             _, a, op, b = line.split()
             if op not in COMPARATORS: error('unknown comparison operator {}'.format(op))
+            if a in aliases: a = aliases[a]
+            if b in aliases: b = aliases[b]
             mnemonic = COMPARATORS[op]
 
             i += 1
@@ -152,26 +158,43 @@ def convert_tree(tree, cmds_before=0):
             i += 1
 
             if whilenot:
-                body_code = convert_tree(body_tree, cmds_before=cmds_before + len(res) + 1)
+                body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 1)
                 back = len(res)
                 res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
                     t=cmds_before + len(res) + len(body_code) + 2))
                 res.extend(body_code)
                 res.append('jeq {t}, 0, 0'.format(t=back))
             else:
-                body_code = convert_tree(body_tree, cmds_before=cmds_before + len(res) + 2)
+                body_code = convert_tree(body_tree, aliases, cmds_before=cmds_before + len(res) + 2)
                 back = len(res)
                 res.append('{m} {t}, {a}, {b}'.format(m=mnemonic, a=a, b=b,
                     t=cmds_before + len(res) + 2))
                 res.append('jeq {t}, 0, 0'.format(t=cmds_before + len(res) + len(body_code) + 2))
                 res.extend(body_code)
                 res.append('jeq {t}, 0, 0'.format(t=back))
+        elif line.startswith('alias '):
+            # alias
+            _, name, value = line.split()
+            if (not name.isalpha()) or (len(name) == 1) or (name in MNEMONICS):
+                error('invalid alias "{}"'.format(name))
+            if name in aliases: error('trying to redefine alias "{}"'.format(name))
+            aliases[name] = value
+            i += 1
         else:
             # some GHC mnemonic
-            if not any([line.startswith(x) for x in MNEMONICS]):
-                error('unknown mnemonic {}'.format(line))
+            mnemonic = line[:line.index(' ')]
+            if mnemonic not in MNEMONICS:
+                error('unknown GHC mnemonic "{}"'.format(mnemonic))
+            args_ = line[line.index(' ')+1:].split(',')
+            args = []
+            for a in args_:
+                a = a.strip()
+                if a in aliases:
+                    args.append(aliases[a])
+                else:
+                    args.append(a)
 
-            res.append(line)
+            res.append('{} {}'.format(mnemonic, ','.join(args)))
             i += 1
 
     return res
@@ -179,7 +202,7 @@ def convert_tree(tree, cmds_before=0):
 
 def compile_into_ghc(code):
     tree, _ = make_indent_tree(code)
-    ghc_code = convert_tree(tree)
+    ghc_code = convert_tree(tree, {})
     ghc_code.append('hlt')
     return ghc_code
 
