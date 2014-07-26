@@ -76,7 +76,7 @@ rtn
         program.emit(builder)
         self.assertEquals("""ld 0 0
 ldc 0
-gt
+cgt
 sel 5 7
 rtn
 ldc 1
