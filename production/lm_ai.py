@@ -17,8 +17,9 @@ class Oscillating(game.LambdaManAI):
 
 
 class NearestPill(game.LambdaManAI):
-    def __init__(self):
+    def __init__(self, straight=False):
         self.rng = random.Random(42)
+        self.straight = straight
 
     def get_move(self, map):
         lm = map.lambdaman
@@ -29,4 +30,12 @@ class NearestPill(game.LambdaManAI):
             if target in [game.PILL, game.POWER_PILL, game.FRUIT]:
                 return d
 
-        return self.rng.choice(game.DIRECTIONS)
+        if self.straight:
+            nx = map.lambdaman.x + game.DELTA_X[map.lambdaman.direction]
+            ny = map.lambdaman.y + game.DELTA_Y[map.lambdaman.direction]
+            if map.at(nx, ny) != game.WALL:
+                return map.lambdaman.direction
+            else:
+                return self.rng.choice(game.DIRECTIONS)
+        else:
+            return self.rng.choice(game.DIRECTIONS)

@@ -120,6 +120,7 @@ def main():
         lm_specs=[
             #'py:lm_ai.Oscillating(frequency=5)',
             'py:lm_ai.NearestPill()',
+            'py:lm_ai.NearestPill(straight=True)',
             'gcc_file:YoleGCC:../data/lms/right.gcc',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
