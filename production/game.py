@@ -235,14 +235,12 @@ class FruitSpawnpoint(Actor):
 
     def move(self):
         if self.state == 0 or self.state == 2:
-            immediately_eaten = False
-            for lman in self.map.lambdamen:
-                if lman.x == self.x and lman.y == self.y:
-                    # next move has been scheduled already so the speed change
-                    # will not affect time of next move
-                    lman.eat(self.map.fruit_score())
-                    immediately_eaten = True
-            if not immediately_eaten:
+            lman = self.map.lambdaman
+            if lman and lman.x == self.x and lman.y == self.y:
+                # next move has been scheduled already so the speed change
+                # will not affect time of next move
+                lman.eat(self.map.fruit_score())
+            else:
                 self.map.spawn(self.x, self.y, FRUIT)
             self.speed = FRUIT_EXPIRE_TIMES[self.state/2] - FRUIT_SPAWN_TIMES[self.state/2]
         else:
@@ -257,7 +255,7 @@ class FruitSpawnpoint(Actor):
 class Map:
     def __init__(self, lines, ghost_specs, lm_spec):
         self.ghosts = []
-        self.lambdamen = []
+        self.lambdaman = None
         self.cells = []
         self.current_tick = 0
         self.move_queue = []
@@ -269,9 +267,11 @@ class Map:
             for x, c in enumerate(line):
                 contents = MAP_TILES.index(c)
                 if contents == LAMBDAMAN:
+                    if self.lambdaman:
+                        raise Exception("can't have multiple lambdamen")
                     lman_ai = lambda_man_ai_from_spec(lm_spec)
                     lman = LambdaMan(self, x, y, lman_ai)
-                    self.lambdamen.append(lman)
+                    self.lambdaman = lman
                 elif contents == GHOST:
                     index = len(self.ghosts)
                     ai_index = len(self.ghosts) % len(ghost_specs)
@@ -289,9 +289,9 @@ class Map:
                 line_cells.append(contents)
             self.cells.append(line_cells)
         
-        for lman in self.lambdamen:
-            lman.ai.initialize(self, None)
-            self.schedule(lman)
+        if self.lambdaman:
+            self.lambdaman.ai.initialize(self, None)
+            self.schedule(self.lambdaman)
 
     def width(self):
         return len(self.cells[0])
@@ -304,9 +304,8 @@ class Map:
 
     def line_as_text(self, y):
         result = [MAP_TILES_VIEW[c] for c in self.cells[y]]
-        for lman in self.lambdamen:
-            if lman.y == y:
-                result[lman.x] = '\\'
+        if self.lambdaman.y == y:
+            result[self.lambdaman.x] = '\\'
         for ghost in self.ghosts:
             if ghost.y == y:
                 result[ghost.x] = '='
@@ -366,16 +365,15 @@ class Map:
         return len(self.cells) * len(self.cells[0]) / 100
 
     def check_lman_ghost_collisions(self):
-        for lman in self.lambdamen:
-            for ghost in self.ghosts:
-                if lman.x == ghost.x and lman.y == ghost.y:
-                    if ghost.vitality == FRIGHT:
-                        ghost.eaten()
-                        lman.score += self.ghost_eaten_score()
-                        self.ghosts_eaten += 1
-                    elif ghost.vitality == STANDARD:
-                        lman.eaten()
-                        self.reset_ghosts()
+        for ghost in self.ghosts:
+            if self.lambdaman.x == ghost.x and self.lambdaman.y == ghost.y:
+                if ghost.vitality == FRIGHT:
+                    ghost.eaten()
+                    self.lambdaman.score += self.ghost_eaten_score()
+                    self.ghosts_eaten += 1
+                elif ghost.vitality == STANDARD:
+                    self.lambdaman.eaten()
+                    self.reset_ghosts()
 
     def ghost_eaten_score(self):
         if self.ghosts_eaten >= len(GHOSTS_EATEN_SCORES):
@@ -385,7 +383,7 @@ class Map:
     def game_over(self):
         if self.pills_remaining == 0:
             return True
-        if all([lman.lives == 0 for lman in self.lambdamen]):
+        if self.lambdaman.lives == 0:
             return True
         if self.current_tick >= 127 * self.width() * self.height() * 16:
             return True

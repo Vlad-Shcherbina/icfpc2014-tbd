@@ -64,7 +64,7 @@ class GCCWrapper:
         return [world.at(x, y) for x in range(world.width())]
 
     def encode_lman(self, world):
-        lman = world.lambdamen[0]
+        lman = world.lambdaman
         return (world.remaining_power_pill_ticks(),
                 (lman.x, lman.y),
                 lman.direction,

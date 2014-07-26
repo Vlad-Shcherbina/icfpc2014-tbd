@@ -217,16 +217,12 @@ class GHC:
             else:
                 self.new_direction = None
         elif which == 1:
-            self.registers[0] = self.gamemap.lambdamen[0].x
-            self.registers[1] = self.gamemap.lambdamen[0].y
+            self.registers[0] = self.gamemap.lambdaman.x
+            self.registers[1] = self.gamemap.lambdaman.y
         elif which == 2:
-            if len(self.gamemap.lambdamen) >= 2:
-                self.registers[0] = self.gamemap.lambdamen[1].x
-                self.registers[1] = self.gamemap.lambdamen[1].y
-            else:
-                logging.debug('INT2 called when there is only one lambdaman')
-                self.registers[0] = 255
-                self.registers[1] = 255
+            logging.debug('INT2 called when there is only one lambdaman')
+            self.registers[0] = 255
+            self.registers[1] = 255
         elif which == 3:
             self.registers[0] = self.index
         elif which == 4:

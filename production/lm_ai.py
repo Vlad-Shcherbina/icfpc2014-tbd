@@ -21,7 +21,7 @@ class NearestPill(game.LambdaManAI):
         self.rng = random.Random(42)
 
     def get_move(self, map):
-        lm = map.lambdamen[0]  # TODO: index
+        lm = map.lambdaman
         for d in game.DIRECTIONS:
             dx = game.DELTA_X[d]
             dy = game.DELTA_Y[d]

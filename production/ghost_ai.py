@@ -18,7 +18,7 @@ class GHC_Ints:
 
     def get_man_pos(self):
         'INT 1', 'INT 2'
-        man = self.map.lambdamen[0]
+        man = self.map.lambdaman
         return (man.x, man.y)
 
     def get_index(self):

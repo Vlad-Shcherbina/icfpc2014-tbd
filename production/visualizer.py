@@ -63,7 +63,7 @@ def main():
             for y in range(map.height()):
                 stdscr.addstr(y, 0, map.line_as_text(y))
             stdscr.addstr(map.height(), 0, "Tick {0} Score {1}     ".format(
-                map.move_queue[0].next_move, map.lambdamen[0].score))
+                map.move_queue[0].next_move, map.lambdaman.score))
             stdscr.refresh()
             next_actor = map.move_queue[0]
             if isinstance(next_actor, LambdaMan):
@@ -107,7 +107,7 @@ def main():
         curses.echo()
         curses.endwin()
         print "Tick {0} Score {1}".format(map.current_tick,
-                                          map.lambdamen[0].score)
+                                          map.lambdaman.score)
 
 
 if __name__ == '__main__':

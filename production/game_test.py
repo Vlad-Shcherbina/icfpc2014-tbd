@@ -18,7 +18,7 @@ class GameTest(TestCase):
         set_interactive_lambda_man_direction(RIGHT)
         map = Map(lines, ghost_ais, lman_ai)
         map.step()
-        lman = map.lambdamen[0]
+        lman = map.lambdaman
         self.assertEquals(2, lman.x)
         self.assertEquals(10, lman.score)
         self.assertEquals(EMPTY, map.at(2, 1))

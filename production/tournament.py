@@ -52,7 +52,7 @@ def play(result):
     while not map.game_over():
         map.step()
 
-    result.score = map.lambdamen[0].score
+    result.score = map.lambdaman.score
     result.ticks = map.current_tick
     logger.info('score: {}, ticks: {}'.format(result.score, result.ticks))
 
