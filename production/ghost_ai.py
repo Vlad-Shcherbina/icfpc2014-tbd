@@ -44,8 +44,8 @@ class BaseChaser(BasePyAI):
             if direction == game.OPPOSITE_DIRECTIONS[self.ghost.direction]:
                 continue
 
-            next_x = self.ghost.x + game.DELTA_X[self.ghost.direction]
-            next_y = self.ghost.y + game.DELTA_Y[self.ghost.direction]
+            next_x = self.ghost.x + game.DELTA_X[direction]
+            next_y = self.ghost.y + game.DELTA_Y[direction]
             if self.map.at(next_x, next_y) == game.WALL:
                 continue
 
