@@ -52,13 +52,13 @@ def save_map(map, filename):
 
 
 def main():
-    for size in 15, 21, 30:
-        for block_size in 3, 5:
+    for size in 16, 22, 29:
+        for block_size in 4, 6:
             for rich in [True, False]:
                 map = manhattan(size, size, block_size)
-                place(map, r'\oooo%=====')
-                fill_with_pills(map, 0.9 if rich else 0.3)
-                save_map(map, 'manhattan5gh_{0}x{0}_{1}x{1}_{2}.txt'.format(
+                fill_with_pills(map, 0.8 if rich else 0.25)
+                place(map, r'\%ooooo======')
+                save_map(map, 'manhattan6gh_{0}x{0}_{1}x{1}_{2}.txt'.format(
                     size,
                     block_size,
                     'rich' if rich else 'scarce'))
