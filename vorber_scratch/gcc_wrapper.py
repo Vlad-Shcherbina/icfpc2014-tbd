@@ -9,24 +9,7 @@ class wrapper_to_gcc_interface:
         Runs the loaded code
         '''
         pass
-    def push_data_int(i):
-        '''
-        Method to push int value on gcc data stack
-        i should be int
-        '''
-        pass
-    def push_data_cons(t):
-        '''
-        Method to push 2-element tuple on gcc data stack
-        t should be tuple with exactly 2 elements
-        '''
-        pass
-    def pop_data_int():
-        '''
-        Method to pop int from data stack
-        intended usage is to retrieve program result after it is finished
-        '''
-        pass
+
     def pop_data_cons():
         '''
         Method to pop cons from data stack
