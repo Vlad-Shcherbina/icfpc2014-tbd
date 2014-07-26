@@ -53,9 +53,19 @@ def main():
     map.set_ai_specs(args.lm, args.ghost)
 
     stdscr = curses.initscr()
+
     curses.noecho()
     curses.cbreak()
     stdscr.keypad(1)
+
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_BLUE, curses.COLOR_BLACK)
+
+    ghost_colors = [curses.color_pair(i) for i in 2, 3, 4, 5]
 
     try:
         history = []
@@ -63,7 +73,13 @@ def main():
             history = history[-MAX_HISTORY_SIZE:]
             for y in range(map.height()):
                 stdscr.addstr(y, 0, map.line_as_text(y))
-            stdscr.addstr(map.height(), 0, "Tick {0} Score {1}     ".format(
+            for ghost in map.ghosts:
+                idx = ghost.index % len(args.ghost)
+                stdscr.addstr(ghost.y, ghost.x, '=', ghost_colors[idx])
+            for i, ghost_spec in enumerate(args.ghost):
+                stdscr.addstr(i, map.width() + 1, ghost_spec, ghost_colors[i])
+
+            stdscr.addstr(map.height(), 0, "Tick {0} Score {1}   ".format(
                 map.move_queue[0].next_move, map.lambdaman.score))
             stdscr.refresh()
             next_actor = map.move_queue[0]
