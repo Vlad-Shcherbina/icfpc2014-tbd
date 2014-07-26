@@ -64,6 +64,11 @@ def table():
         by_map_lm_ghosts[result.map, result.lm_spec, ghosts].append(result)
         by_lm_ghosts[result.lm_spec, ghosts].append(result)
 
+    def best_among_lms(result):
+        ghosts = tuple(result.ghost_specs)
+        scores = [r.score for lm in lms for r in by_map_lm_ghosts[result.map, lm, ghosts]]
+        return max(scores) == result.score > min(scores)
+
     return flask.render_template(
         'table.html',
         **locals())

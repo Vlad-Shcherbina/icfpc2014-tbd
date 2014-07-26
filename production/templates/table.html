@@ -7,10 +7,13 @@ th {
     text-align: left;
     valign: top;
 }
+.best {
+    background-color: #dfd;
+}
 </style>
 
 {% macro render_result(result) -%}
-<div>
+<div {% if best_among_lms(result) %}class="best"{% endif %}>
     <b>{{ '%0.3f' | format(result.score / result.baseline_score()) }}</b>
     ({{ result.score }}) <br>
     {{ result.ticks }} ticks <br>
