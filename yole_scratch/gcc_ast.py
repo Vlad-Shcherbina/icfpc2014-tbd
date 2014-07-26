@@ -10,7 +10,7 @@ class GccTextBuilder(object):
             for k, v in self.labels.items():
                 if i == v:
                     result += ';{}\n'.format(k)
-            result += '   ' + line + '\n'
+            result += '    ' + line + '\n'
         return result
 
     def add_instruction(self, name, *args):
@@ -60,6 +60,17 @@ class GccProgram(object):
         self.functions.append(result)
         self.function_index[name] = result
         return result
+
+    def add_standard_main_function(self):
+        f = self.add_function('main', ['world', 'undocumented'])
+        f.add_instruction(GccInline("""
+            DUM  2        ; 2 top-level declarations
+            LDC  2        ; declare constant down
+            LDF  $func_step$     ; declare function step
+            LDF  $func_init$     ; init function
+            RAP  2        ; load declarations into environment and run init
+            """))
+        # no need for return, it will be added automatically
 
     def emit(self, builder):
         for f in self.functions:
@@ -115,6 +126,13 @@ class GccFunction():
         builder.add_instruction('rtn')
         context.resolve_queue(builder)
 
+class GccInline(object):
+    def __init__(self, code):
+        self.code = code
+
+    def emit(self, builder, context):
+        for line in self.code.strip().splitlines():
+            builder.add_instruction(line.strip())
 
 class GccConstant(object):
     def __init__(self, value):
