@@ -49,7 +49,8 @@ def main():
     with open(os.path.join('../data/maps', args.map)) as fin:
         lines = [line.strip('\n') for line in fin]
 
-    map = Map(lines, args.ghost, args.lm)
+    map = Map(lines)
+    map.set_ai_specs(args.lm, args.ghost)
 
     stdscr = curses.initscr()
     curses.noecho()
