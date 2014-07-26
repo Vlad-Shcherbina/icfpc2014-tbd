@@ -167,6 +167,27 @@ class GccASTTest(unittest.TestCase):
             rtn
             """, builder.text)
 
+    def test_assignment(self):
+        program = GccProgram()
+        body = program.add_function("main", ["x"])
+        body.add_instruction(GccAssignment("y", GccConstant(42)))
+        body.add_instruction(GccAssignment("x", GccConstant(239)))
+        body.add_instruction(GccTuple(GccNameReference("x"),
+                                      GccNameReference("y")))
+        builder = GccTextBuilder()
+        program.emit(builder)
+        self.assert_code_equals("""
+        ;$func_main$
+            dum 1
+            ldc 42
+            st 0 0
+            ldc 239
+            st 1 0
+            ld 1 0
+            ld 0 0
+            cons
+            rtn
+            """, builder.text)
 
 if __name__ == '__main__':
     import sys

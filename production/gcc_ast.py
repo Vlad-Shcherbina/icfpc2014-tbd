@@ -95,8 +95,15 @@ class GccEmitContext(object):
         self.terminated = False
 
     def resolve_variable(self, name):
+        args_frame_index = 0
+        if self.function.local_variables:
+            try:
+                return 0, self.function.local_variables.index(name)
+            except ValueError:
+                pass  # ignore, continue lookup
+            args_frame_index += 1
         index = self.function.args.index(name)
-        return 0, index
+        return args_frame_index, index
 
     def resolve_function(self, name):
         if not self.function.program:
@@ -130,16 +137,32 @@ class GccFunction():
         self.name = name
         self.args = args
         self.main_block = GccCodeBlock()
+        self.local_variables = []
 
     def add_instruction(self, insn):
         self.main_block.instructions.append(insn)
 
     def emit(self, builder):
         context = GccEmitContext(self)
+        self.collect_local_variables(self.main_block, context)
+        if self.local_variables:
+            builder.add_instruction("dum", len(self.local_variables))
         self.main_block.emit(builder, context)
         if not context.terminated:
             builder.add_instruction('rtn')
         context.resolve_queue(builder)
+
+    def collect_local_variables(self, block, context):
+        for insn in block.instructions:
+            if isinstance(insn, GccAssignment):
+                try:
+                    context.resolve_variable(insn.name)
+                except ValueError:
+                    self.local_variables.append(insn.name)
+            elif isinstance(insn, GccConditionalBlock):
+                self.collect_local_variables(insn.true_branch, context)
+                self.collect_local_variables(insn.false_branch, context)
+
 
 class GccInline(object):
     def __init__(self, code):
@@ -284,3 +307,14 @@ class GccPrint(object):
     def emit(self, builder, context):
         self.arg.emit(builder, context)
         builder.add_instruction("dbug")
+
+
+class GccAssignment(object):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def emit(self, builder, context):
+        self.value.emit(builder, context)
+        frame_index, var_index = context.resolve_variable(self.name)
+        builder.add_instruction("st", frame_index, var_index)

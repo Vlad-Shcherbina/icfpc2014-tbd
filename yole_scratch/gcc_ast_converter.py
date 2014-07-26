@@ -29,6 +29,7 @@ def convert_python_to_gcc_function(program, func_def):
 def convert_python_to_gcc_statement(stmt):
     if isinstance(stmt, Expr) or isinstance(stmt, Return):
         return convert_python_to_gcc_ast(stmt.value)
+
     if isinstance(stmt, If):
         test = convert_python_to_gcc_ast(stmt.test)
         cond = GccConditionalBlock(test)
@@ -39,8 +40,14 @@ def convert_python_to_gcc_statement(stmt):
             cond.false_branch.instructions.append(
                 convert_python_to_gcc_statement(child))
         return cond
+
     if isinstance(stmt, Print):
         return GccPrint(convert_python_to_gcc_ast(stmt.values[0]))
+
+    if isinstance(stmt, Assign):
+        return GccAssignment(stmt.targets[0].id,
+                             convert_python_to_gcc_ast(stmt.value))
+
     raise Exception("Unsupported statement type {0}".format(stmt))
 
 
