@@ -1,74 +1,55 @@
 class GCCInterface(object):
-    def run():
-        '''
-        Runs the loaded code
-        '''
-        pass
+    def initialize(self, world_state, undocumented):
+        '''world_state must be an opaque handle constructed via marshall_* methods.
+        returns (ai_state, step_function)'''
+    
+    def step(self, ai_state, world_state):
+        '''returns ai_state, move. Move is an already decoded integer.'''
 
-    def pop_data_cons():
-        '''
-        Method to pop cons from data stack
-        intended usage is to retrieve program result after it is finished
-        '''
-        pass
-    def pop_data_closure():
-        '''
-        Method to pop closure from data stack
-        intended usage is to retrieve program result after it is finished
-        '''
-        pass
-    def set_ip(ip):
-        '''
-        Sets instruction pointer (register %c) to specified instruction
-        '''
-        pass
-    def set_env(e):
-        '''
-        Sets environment pointer
-        '''
-        pass
-    def add_env_cons(ep, t):
-        '''
-        Adds a 2-element tuple to environment
-        ep: environment pointer
-        t: tuple
-        '''
-        pass
+    def marshall_int(self, i):
+        'Return an opaque handle representing i'
+    
+    def marshall_cons(self, car, cdr):
+        'Return an opaque handle representing (car, cdr)'
+
 
 class GCCWrapper:
-    def __init__(gcc, code, world_state, undefined):
+    def __init__(self, gcc, world, undocumented):
+        assert isinstance(gcc, GCCInterface)
         self.gcc = gcc
-        gcc.load(code)
-        initialize(world_state, undefined)
+        world_state = self.marshall_world_state(world)
+        self.ai_state, self.step_function = gcc.initialize(world_state, undocumented)
         
-    def initialize(world_state, udefined):
-        #prepare input params for gcc
-        #it seems they should be put onto env_stack
-        self.gcc.set_env(0)
-        self.gcc.set_env_cons(0,world_state_to_cons(world_state))
-        self.gcc.set_env_cons(0,undefined_cons(undefined))
-        #initial run to get step and ai state
-        self.gcc.run()
-        #get result from data stack, resut is a closure cell
-        ret = gcc.pop_data_cons()
-        self.ai_state = ret[0]
-        self.closure = ret[1]
+    
+    def step(self, world):
+        world_state = self.marshall_world_state(world)
+        self.ai_state, move = self.gcc.step(self.ai_state, world_state)
+        return move
         
-    def eval(world_state, undefined):
-        #all further evals after initialize go as follows
-        #set up machine to run the closure it returned 
-        #that is set %c, %e to what it should be, and fill env
-        self.gcc.set_ip(self.closure[0])
-        self.gcc.set_env(self.closure[1])
-        self.gcc.set_env_cons(self.closure[1], ai_state)
-        self.gcc.set_env_cons(self.closure[1], world_state_to_cons(world_state))
-        #then run the machine and extract new state and direction
-        self.gcc.run()
-        ret = self.gcc.pop_data_cons()
-        self.ai_state = ret[0]
-        direction = ret[1]
-        return direction
-    def undefined_cons(undefined):
-        return (0,0)
-    def world_state_to_cons(world_state):
-        pass
+    
+    def marshall_world_state(self, world):
+        # convert world_state to the list/tuple/int representation
+        world_state = world
+        # go implement the above, lol
+        
+        gcc = self.gcc
+        def rec(item):
+            if isinstance(item, int):
+                return gcc.marshall_int(item)
+            
+            if isinstance(item, tuple):
+                curr = None
+            elif isinstance(item, list):
+                curr = gcc.marshall_int(0)
+            else:
+                assert False
+                
+            for it in reversed(item):
+                it = rec(it)
+                if curr is None:
+                    curr = it
+                else:
+                    curr = gcc.marshall_cons(it, curr)
+            return curr
+        return rec(world_state)
+
