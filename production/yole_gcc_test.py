@@ -1,5 +1,5 @@
 from unittest import TestCase
-from yole_gcc import GccMachine
+from yole_gcc import GccMachine, GccException
 from asm_parser import parse_gcc
 
 
@@ -189,3 +189,8 @@ rtn
         state, step = machine.call(0, 0, 0)
         new_state, direction = machine.call(step, state, 0)
         self.assertEquals(2, direction)
+
+    def test_max_ticks(self):
+        code = open("../data/lms/miner.gcc").read()
+        machine = GccMachine(parse_gcc(code))
+        self.assertRaises(GccException, lambda: machine.call(0, 0, 0, max_ticks=3))

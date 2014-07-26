@@ -72,7 +72,7 @@ class VorberGCC(GCCInterface):
     def marshall_cons(self, car, cdr):
         return {'tag': 'cons', 'value': (car, cdr)}
 
-    def call(self, address_or_closure, *args):
+    def call(self, address_or_closure, *args, **kwargs):
         'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
         # Implement the stuff below, OK?
         'reset all stacks' #vorber: gcc state persists between calls, unless explicitly modified from outside

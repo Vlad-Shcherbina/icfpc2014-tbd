@@ -1,5 +1,5 @@
 class GCCInterface(object):
-    def call(self, address_or_closure, *args):
+    def call(self, address_or_closure, *args, **kwargs):
         'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
 
     def marshall_int(self, i):
@@ -17,12 +17,12 @@ class GCCWrapper:
     
     def initialize(self, world, undocumented):
         world_state = self.marshall_world_state(world)
-        self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented)
+        self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented, max_ticks=3072*1000*60)
             
     
     def get_move(self, world):
         world_state = self.marshall_world_state(world)
-        self.ai_state, move = self.gcc.call(self.step_function, self.ai_state, world_state)
+        self.ai_state, move = self.gcc.call(self.step_function, self.ai_state, world_state, max_ticks=3072*1000)
         return move
         
     

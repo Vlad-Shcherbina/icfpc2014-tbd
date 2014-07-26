@@ -35,7 +35,7 @@ class GccMachine(GCCInterface):
     def marshall_cons(self, car, cdr):
         return car, cdr
 
-    def call(self, address_or_closure, *args):
+    def call(self, address_or_closure, *args, **kwargs):
         assert len(self.data_stack) == 0
         if not isinstance(address_or_closure, GccClosure):
             address_or_closure = GccClosure(address_or_closure, None)
@@ -44,7 +44,7 @@ class GccMachine(GCCInterface):
             callee_frame.values[i] = args[i]
         self.current_frame = callee_frame
         self.ip = address_or_closure.ip
-        self.run()
+        self.run(kwargs.get('max_ticks'))
         if self.data_stack:
             assert len(self.data_stack) == 1
             result = self.data_stack[0]
@@ -201,9 +201,14 @@ class GccMachine(GCCInterface):
         f.instruction_args = args
         self.instructions.append(f)
 
-    def run(self):
+    def run(self, max_ticks=None):
         self.done = False
+        self.ticks = 0
         while self.ip >= 0 and self.ip < len(self.instructions):
+            self.ticks += 1
+            if max_ticks and self.ticks > max_ticks:
+                raise GccException("Execution time limit exceeded")
+
             try:
                 next_ip = self.instructions[self.ip]()
             except GccException, e:
