@@ -118,14 +118,14 @@ def main():
         # ],
         maps=all_maps(max_size=1500),
         lm_specs=[
-            'py:lm_ai.Oscillating(frequency=5)',
+            #'py:lm_ai.Oscillating(frequency=5)',
             'py:lm_ai.NearestPill()',
             'gcc_file:YoleGCC:../data/lms/right.gcc',
-            'gcc_file:VorberGCC:../data/lms/right.gcc',
+            #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[
-            ['py:GhostAI_Shortest', 'ghc:fickle.ghc'],
-            ['ghc:miner.ghc'],
+            ['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
+            ['py:GhostAI_Shortest'],
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
         ],
         parallel=False)
