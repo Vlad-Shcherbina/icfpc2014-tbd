@@ -1,6 +1,5 @@
 #GCC implementation
 import sys
-sys.path.append('../production')
 from command_enums import GCC_CMD
 from gcc_wrapper import GCCInterface
 

@@ -99,7 +99,7 @@ class LambdaManAI(object):
 
 # FIXME! fix dependencies 
 
-from tmp_gcc_interpreter import VorberGCC
+from vorber_gcc import VorberGCC
 import lm_ai
 
 interactive_lambda_man_direction = None
