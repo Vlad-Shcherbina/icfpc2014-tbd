@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import glob
 
 import game
 
@@ -75,14 +76,26 @@ def save_results(results, filename):
         json.dump(map(Result.to_json, results), fout, indent=2)
 
 
+def all_maps():
+    maps = []
+    map_dir = '../data/maps'
+    for dir, _, files in os.walk(map_dir):
+        dir = os.path.relpath(dir, map_dir)
+        for file in files:
+            maps.append(os.path.join(dir, file))
+    return maps
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
-
+    print all_maps()
     results = play_tournament(
-        maps=[
-            'default_map.txt',
-            'gen/hz.txt',
-        ],
+        # maps=[
+        #     'default_map.txt',
+        #     'gen/hz.txt',
+        #     '../../twigil_scratch/map_91_91_100_10.txt',
+        # ],
+        maps=all_maps(),
         lm_specs=[
             'py:lm_ai.Oscillating(frequency=5)',
             'py:lm_ai.NearestPill()',
