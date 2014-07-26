@@ -18,7 +18,7 @@ class BasePyAI(object):
 class GhostAI_Random(BasePyAI):
 
     def get_move(self):
-        return self.rng.choise(game.DIRECTIONS)
+        return self.rng.choice(game.DIRECTIONS)
 
 
 class GhostAI_Shortest(BasePyAI):
@@ -34,16 +34,11 @@ class GhostAI_Shortest(BasePyAI):
 
 class BaseChaser(BasePyAI):
 
-    def get_target(self):
-        raise NotImplementedError()
-
-    def chase_target(self):
+    def chase(self, target_x, target_y):
         # maximum distance on a map
         score = 255 * 255 * 2
 
-        best_direction = None
-
-        target_x, target_y = self.get_target()
+        best_direction = self.rng.choice(game.DIRECTIONS)
 
         for direction in game.DIRECTIONS:
             if direction == game.OPPOSITE_DIRECTIONS[self.ghost.direction]:
@@ -62,6 +57,7 @@ class BaseChaser(BasePyAI):
             if score > d:
                 best_direction = direction
                 score = d
+        return best_direction
 
     def choose_random(self):
         directions = []
@@ -79,9 +75,11 @@ class BaseChaser(BasePyAI):
 
     def get_move(self):
         if self.ghost.vitality == game.STANDARD:
-            return self.chase_target()
+            return self.chase(*self.get_target())
         else:
-            return self.choose_random()
+            target = self.map.lambdaman.x, self.map.lambdaman.y
+            return game.OPPOSITE_DIRECTIONS[
+                self.chase(*target)]
 
 
 class GhostAI_Red(BaseChaser):
