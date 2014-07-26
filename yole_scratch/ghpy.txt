@@ -23,3 +23,6 @@ ghpy supported features
     a 'car' instruction will be generated and will fail
 - 'print' for debug information
 - Assignments (you can assign to local variables and parameters)
+- int() function can be used to check whether a value is a number or a cons
+  cell. This can be used for iterating over lists of unknown length (see
+  list_length.py for usage example).
