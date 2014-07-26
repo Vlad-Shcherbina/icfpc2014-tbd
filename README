@@ -1,0 +1,13 @@
+Submission by team tbd. Code repository (will become public after contest):
+
+  https://github.com/Vlad-Shcherbina/icfpc2014-tbd/
+
+Lightning round solution is generated from a manually built AST. See
+gcc_ast.py for the implementation of the AST nodes and gen_gcc.py for the
+code that builds the AST for the solution.
+
+We also have a whole bunch of code (game implementation, GHC and GCC
+interpreters, map generator and so on) which wasn't directly used for the
+lightning round solution.
+
+The code has been implemented in Python 2.7.
