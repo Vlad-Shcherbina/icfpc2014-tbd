@@ -1,5 +1,9 @@
+import sys
+sys.path.append('../production')
+
 from unittest import TestCase
-from gcc import GccMachine, parse_gcc
+from gcc import GccMachine
+from asm_parser import parse_gcc
 
 
 class GccTest(TestCase):
@@ -115,12 +119,12 @@ class GccTest(TestCase):
         self.assertEquals(self.gcc_machine.data_stack, [4])
 
     def test_parser(self):
-        machine = parse_gcc("ldc 3\nldc 4\nadd")
+        machine = GccMachine(parse_gcc("ldc 3\nldc 4\nadd"))
         machine.run()
         self.assertEquals(machine.data_stack, [7])
 
     def test_local_gcc(self):
-        machine = parse_gcc("""
+        machine = GccMachine(parse_gcc("""
         LDC 21
         LDF 4
         AP 1
@@ -128,12 +132,12 @@ class GccTest(TestCase):
         LD 0 0
         LD 0 0
         ADD
-        RTN""")
+        RTN"""))
         machine.run()
         self.assertEquals(machine.data_stack, [42])
 
     def test_sel(self):
-        machine = parse_gcc("""
+        machine = GccMachine(parse_gcc("""
 ldc 0
 sel 3 5
 rtn
@@ -141,12 +145,12 @@ ldc 2
 join
 ldc 42
 join
-""")
+"""))
         machine.run()
         self.assertEquals(machine.data_stack, [42])
 
     def test_sel_false(self):
-        machine = parse_gcc("""
+        machine = GccMachine(parse_gcc("""
 ldc 2
 sel 3 5
 rtn
@@ -154,6 +158,6 @@ ldc 42
 join
 ldc 1
 join
-""")
+"""))
         machine.run()
         self.assertEquals(machine.data_stack, [42])

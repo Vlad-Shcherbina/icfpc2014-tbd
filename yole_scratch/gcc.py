@@ -13,13 +13,17 @@ class GccClosure:
         self.frame = frame
 
 class GccMachine:
-    def __init__(self):
+    def __init__(self, instructions=None):
         self.data_stack = []
         self.current_frame = None
         self.instructions = []
         self.control_stack = []
         self.ip = 0
         self.done = False
+        if instructions:
+            for insn in instructions:
+                self.add_instruction(insn.op.lower(), insn.args)
+
 
     def ldc(self, arg):
         self.data_stack.append(arg)
@@ -152,20 +156,3 @@ class GccMachine:
                 self.ip = next_ip
             else:
                 self.ip = self.ip + 1
-
-
-def parse_gcc(code):
-    machine = GccMachine()
-    for line in code.splitlines():
-        semicolon = line.find(';')
-        if semicolon >= 0:
-            line = line[:semicolon]
-        line = line.strip()
-        if not line:
-            continue
-        fields = line.split()
-        instruction = fields[0].lower()
-        args = map(int, fields[1:])
-        machine.add_instruction(instruction, args)
-
-    return machine
