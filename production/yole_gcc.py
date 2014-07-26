@@ -202,6 +202,8 @@ class GccMachine(GCCInterface):
         self.instructions.append(f)
 
     def run(self, max_ticks=None):
+        if len(self.instructions) > 1048576:
+            raise GccException("Program too long")
         self.done = False
         self.ticks = 0
         while self.ip >= 0 and self.ip < len(self.instructions):
