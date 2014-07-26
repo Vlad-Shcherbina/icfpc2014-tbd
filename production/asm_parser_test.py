@@ -38,7 +38,7 @@ def test_gcc():
   RAP  2        ; load declarations into environment and run main
   RTN           ; final return
 main:
-  LDC  1
+  LDC  -1
   LD   0 0      ; var go
   AP   1        ; call go(1)
   RTN
@@ -64,7 +64,7 @@ go:
             ParsedInstruction(op='LDF', args=['main'], line=5, source='<unnamed code>', original_text='  LDF  main     ; main function'),
             ParsedInstruction(op='RAP', args=['2'], line=6, source='<unnamed code>', original_text='  RAP  2        ; load declarations into environment and run main'),
             ParsedInstruction(op='RTN', args=[], line=7, source='<unnamed code>', original_text='  RTN           ; final return'),
-            ParsedInstruction(op='LDC', args=['1'], line=9, source='<unnamed code>', original_text='  LDC  1'),
+            ParsedInstruction(op='LDC', args=['-1'], line=9, source='<unnamed code>', original_text='  LDC  -1'),
             ParsedInstruction(op='LD', args=['0', '0'], line=10, source='<unnamed code>', original_text='  LD   0 0      ; var go'),
             ParsedInstruction(op='AP', args=['1'], line=11, source='<unnamed code>', original_text='  AP   1        ; call go(1)'),
             ParsedInstruction(op='RTN', args=[], line=12, source='<unnamed code>', original_text='  RTN'),
@@ -91,7 +91,7 @@ go:
             ParsedInstruction(op='LDF', args=[6], line=5, source='<unnamed code>', original_text='  LDF  main     ; main function'),
             ParsedInstruction(op='RAP', args=[2], line=6, source='<unnamed code>', original_text='  RAP  2        ; load declarations into environment and run main'),
             ParsedInstruction(op='RTN', args=[], line=7, source='<unnamed code>', original_text='  RTN           ; final return'),
-            ParsedInstruction(op='LDC', args=[1], line=9, source='<unnamed code>', original_text='  LDC  1'),
+            ParsedInstruction(op='LDC', args=[-1], line=9, source='<unnamed code>', original_text='  LDC  -1'),
             ParsedInstruction(op='LD', args=[0, 0], line=10, source='<unnamed code>', original_text='  LD   0 0      ; var go'),
             ParsedInstruction(op='AP', args=[1], line=11, source='<unnamed code>', original_text='  AP   1        ; call go(1)'),
             ParsedInstruction(op='RTN', args=[], line=12, source='<unnamed code>', original_text='  RTN'),

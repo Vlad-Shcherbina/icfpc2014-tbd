@@ -35,7 +35,7 @@ def pre_parse(text, mode, source='<unnamed code>', strict=False):
         instruction => op \s+ arglist | op
         arglist => arg argsep arglist | arg
         op => [a-zA-Z]+
-        arg => [a-zA-Z0-9\[\]]+
+        arg => [\-a-zA-Z0-9\[\]]+
         label => [_a-zA-Z][_a-zA-Z0-9]*
         argsep => {}
     '''.format('\s+' if mode == MODE_GCC else ',')
@@ -94,12 +94,12 @@ def parse_gcc(text, source='<unnamed code>', strict=False):
         # conver args to ints
         args = []
         for i, arg in enumerate(inst.args):
-            if re.match(r'\d+$', arg):
+            if re.match(r'-?\d+$', arg):
                 arg = int(arg)
             elif strict:
                 # only numbers allowed
                 ParsingException.from_inst(inst, 'Argument {} is invalid: {}'.format(i + 1, arg))
-            elif re.match(r'0[x0b]\d+$', arg):
+            elif re.match(r'-?0[x0b]\d+$', arg):
                 arg = int(arg, 0) # support hex and octal and shit
                 # note that we don't accidentally parse 0123 as octal because it's already handled 
             elif arg in labels:
