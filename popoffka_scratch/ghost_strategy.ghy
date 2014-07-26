@@ -1,0 +1,139 @@
+; main stuff!
+
+!myindex
+!ghoststats
+alias gdir [0]
+mov gdir, b
+
+alias gx [1]
+alias gy [2]
+!ghostpos
+mov gx, a
+mov gy, b
+
+alias lx [3]
+alias ly [4]
+!lambdaman
+mov lx, a
+mov ly, b
+
+alias opdir [5]
+
+if a = 1
+    ; if we are frightened
+    mov g, gdir
+
+    ; save opposite dir in opdir
+    mov h, pc
+    jmp /opposite/
+    mov opdir, g
+
+    ; try all valid directions, use any that doesn't kill us
+    mov g, 0
+    mov c, gdir
+    whilenot g = 4
+        ifnot g = opdir
+            mov e, gx
+            mov f, gy
+            mov h, pc
+            jmp /dirmove/
+            ifnot lx = e
+                ifnot lx = f
+                    mov a, e
+                    mov b, f
+                    !mapq
+                    ifnot a = 0
+                        mov c, g
+        inc g
+    mov a, c
+else
+    ; we ain't afraid of no lambdas!
+
+    ; try all valid directions, use one that minimizes Manhattan distance to LM
+    mov g, 0
+    mov c, gdir
+    mov d, 255
+    whilenot g = 4
+        ifnot g = opdir
+            mov e, gx
+            mov f, gy
+            mov h, pc
+            jmp /dirmove/
+            mov h, pc
+            jmp /lmdistance/
+            ifnot e > d
+                mov d, e
+                mov c, g
+        inc g
+    mov a, c
+!report
+hlt
+
+; dirmove is a subroutine
+; put call address into h
+; put (x, y, dir) in (e, f, g)
+; will change (x, y) in place
+
+| dirmove
+; the x-dir
+add g, 252
+mov [252], 0   ; 0 up
+mov [253], 1   ; 1 right
+mov [254], 0   ; 2 down
+mov [255], 255 ; 3 left
+add e, [h]
+
+; the y-dir
+mov [252], 255 ; 0 up
+mov [253], 0   ; 1 right
+mov [254], 1   ; 2 down
+mov [255], 0   ; 3 left
+add f, [h]
+
+sub g, 252
+add h, 2
+jmp h
+
+; opposite is a subroutine
+; put call address into h
+; put dir in g
+; will change dir in place
+
+| opposite
+add g, 252
+mov [252], 2   ; 0 up
+mov [253], 3   ; 1 right
+mov [254], 0   ; 2 down
+mov [255], 1   ; 3 left
+mov g, [g]
+
+add h, 2
+jmp h
+
+; lmdistance is a subroutine
+; put call address in h
+; put (x, y) in (e, f)
+; will put distance in e
+
+| lmdistance
+mov [252], 0
+if e < lx
+    add [252], lx
+    sub [252], e
+else
+    add [252], e
+    sub [252], lx
+mov [253], 0
+if f < ly
+    add [253], ly
+    sub [253], f
+else
+    add [253], f
+    sub [253], ly
+div [252], 2
+div [253], 2
+mov e, [252]
+add e, [253]
+
+add h, 2
+jmp h
