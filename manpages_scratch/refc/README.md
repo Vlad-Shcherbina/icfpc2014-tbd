@@ -5,7 +5,7 @@ Dependencies:
 
 ```
 pacman -S phantomjs
-pip2 install tornado
+pip2 install tornado requests
 ```
 
 Running:
@@ -25,5 +25,4 @@ to either
  + http://localhost:52014/run/stats (gives only statistics: ticks, score, lives)
 
 TODO:
- + Python library that will export functions to work with POST API.
  + Client for LMCPU simul

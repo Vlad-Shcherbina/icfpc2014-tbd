@@ -24,7 +24,7 @@ var runstats_handle = function(req, res) {
 
 var run_handle_do = function(interests, req, res) {
   var handle_do = function(interests, post, res) {
-    if(!post.map || !post.lambda || !post.g1ai) {
+    if(!post.map || !post.lambda || !post.ghost_ais || post.ghost_ais.length === 0) {
       throw "Not enough keys"
     }
     try {
@@ -35,10 +35,11 @@ var run_handle_do = function(interests, req, res) {
           var result    = []
           document.getElementById('map').value = post.map
           document.getElementById('lambda').value = post.lambda
-          document.getElementById('g1ai').value = post.g1ai
-          if(post.g2ai) { document.getElementById('g2ai').value = post.g2ai; }
-          if(post.g3ai) { document.getElementById('g3ai').value = post.g3ai; }
-          if(post.g4ai) { document.getElementById('g4ai').value = post.g4ai; }
+          
+          document.getElementById('g1ai').value = post.ghost_ais[0]
+          if(post.ghost_ais[1]) { document.getElementById('g2ai').value = post.ghost_ais[1]; }
+          if(post.ghost_ais[2]) { document.getElementById('g3ai').value = post.ghost_ais[2]; }
+          if(post.ghost_ais[3]) { document.getElementById('g4ai').value = post.ghost_ais[3]; }
           load()
           if(document.getElementById('status').textContent !== "Program Loaded") {
             return document.getElementById('status').textContent
