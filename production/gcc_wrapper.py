@@ -1,10 +1,6 @@
 class GCCInterface(object):
-    def initialize(self, world_state, undocumented):
-        '''world_state must be an opaque handle constructed via marshall_* methods.
-        returns (ai_state, step_function)'''
-    
-    def step(self, ai_state, world_state):
-        '''returns ai_state, move. Move is an already decoded integer.'''
+    def call(self, address_or_closure, *args):
+        'Call a function or closure.'
 
     def marshall_int(self, i):
         'Return an opaque handle representing i'
@@ -21,12 +17,12 @@ class GCCWrapper:
     
     def initialize(self, world, undocumented):
         world_state = self.marshall_world_state(world)
-        self.ai_state, self.step_function = self.gcc.initialize(world_state, undocumented)
+        self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented)
             
     
     def step(self, world):
         world_state = self.marshall_world_state(world)
-        self.ai_state, move = self.gcc.step(self.ai_state, world_state)
+        self.ai_state, move = self.gcc.call(self.step_function, self.ai_state, world_state)
         return move
         
     

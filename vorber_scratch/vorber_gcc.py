@@ -33,8 +33,7 @@ class VorberGCC(GCCInterface):
         self.terminal_state = False
         self.state = 'empty'
         # this should go to "run", I guess?
-        self.ctrl_stack.append({'tag':'TAG_STOP'}) # to be able to stop with RTN without popping an empty stack
-
+ 
 
     def single_step(self):
         '''
@@ -66,12 +65,23 @@ class VorberGCC(GCCInterface):
     def marshall_cons(self, car, cdr):
         return {'tag': 'cons', 'value': (car, cdr)}
     
-    def initialize(self, world_state, undocumented):
-        '''world_state must be an opaque handle constructed via marshall_* methods.
-        returns (ai_state, step_function)'''
-    
-    def step(self, ai_state, world_state):
-        '''returns ai_state, move. Move is an already decoded integer.'''
+    def call(self, address_or_closure, *args):
+        '''Call a function.
+        
+        Put args on data stack, return the contents of data stack after the function returns
+        '''
+        # reset all stacks
+        # put args on the data stack
+        self.ctrl_stack.append({'tag':'TAG_STOP'})
+        if isinstance(address_or_closure, int):
+            self.reg_c = address_or_closure
+        else:
+            # it's a closure
+            'set self.reg_c and self.reg_e from the closure'
+        self.run()
+        'return everything on the data stack'
+        
+        
         
     #Following methods are intended for internal use only
         
