@@ -98,6 +98,7 @@ def main():
         lm_specs=[
             'py:lm_ai.Oscillating(frequency=5)',
             'py:lm_ai.NearestPill()',
+            'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[
             ['py:GhostAI_Shortest', 'ghc:fickle.ghc'],
