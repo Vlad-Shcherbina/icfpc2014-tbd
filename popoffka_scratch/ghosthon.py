@@ -142,7 +142,7 @@ def convert_tree(tree, aliases, labels, cmds_before=0):
                 else:
                     res.append((mnemonic, [cmds_before + len(res) + 2, a, b]))
                     body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
-                    res.append(('jeq', [cmds_before + len(res) + 1 + len(body_code), 0, 0]))
+                    res.append(('mov', ['pc', cmds_before + len(res) + 1 + len(body_code)]))
                     res.extend(body_code)
             else:
                 if ifnot:
@@ -152,7 +152,7 @@ def convert_tree(tree, aliases, labels, cmds_before=0):
                 res.append((mnemonic, [cmds_before + len(res) + 2 + len(else_code), a, b]))
                 res.extend(else_code)
                 body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 1)
-                res.append(('jeq', [cmds_before + len(res) + 1 + len(body_code), 0, 0]))
+                res.append(('mov', ['pc', cmds_before + len(res) + 1 + len(body_code)]))
                 res.extend(body_code)
         elif line.startswith('while'):
             # while / whilenot
@@ -177,14 +177,14 @@ def convert_tree(tree, aliases, labels, cmds_before=0):
                 back = len(res)
                 res.append((mnemonic, [cmds_before + len(res) + len(body_code) + 2, a, b]))
                 res.extend(body_code)
-                res.append(('jeq', [back, 0, 0]))
+                res.append(('mov', ['pc', back]))
             else:
                 body_code = convert_tree(body_tree, aliases, labels, cmds_before=cmds_before + len(res) + 2)
                 back = len(res)
                 res.append((mnemonic, [cmds_before + len(res) + 2, a, b]))
-                res.append(('jeq', [cmds_before + len(res) + len(body_code) + 2, 0, 0]))
+                res.append(('mov', ['pc', cmds_before + len(res) + len(body_code) + 2]))
                 res.extend(body_code)
-                res.append(('jeq', [back, 0, 0]))
+                res.append(('mov', ['pc', back]))
         elif line.startswith('alias '):
             # alias
             _, name, value = line.split()
@@ -196,7 +196,7 @@ def convert_tree(tree, aliases, labels, cmds_before=0):
         elif line.startswith('jmp '):
             # jmp
             _, address = line.split()
-            res.append(('jeq', [address, 0, 0]))
+            res.append(('mov', ['pc', address]))
             i += 1
         else:
             # some GHC mnemonic
