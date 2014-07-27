@@ -280,3 +280,6 @@ class GccMachine(GCCInterface):
             result += "  " + str(f.values) + "\n"
             f = f.parent
         return result
+
+    def last_call_ticks(self):
+        return self.ticks

@@ -40,6 +40,14 @@ th {
         <span class="power_pill">o</span>
     {% endfor %}
     <br>
+    {% if result.gcc_stats.init != -1 %}
+    <small>
+        GCC ticks:
+            init={{ result.gcc_stats.init }},
+            avg={{ result.gcc_stats.avg }},
+            total={{ result.gcc_stats.total }}
+    </small> <br>
+    {% endif %}
     <a href="{{ (
         'python visualizer.py --map={} --lm="{}" '.format(
             result.map, result.lm_spec) +

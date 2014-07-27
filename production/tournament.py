@@ -22,6 +22,7 @@ class Result(object):
         'fruits_eaten',
         'ghosts_eaten',
         'power_pills_eaten',
+        'gcc_stats',
     ]
     # For now pacman and ghost specs representation is not defined.
     # Let's assume they are json-able objects, strings maybe.
@@ -39,6 +40,7 @@ class Result(object):
             fruits_eaten=self.fruits_eaten,
             ghosts_eaten=self.ghosts_eaten,
             power_pills_eaten=self.power_pills_eaten,
+            gcc_stats=self.gcc_stats,
             )
 
     def baseline_score(self):
@@ -57,6 +59,7 @@ class Result(object):
         result = Result()
         for k, v in data.items():
             setattr(result, k, v)
+        result.gcc_stats = game.GccStats(*result.gcc_stats)
         return result
 
 
@@ -78,6 +81,7 @@ def play(result):
     result.fruits_eaten = map.fruits_eaten
     result.power_pills_eaten = map.power_pills_eaten
     result.ghosts_eaten = map.ghosts_eaten
+    result.gcc_stats = map.lman_vm_statistics()
     logger.info('score: {}, ticks: {}'.format(result.score, result.ticks))
     return result
 
