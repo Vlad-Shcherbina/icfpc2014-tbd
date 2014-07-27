@@ -1,4 +1,10 @@
+import logging
+
 import game
+
+
+logger = logging.getLogger(__name__)
+
 
 class GCCInterface(object):
     def call(self, address_or_closure, *args, **kwargs):
@@ -36,6 +42,7 @@ class GCCWrapper(object):
         self.total_step_ticks += ticks
         if ticks > self.max_step_ticks:
             self.max_step_ticks = ticks
+        logger.info('ai state: {}'.format(self.ai_state))
         return move
 
     def get_vm_statistics(self):
