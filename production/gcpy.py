@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser(description="Run a greatly castrated python scr
 parser.add_argument('-p', help='program to run', dest='program')
 parser.add_argument('-m', help='map to use', dest='map', default='default_map.txt')
 parser.add_argument('-a', help='program arguments', dest='args', nargs='+', type=int, default=[])
+parser.add_argument('--no-tco', help='disable TCO', dest='disable_tco', type=bool, default=False)
 #parser.add_argument('-r', help='program arguments', dest='run', type=bool, default=False)
 
 if __name__ == "__main__":
@@ -24,7 +25,7 @@ if __name__ == "__main__":
     python_ast = ast.parse(code)
     gcc_program = convert_python_to_gcc_module(python_ast)
     builder = GccTextBuilder()
-    gcc_program.emit(builder)
+    gcc_program.emit(builder, disable_tco=args.disable_tco)
     print(builder.text)
     machine = GccMachine(parse_gcc(builder.text))
     wrapper = GCCWrapper(machine)

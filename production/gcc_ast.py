@@ -76,10 +76,10 @@ class GccProgram(object):
             """))
         # no need for return, it will be added automatically
 
-    def emit(self, builder):
+    def emit(self, builder, **kwargs):
         for f in self.functions:
             builder.add_label("$func_{}$".format(f.name))
-            f.emit(builder)
+            f.emit(builder, **kwargs)
         builder.fixup_labels()
 
 
@@ -97,6 +97,7 @@ class GccEmitContext(object):
         self.function = function
         self.block_queue = []
         self.terminated = False
+        self.disable_tco = False
 
     def resolve_variable(self, name):
         args_frame_index = 0
@@ -129,6 +130,7 @@ class GccEmitContext(object):
                 builder.add_instruction(terminator)
 
     def is_tail(self, instruction):
+        if self.disable_tco: return False
         return self.is_block_tail(instruction, self.function.main_block)
 
     def is_block_tail(self, instruction, block):
@@ -153,8 +155,10 @@ class GccFunction():
     def add_instruction(self, insn):
         self.main_block.instructions.append(insn)
 
-    def emit(self, builder):
+    def emit(self, builder, **kwargs):
         context = GccEmitContext(self)
+        if 'disable_tco' in kwargs:
+            context.disable_tco = True
         self.collect_local_variables(self.main_block, context)
         if self.program:
             self.check_name_conflicts()
