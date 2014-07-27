@@ -40,6 +40,7 @@ class Result(object):
         with open(os.path.join('../data/maps', self.map).partition('#')[0]) as fin:
             data = fin.read().strip()
         x = game.PILL_SCORE * data.count('.') + 1.0
+        x += game.POWER_PILL_SCORE * data.count('o')
         # This score is imprecise, we don't care.
         assert x > 0
         return x
