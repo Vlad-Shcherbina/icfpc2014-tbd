@@ -11,8 +11,8 @@ def to_int32(x):
     return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
 
 def do_stuff():
-    for x in xrange(-20, 20):
-        print to_int32(2**32 + x)
+    from cmath import sin
+    print eval('sin(4)') 
     
 
 def main():

@@ -20,7 +20,7 @@ class GccClosure:
 
 
 def to_int32(x):
-    return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
+    return int((x & 0xFFFFFFFF) - ((x & 0x80000000) << 1))
 
 
 class GccMachine(GCCInterface):
@@ -58,7 +58,7 @@ class GccMachine(GCCInterface):
             return result
 
     def ldc(self, arg):
-        self.data_stack.append(arg)
+        self.data_stack.append(to_int32(arg))
 
     def add(self):
         self.data_stack.append(to_int32(self.pop_int() + self.pop_int()))
