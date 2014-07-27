@@ -51,3 +51,12 @@ class IntegrationTest(TestCase):
         self.world_state = self.wrapper.marshall_world_state(self.map)
         result = self.machine.call(0, self.world_state)
         self.assertEquals(3, result)
+
+    def test_has_ghost_at(self):
+        self.prepare("default_map.txt", "has_ghost_at.py")
+        result = self.machine.call(0, self.world_state, 11, 8)
+        self.assertEquals(1, result)
+        result = self.machine.call(0, self.world_state, 12, 10)
+        self.assertEquals(1, result)
+        result = self.machine.call(0, self.world_state, 2, 2)
+        self.assertEquals(0, result)
