@@ -62,6 +62,16 @@ Path to json file with results:
 
     <hr>
 
+    <h3>
+    {% if by_ghosts %}
+        <a href="{{ url_for('table') }}?results_filename={{results_filename}}">lm-centric view</a> | ghost-centric view
+    {% else %}
+        lm-centric view |
+        <a href="{{ url_for('table') }}?results_filename={{results_filename}}&by_ghosts=1">ghost-centric view</a>
+    {% endif %}
+    </h3>
+
+
     {% if by_ghosts %}
         <table>
         <tr>
@@ -72,7 +82,7 @@ Path to json file with results:
         </tr>
         <tr>
         <th>ghost team</th>
-        
+
         {% for lm in lms %}
             {% for ghosts in ghostss %}
               <th><ul>
