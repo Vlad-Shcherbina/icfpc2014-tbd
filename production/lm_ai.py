@@ -53,7 +53,7 @@ class NearestPill(game.LambdaManAI):
 
 class TunnelDigger(game.LambdaManAI):
     def __init__(self):
-        pass
+        self.rng = random.Random(42)
 
     def get_move(self, world):
         lm = world.lambdaman
@@ -76,7 +76,7 @@ class TunnelDigger(game.LambdaManAI):
             while i != towall:
                 ix, iy = after(i)
                 for g in world.ghosts:
-                    if (g.x, g.y) == (ix, iy):
+                    if (g.vitality == game.STANDARD) and (g.x, g.y) == (ix, iy):
                         if g.direction != d:
                             dist_ghost = min(dist_ghost, (i + 1) / 2)
                         else:
@@ -90,7 +90,13 @@ class TunnelDigger(game.LambdaManAI):
                 i = 1
                 while i != towall:
                     if i >= dist_ghost: break
-                    tp = world.at(*after(i))
+                    ix, iy = after(i)
+
+                    for g in world.ghosts:
+                        if (g.vitality == game.FRIGHT) and (g.x, g.y) == (ix, iy):
+                            score_here += 5
+
+                    tp = world.at(ix, iy)
                     if tp == game.PILL:
                         score_here += 1
                     elif tp == game.POWER_PILL:
@@ -102,6 +108,12 @@ class TunnelDigger(game.LambdaManAI):
             if score_here > best_score:
                 best_score, best_dir = score_here, d
 
-        return best_dir
+        if best_score > 0:
+            return best_dir
+
+        if world.at(lm.x + game.DELTA_X[lm.direction], lm.y + game.DELTA_Y[lm.direction]) != game.WALL:
+            return lm.direction
+        return self.rng.choice(game.DIRECTIONS)
+
 
 
