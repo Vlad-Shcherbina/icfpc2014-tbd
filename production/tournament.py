@@ -66,7 +66,7 @@ def play(result):
     while not map.game_over():
         map.step()
 
-    result.score = map.lambdaman.score
+    result.score = map.get_final_score()
     result.ticks = map.current_tick
     logger.info('score: {}, ticks: {}'.format(result.score, result.ticks))
     return result
@@ -116,27 +116,29 @@ def main():
     logger.setLevel(logging.INFO)
     results = play_tournament(
         # maps=[
+        #     'map_21_9_10_3_0.7.txt#2'
+        #      'map_big_noghost.txt'
         #     'default_map.txt',
         #     'gen/hz.txt',
         #     '../../twigil_scratch/map_91_91_100_10.txt',
-        # ],
+        #],
         maps=all_rotations(all_maps(max_size=1500)),
         lm_specs=[
             #'py:lm_ai.Oscillating(frequency=5)',
             #'py:lm_ai.NearestPill()',
-            'gcc_file:YoleGCC:../data/lms/right.gcc',
+            #'gcc_file:YoleGCC:../data/lms/right.gcc',
             'py:lm_ai.NearestPill(straight=True)',
             'py:lm_ai.TunnelDigger()',
             'py:lm_wave.Wavy(50)',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[
-            #['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
+            ['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
             ['py:GhostAI_Shortest'],
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
             ['py:GhostAI_Red'],
             ['ghosthon:../data/ghosts/red.ghy'],
-            #['ghc:red.ghc'],
+            ['ghc:red.ghc'],
             ['py:Hunter'],
         ],
         parallel=True)

@@ -432,7 +432,11 @@ class Map:
         if self.current_tick >= 127 * self.width() * self.height() * 16:
             return True
         return False
-
+    def get_final_score(self):
+        score_mult = 1
+        if self.pills_remaining == 0:
+            score_mult += self.lambdaman.lives
+        return self.lambdaman.score*score_mult
     def remaining_power_pill_ticks(self):
         if not self.fright_end:
             return 0
