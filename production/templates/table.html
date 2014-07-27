@@ -10,6 +10,19 @@ th {
 .best {
     background-color: #dfd;
 }
+
+.fruit {
+    font-weight: bold;
+    color: red;
+}
+.ghost {
+    font-weight: bold;
+    color: #060;
+}
+.power_pill {
+    font-weight: bold;
+    color: #00B;
+}
 </style>
 
 {% macro render_result(result) -%}
@@ -17,6 +30,16 @@ th {
     <b>{{ '%0.3f' | format(result.score / result.baseline_score()) }}</b>
     ({{ result.score }}) <br>
     {{ result.ticks }} ticks <br>
+    {% for _ in range(result.fruits_eaten) %}
+        <span class="fruit">%</span>
+    {% endfor %}
+    {% for _ in range(result.ghosts_eaten) %}
+        <span class="ghost">g</span>
+    {% endfor %}
+    {% for _ in range(result.power_pills_eaten) %}
+        <span class="power_pill">o</span>
+    {% endfor %}
+    <br>
     <a href="{{ (
         'python visualizer.py --map={} --lm="{}" '.format(
             result.map, result.lm_spec) +

@@ -185,9 +185,11 @@ class LambdaMan(Actor):
             self.eat(PILL_SCORE)
         elif c == POWER_PILL:
             self.eat(POWER_PILL_SCORE)
+            self.map.power_pills_eaten += 1
             self.map.frighten_ghosts()
         elif c == FRUIT:
             self.eat(self.map.fruit_score())
+            self.map.fruits_eaten += 1
         else:
             self.speed = LAMBDAMAN_SPEED
 
@@ -280,7 +282,7 @@ class FruitSpawnpoint(Actor):
         self.state += 1
 
 
-class Map:
+class Map(object):
     def __init__(self, lines):
         self.ghosts = []
         self.lambdaman = None
@@ -289,6 +291,8 @@ class Map:
         self.move_queue = []
         self.pills_remaining = 0
         self.ghosts_eaten = 0
+        self.fruits_eaten = 0
+        self.power_pills_eaten = 0
         self.fright_end = None
         for y, line in enumerate(lines):
             if y == 0:

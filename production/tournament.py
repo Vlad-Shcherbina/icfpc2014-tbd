@@ -19,6 +19,9 @@ class Result(object):
         'ghost_specs',  # list
         'score',
         'ticks',
+        'fruits_eaten',
+        'ghosts_eaten',
+        'power_pills_eaten',
     ]
     # For now pacman and ghost specs representation is not defined.
     # Let's assume they are json-able objects, strings maybe.
@@ -32,7 +35,11 @@ class Result(object):
             lm_spec=self.lm_spec,
             ghost_specs=self.ghost_specs,
             score=self.score,
-            ticks=self.ticks)
+            ticks=self.ticks,
+            fruits_eaten=self.fruits_eaten,
+            ghosts_eaten=self.ghosts_eaten,
+            power_pills_eaten=self.power_pills_eaten,
+            )
 
     def baseline_score(self):
         """Just some number to scale actual score against."""
@@ -68,6 +75,9 @@ def play(result):
 
     result.score = map.get_final_score()
     result.ticks = map.current_tick
+    result.fruits_eaten = map.fruits_eaten
+    result.power_pills_eaten = map.power_pills_eaten
+    result.ghosts_eaten = map.ghosts_eaten
     logger.info('score: {}, ticks: {}'.format(result.score, result.ticks))
     return result
 

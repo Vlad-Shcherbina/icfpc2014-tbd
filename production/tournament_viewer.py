@@ -27,8 +27,17 @@ def render_aggregate_results(results):
     score = stats.Distribution()
     for result in results:
         score.add_value(result.score / result.baseline_score())
+
+    fruits_eaten = sum(result.fruits_eaten for result in results)
+    ghosts_eaten = sum(result.ghosts_eaten for result in results)
+    power_pills_eaten = sum(result.power_pills_eaten for result in results)
     #return '{} results'.format(len(results))
-    return flask.Markup('<b>{}</b>'.format(score.to_html()))
+    return flask.Markup("""
+        <big><b>{}</b><br></big>
+        <span class="fruit">{} %</span>;
+        <span class="ghost">{} g</span>;
+        <span class="power_pill">{} o</span>
+        """.format(score.to_html(), fruits_eaten, ghosts_eaten, power_pills_eaten))
     #assert isinstance(s, basestring), type(s)
     #return 'data:{};base64,{}'.format(mime, base64.b64encode(s))
 
