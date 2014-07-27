@@ -37,7 +37,7 @@ class Result(object):
     def baseline_score(self):
         """Just some number to scale actual score against."""
         # TODO: cache
-        with open(os.path.join('../data/maps', self.map)) as fin:
+        with open(os.path.join('../data/maps', self.map).partition('#')[0]) as fin:
             data = fin.read().strip()
         x = game.PILL_SCORE * data.count('.') + 1.0
         # This score is imprecise, we don't care.
@@ -107,6 +107,8 @@ def all_maps(max_size=1000000):
             maps.append(os.path.join(rel_dir, file))
     return maps
 
+def all_rotations(maps):
+    return ['{}#{}'.format(m, rot) for m in maps for rot in range(4)]
 
 def main():
     logging.basicConfig(level=logging.WARNING)
@@ -117,21 +119,22 @@ def main():
         #     'gen/hz.txt',
         #     '../../twigil_scratch/map_91_91_100_10.txt',
         # ],
-        maps=all_maps(max_size=1500),
+        maps=all_rotations(all_maps(max_size=1500)),
         lm_specs=[
             #'py:lm_ai.Oscillating(frequency=5)',
-            'py:lm_ai.NearestPill()',
+            #'py:lm_ai.NearestPill()',
             'py:lm_ai.NearestPill(straight=True)',
             'gcc_file:YoleGCC:../data/lms/right.gcc',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[
-            ['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
+            #['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
             ['py:GhostAI_Shortest'],
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
+            ['py:GhostAI_Red'],
             ['py:Hunter'],
         ],
-        parallel=False)
+        parallel=True)
 
     save_results(results, '../data/some_results.json')
 
