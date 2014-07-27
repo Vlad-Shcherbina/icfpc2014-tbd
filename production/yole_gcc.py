@@ -24,7 +24,7 @@ def to_int32(x):
 
 
 class GccMachine(GCCInterface):
-    def __init__(self, instructions=None):
+    def __init__(self, instructions=None, source_map=None):
         self.data_stack = []
         self.current_frame = None
         self.instructions = []
@@ -33,6 +33,7 @@ class GccMachine(GCCInterface):
         if instructions:
             for insn in instructions:
                 self.add_instruction(insn.op.lower(), insn.args)
+        self.source_map = source_map
 
     def marshall_int(self, i):
         return to_int32(i)
@@ -183,7 +184,8 @@ class GccMachine(GCCInterface):
     def pop_int(self):
         result = self.data_stack.pop()
         if type(result) != int:
-            raise GccException("TAG_MISMATCH")
+            raise GccException("TAG_MISMATCH: Expected int, found " +
+                               str(result))
         return result
 
     def pop_cons(self):
@@ -196,7 +198,8 @@ class GccMachine(GCCInterface):
     def pop_closure(self):
         closure = self.data_stack.pop()
         if not isinstance(closure, GccClosure):
-            raise GccException("TAG_MISMATCH")
+            raise GccException("TAG_MISMATCH: Expected closure, found " +
+                               str(closure))
         return closure
 
     def add_instruction(self, name, args):
@@ -220,8 +223,12 @@ class GccMachine(GCCInterface):
             try:
                 next_ip = self.instructions[self.ip]()
             except GccException, e:
-                raise GccException("Error at IP {0}: {1}".format(
-                    self.ip, e.message))
+                if self.source_map:
+                    location = self.source_map.details_for_ip(self.ip)
+                else:
+                    location = self.ip
+                raise GccException("Error at {0}: {1}".format(
+                    location, e.message))
 
             if self.done:
                 break

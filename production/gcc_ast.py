@@ -51,6 +51,21 @@ class GccTextBuilder(object):
 
         self.lines = map(fixup_labels_in_line, self.lines)
 
+    def details_for_ip(self, ip):
+        previous_label_ip = -1
+        label_name = None
+        for name, offset in self.labels.iteritems():
+            if name.startswith("$label"):
+                continue
+            if ip > offset > previous_label_ip:
+                label_name = name
+                previous_label_ip = offset
+        if label_name:
+            return "IP {0} (at label {1}+{2})".format(ip, label_name,
+                                                      ip-previous_label_ip)
+        return "IP {0}".format(label_name)
+
+
 
 class GccProgram(object):
     def __init__(self):

@@ -18,7 +18,7 @@ class IntegrationTest(TestCase):
         gcc_program = convert_python_to_gcc_module(python_ast)
         builder = GccTextBuilder()
         gcc_program.emit(builder)
-        self.machine = GccMachine(parse_gcc(builder.text))
+        self.machine = GccMachine(parse_gcc(builder.text), builder)
         self.wrapper = GCCWrapper(self.machine)
         self.map = load_map(map_file)
         self.world_state = self.wrapper.marshall_world_state(self.map)
@@ -41,3 +41,13 @@ class IntegrationTest(TestCase):
         self.prepare("default_map.txt", "list_length.py")
         result = self.machine.call(0, self.world_state[0])
         self.assertEquals(22, result)
+
+    def test_best_pill_direction(self):
+        self.prepare("default_map.txt", "best_pill_direction.py")
+        result = self.machine.call(0, self.world_state)
+        self.assertEquals(1, result)
+        self.map.lambdaman.x = 20
+        self.map.lambdaman.y = 16
+        self.world_state = self.wrapper.marshall_world_state(self.map)
+        result = self.machine.call(0, self.world_state)
+        self.assertEquals(3, result)
