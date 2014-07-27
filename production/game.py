@@ -5,7 +5,6 @@ import collections
 from ghc import GHC
 import ghost_ai
 from asm_parser import parse_gcc
-from gcc_wrapper import GCCWrapper
 import ghosthon
 
 
@@ -75,6 +74,7 @@ def ghost_ai_from_spec(ghost_spec):
 
 def lambda_man_ai_from_spec(lm_spec):
     # import everything here so that modules could initialize properly
+    from gcc_wrapper import GCCWrapper
     from vorber_gcc import VorberGCC
     from yole_gcc import GccMachine as YoleGCC
     import lm_ai
