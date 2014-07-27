@@ -184,3 +184,27 @@ class Hunter(BasePyAI):
                 return best_trail[1]
             else:
                 return dir_to(self.ghost, lm)
+
+
+class Splitters(BasePyAI):
+    '''Uniformly splits at each junction'''
+
+    def get_move(self):
+        directions = []
+        packman = []
+        # *2 and slice is here to rotate based on the direction
+        for delta_x, delta_y, direction in (zip(game.DELTA_X, game.DELTA_Y, game.DIRECTIONS)*2)[self.ghost.direction:self.ghost.direction+4]:
+            if direction == game.OPPOSITE_DIRECTIONS[self.ghost.direction]:
+                continue
+            content = self.map.at(self.ghost.x + delta_x, self.ghost.y + delta_y)
+            if content == '\\':
+                packman = [direction]
+            elif content != '#':
+                directions.append(direction)
+        if len(directions) + len(packman) < 2:
+            # We have no choice
+            return self.ghost.direction
+        if packman and self.ghost.vitality != game.FRIGHT:
+            # Get him!
+            return packman[0]
+        return directions[self.ghost.index % len(directions)]
