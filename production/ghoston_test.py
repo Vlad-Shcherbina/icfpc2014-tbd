@@ -29,4 +29,5 @@ def test_run():
         ],
         ghost_team_specs=[
             ['ghosthon:../data/hello.ghy'],
+            ['ghosthon:../data/ghosts/red.ghy'],
         ])

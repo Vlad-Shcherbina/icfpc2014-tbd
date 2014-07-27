@@ -133,6 +133,8 @@ def main():
             ['py:GhostAI_Shortest'],
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
             ['py:GhostAI_Red'],
+            ['ghosthon:../data/ghosts/red.ghy'],
+            #['ghc:red.ghc'],
             ['py:Hunter'],
         ],
         parallel=True)

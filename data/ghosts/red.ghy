@@ -1,0 +1,91 @@
+; python ghosthon.py <../data/ghosts/red.ghy >../data/ghosts/red.ghc
+
+
+alias xx [227]
+alias yy [228]
+
+alias up [220]
+alias down [221]
+alias left [210]
+alias right [211]
+
+alias hor [200]
+alias ver [201]
+alias hordir [203]
+alias verdir [204]
+
+alias vitality [240]
+alias direction [241]
+alias opposite [242]
+
+
+
+!myindex
+!ghostpos
+mov xx, a
+mov yy, b
+
+!lambdaman
+
+if xx < a
+    mov right, a
+    sub right, xx
+    mov left, 0
+else
+    mov left, xx
+    sub left, a
+    mov right, 0
+
+if yy < b
+    mov down, b
+    sub down, yy
+    mov up, 0
+else
+    mov up, yy
+    sub up, b
+    mov down, 0
+
+
+; flip if frightened
+!myindex
+!ghoststats
+mov vitality, a
+mov direction, b
+if vitality = 1
+    mov d, left
+    mov left, right
+    mov right, d
+    mov d, up
+    mov up, down
+    mov down, d
+
+
+if left > right
+    mov hordir, 3
+    mov hor, left
+else
+    mov hordir, 1
+    mov hor, right
+
+if up > down
+    mov verdir, 0
+    mov ver, up
+else
+    mov verdir, 2
+    mov ver, down
+
+if hor > ver
+    mov a, hordir
+else
+    mov a, verdir
+
+
+; If algorithm suggests to turn around, pick some other direction instead.
+mov opposite, direction
+xor opposite, 2
+if opposite = a
+    add a, 1
+    if a = 4
+        mov a, 0
+
+!report
