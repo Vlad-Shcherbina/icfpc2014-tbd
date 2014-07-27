@@ -50,3 +50,58 @@ class NearestPill(game.LambdaManAI):
                 return self.rng.choice(game.DIRECTIONS)
         else:
             return self.rng.choice(game.DIRECTIONS)
+
+class TunnelDigger(game.LambdaManAI):
+    def __init__(self):
+        pass
+
+    def get_move(self, world):
+        lm = world.lambdaman
+
+        best_score = -1
+        best_dir = -1
+        for d in game.DIRECTIONS:
+            dx, dy = game.DELTA_X[d], game.DELTA_Y[d]
+
+            def after(s):
+                return (lm.x + s * dx, lm.y + s * dy)
+
+            # find distance to wall
+            towall = 1
+            while world.at(*after(towall)) != game.WALL: towall += 1
+
+            # find distance to closest ghost
+            i = 1
+            dist_ghost = 1024
+            while i != towall:
+                ix, iy = after(i)
+                for g in world.ghosts:
+                    if (g.x, g.y) == (ix, iy):
+                        if g.direction != d:
+                            dist_ghost = min(dist_ghost, (i + 1) / 2)
+                        else:
+                            dist_ghost = min(dist_ghost, (towall + 1) / 2)
+                i += 1
+
+            if dist_ghost <= 2:
+                score_here = -1
+            else:
+                score_here = 0
+                i = 1
+                while i != towall:
+                    if i >= dist_ghost: break
+                    tp = world.at(*after(i))
+                    if tp == game.PILL:
+                        score_here += 1
+                    elif tp == game.POWER_PILL:
+                        score_here += 10
+                    elif tp == game.FRUIT:
+                        score_here += 3
+                    i += 1
+
+            if score_here > best_score:
+                best_score, best_dir = score_here, d
+
+        return best_dir
+
+
