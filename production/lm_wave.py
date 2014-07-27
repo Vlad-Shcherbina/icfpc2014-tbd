@@ -42,6 +42,9 @@ class Wavy(game.LambdaManAI):
         front = list(wd_valid_neighbours)
         step = 0
         ghost_positions = map(lambda g: (g.x, g.y), world_map.ghosts)
+        ghost_directions = map(lambda g: g.direction, world_map.ghosts)
+        ghosts_with_directions = zip(ghost_directions, ghost_positions)
+        next_ghost_positions = map(lambda gdp: self.apply_direction(gdp[0],gdp[1][0],gdp[1][1]), ghosts_with_directions)
         while step < max_steps:
             step += 1
             #print step
@@ -51,7 +54,7 @@ class Wavy(game.LambdaManAI):
             while len(front)>0:
                 (dir, (x,y)) = front.pop()
                 #print 'analyzing ', (dir, (x,y))
-                if (x,y) in ghost_positions:
+                if (x,y) in ghost_positions or (x,y) in next_ghost_positions:
                     if world_map.fright_end > (step-1)*world_map.lambdaman.speed:
                         return dir
                     else:
