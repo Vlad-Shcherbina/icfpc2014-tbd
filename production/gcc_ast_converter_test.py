@@ -55,7 +55,7 @@ class GccASTConverterTest(TestCase):
 
     def test_module(self):
         x = ast.parse("""
-def main(world, ghosts): return 42, step\n
+def main(world, ghosts): return 42, step
 def step(state, world): return state+1, 2""")
         tree = convert_python_to_gcc_module(x)
         self.assertIsInstance(tree, GccProgram)
@@ -74,6 +74,8 @@ def step(state, world): return state+1, 2""")
     CONS
     RTN
 """, builder.text)
+        self.assertEquals("IP 6 (at label $func_step$+2) (at source 3:31)",
+                          builder.details_for_ip(6))
 
     def test_condition(self):
         x = ast.parse("""
