@@ -18,6 +18,7 @@ class IntegrationTest(TestCase):
         gcc_program = convert_python_to_gcc_module(python_ast)
         builder = GccTextBuilder()
         gcc_program.emit(builder)
+        print builder.text
         self.machine = GccMachine(parse_gcc(builder.text), builder)
         self.wrapper = GCCWrapper(self.machine)
         self.map = load_map(map_file)
@@ -67,3 +68,9 @@ class IntegrationTest(TestCase):
         self.assertEquals(1, result)
         result = self.machine.call(0, self.world_state, 6, 1)
         self.assertEquals(0, result)
+
+    def test_tco_bug(self):
+        self.prepare("default_map.txt", "tco_bug.py")
+        state, step = self.machine.call(0, self.world_state, 0)
+        state, dir = self.machine.call(step, state, self.world_state)
+        self.assertEquals(3, dir)
