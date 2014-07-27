@@ -11,7 +11,7 @@ backports before we implement car/cdr in castrated python:
 
 
 Remember that sometimes when we use overflows from castrated world, python's long arithmetic
-will yield different behaviour, hence we need to do mod 2^32 to fix that:
+will yield different behaviour, hence we need to do mod 2^32 to fix that if we don't care about signedness:
 
 ```
 < import math
@@ -19,6 +19,13 @@ will yield different behaviour, hence we need to do mod 2^32 to fix that:
 <   return (seed * 1664525 + 1013904223) % int(math.pow(2, 32))
 ---
 >   return (seed * 1664525 + 1013904223)
+```
+
+or this for exactly the same signed values:
+
+```
+def to_int32(x):
+    return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
 ```
 
 ===
