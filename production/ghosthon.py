@@ -235,8 +235,9 @@ def compile_into_ghc(code):
     ghc_code = apply_labels(ghc_code, labels)
     return ghc_code
 
-def main():
-    code = sys.stdin.read().splitlines()
+
+def full_compile(ghoston_code):
+    code = ghoston_code.splitlines()
     ghc = compile_into_ghc(code)
     ghc = ['{} {}'.format(x, ','.join(map(str, y))) for (x, y) in ghc]
 
@@ -246,7 +247,11 @@ def main():
     for i, line in enumerate(ghc):
         res.append('{} {}; {}'.format(line, ' ' * (offset - len(line)), str(i).zfill(3)))
 
-    print '\n'.join(res)
+    return '\n'.join(res).upper()
+
+
+def main():
+    print full_compile(sys.stdin.read())
 
 
 if __name__ == '__main__':

@@ -1,0 +1,16 @@
+mov a, 1
+!report
+
+
+!myindex
+!ghoststats
+alias gdir [0]
+alias gvit [6]
+mov gdir, b
+mov gvit, a
+
+if a = b
+    mov c, 1
+else
+    mov d, 0
+!debug

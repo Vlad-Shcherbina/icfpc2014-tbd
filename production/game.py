@@ -5,6 +5,8 @@ from ghc import GHC
 import ghost_ai
 from asm_parser import parse_gcc
 from gcc_wrapper import GCCWrapper
+import ghosthon
+
 
 UP = 0
 RIGHT = 1
@@ -58,6 +60,10 @@ def ghost_ai_from_spec(ghost_spec):
         with open(os.path.join('../data/ghosts', details)) as fin:
             code = fin.read()
         return GhostAI(code)
+    elif type == 'ghosthon':
+        with open(details) as fin:
+            code = fin.read()
+        return GhostAI(ghosthon.full_compile(code))
     elif type == 'py':
         return getattr(ghost_ai, details)()
     elif type == "empty":
