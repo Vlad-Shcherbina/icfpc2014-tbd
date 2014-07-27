@@ -1,5 +1,6 @@
 import logging
 import os
+import collections
 
 from ghc import GHC
 import ghost_ai
@@ -124,6 +125,9 @@ class EmptyGhostAI:
         return DOWN
 
 
+GccStats = collections.namedtuple('GccStats', 'init avg total')
+
+
 class LambdaManAI(object):
     def get_move(self, map):
         raise NotImplementedError()
@@ -132,7 +136,7 @@ class LambdaManAI(object):
         pass
 
     def get_vm_statistics(self):
-        return None
+        return GccStats(-1, -1, -1)
 
 interactive_lambda_man_direction = None
 
