@@ -130,6 +130,7 @@ def main():
             'py:lm_ai.NearestPill(straight=True)',
             'py:lm_ai.TunnelDigger()',
             'py:lm_wave.Wavy(50)',
+            'py:lm_ff.ForceField()',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[
@@ -138,7 +139,7 @@ def main():
             ['py:GhostAI_Red', 'py:GhostAI_Pink'],
             ['py:GhostAI_Red'],
             ['ghosthon:../data/ghosts/red.ghy'],
-            ['ghc:red.ghc'],
+            #['ghc:red.ghc'],
             ['py:Hunter'],
         ],
         parallel=True)

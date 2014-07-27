@@ -78,8 +78,9 @@ def lambda_man_ai_from_spec(lm_spec):
     from yole_gcc import GccMachine as YoleGCC
     import lm_ai
     import lm_wave
+    import lm_ff
     import gcpy
-    
+
     type, details = lm_spec.split(':', 1)
     if type == 'interactive':
         assert details == ''
