@@ -11,9 +11,10 @@ import pprint
 
 import argparse
 parser = argparse.ArgumentParser(description="Run a greatly castrated python script")
-parser.add_argument('-p', help='Program to run', dest='program')
-parser.add_argument('-m', help='Map to use', dest='map', default='default_map.txt')
-parser.add_argument('-a', help='Program arguments', dest='args', nargs='+', type=int, default=[])
+parser.add_argument('-p', help='program to run', dest='program')
+parser.add_argument('-m', help='map to use', dest='map', default='default_map.txt')
+parser.add_argument('-a', help='program arguments', dest='args', nargs='+', type=int, default=[])
+#parser.add_argument('-r', help='program arguments', dest='run', type=bool, default=False)
 
 if __name__ == "__main__":
   args = parser.parse_args()
