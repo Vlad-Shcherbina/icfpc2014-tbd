@@ -87,7 +87,7 @@ Path to json file with results:
             {% for ghosts in ghostss %}
               <th><ul>
               {% for ghost in ghosts %}
-                <li>{{ ghost }}</li>
+                <li>{{ ghost.replace(":", ": ") }}</li>
               {% endfor %}
               </ul></th>
             {% endfor %}
