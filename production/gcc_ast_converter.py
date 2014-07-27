@@ -32,9 +32,13 @@ def convert_python_to_gcc_statement(stmt):
         test = convert_python_to_gcc_ast(stmt.test)
         cond = GccConditionalBlock(test)
         for child in stmt.body:
+            if isinstance(child, Pass):
+                continue
             cond.true_branch.instructions.append(
                 convert_python_to_gcc_statement(child))
         for child in stmt.orelse:
+            if isinstance(child, Pass):
+                continue
             cond.false_branch.instructions.append(
                 convert_python_to_gcc_statement(child))
         result = cond
