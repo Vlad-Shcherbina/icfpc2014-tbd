@@ -27,12 +27,19 @@ class NearestPill(game.LambdaManAI):
 
     def get_move(self, map):
         lm = map.lambdaman
+        best_score = -1
+        best_dir = -1
         for d in game.DIRECTIONS:
             dx = game.DELTA_X[d]
             dy = game.DELTA_Y[d]
             target = map.at(lm.x + dx, lm.y + dy)
-            if target in [game.PILL, game.POWER_PILL, game.FRUIT]:
-                return d
+            target_score = {game.PILL: 1, game.POWER_PILL: 2, game.FRUIT: 2}.get(target, -1)
+            if best_score < target_score:
+                best_score = target_score
+                best_dir = d
+                pass
+        if best_score > 0:
+            return best_dir
 
         if self.straight:
             nx = map.lambdaman.x + game.DELTA_X[map.lambdaman.direction]
