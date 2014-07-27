@@ -127,6 +127,7 @@ def main():
             'gcc_file:YoleGCC:../data/lms/right.gcc',
             'py:lm_ai.NearestPill(straight=True)',
             'py:lm_ai.TunnelDigger()',
+            'py:lm_wave.Wavy(50)',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[

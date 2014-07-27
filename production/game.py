@@ -121,7 +121,7 @@ class LambdaManAI(object):
 from vorber_gcc import VorberGCC
 from yole_gcc import GccMachine as YoleGCC
 import lm_ai
-
+import lm_wave
 interactive_lambda_man_direction = None
 
 def set_interactive_lambda_man_direction(d):
