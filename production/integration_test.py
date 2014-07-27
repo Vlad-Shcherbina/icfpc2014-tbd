@@ -22,7 +22,7 @@ class IntegrationTest(TestCase):
         self.machine = GccMachine(parse_gcc(builder.text), builder)
         self.wrapper = GCCWrapper(self.machine)
         self.map = load_map(map_file)
-        self.world_state = self.wrapper.marshall_world_state(self.map)
+        self.world_state = self.wrapper.marshal_world_state(self.map)
 
     def test_get_cell_at(self):
         self.prepare("default_map.txt", "get_cell_at.py")
@@ -49,7 +49,7 @@ class IntegrationTest(TestCase):
         self.assertEquals(1, result)
         self.map.lambdaman.x = 20
         self.map.lambdaman.y = 16
-        self.world_state = self.wrapper.marshall_world_state(self.map)
+        self.world_state = self.wrapper.marshal_world_state(self.map)
         result = self.machine.call(0, self.world_state)
         self.assertEquals(3, result)
 

@@ -111,7 +111,7 @@ def parse_gcc(text, source='<unnamed code>', strict=False):
                 if arg >= len(parsed):
                     ParsingException.from_inst(inst, 'Argument {} is invalid, address too large: {} > {}'.format(i + 1, arg, len(parsed)))
             args.append(arg)
-        res.append(inst._replace(args=args) if len(args) else inst)
+        res.append(inst._replace(op=intern(inst.op), args=args) if len(args) else inst)
     return res
 
 

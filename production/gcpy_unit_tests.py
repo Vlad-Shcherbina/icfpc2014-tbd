@@ -3,7 +3,7 @@ import unittest
 import ast
 import pprint
 
-from gcc_utils import *
+from gcc_utils import lto_to_cons, cons_to_list, cons_to_tuple, deep_unmarshal
 from gcc_ast_converter import convert_python_to_gcc_module
 from gcc_ast import GccTextBuilder
 from asm_parser import parse_gcc
@@ -30,7 +30,7 @@ def call(script, func_name, *args):
 
     machine = GccMachine(parse_gcc(builder.text), builder)
 
-    result = machine.call(addr, *args)
+    result = deep_unmarshal(machine, machine.call(addr, *args))
 
     print '** got result'
     pprint.pprint(result)
@@ -40,26 +40,26 @@ def call(script, func_name, *args):
 
 def list_length_test():
     for script in 'list_length.py', 'ff.py':
-        assert call(script, 'list_length', list_to_gcc([])) == 0
-        assert call(script, 'list_length', list_to_gcc(range(5))) == 5
+        assert call(script, 'list_length', lto_to_cons([])) == 0
+        assert call(script, 'list_length', lto_to_cons(range(5))) == 5
 
 
 def list_append_test():
     assert (
-        list_from_gcc(call('ff.py', 'list_append', list_to_gcc([]), 42))
+        cons_to_list(call('ff.py', 'list_append', lto_to_cons([]), 42))
         == [42])
 
     assert (
-        list_from_gcc(call('ff.py', 'list_append', list_to_gcc(range(3)), 42))
+        cons_to_list(call('ff.py', 'list_append', lto_to_cons(range(3)), 42))
         == [0, 1, 2, 42])
 
 
 def list_update_test():
     assert (
-        list_from_gcc(call('ff.py',
-            'list_update', list_to_gcc([42]), 0, 43))
+        cons_to_list(call('ff.py',
+            'list_update', lto_to_cons([42]), 0, 43))
         == [43])
     assert (
-        list_from_gcc(call('ff.py',
-            'list_update', list_to_gcc(range(6)), 3, 42))
+        cons_to_list(call('ff.py',
+            'list_update', lto_to_cons(range(6)), 3, 42))
         == [0, 1, 2, 42, 4, 5])
