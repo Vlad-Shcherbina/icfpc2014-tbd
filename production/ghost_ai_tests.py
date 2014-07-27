@@ -24,3 +24,17 @@ def test_hunter():
         ghost_team_specs=[
             ['py:Hunter'],
         ])
+
+def test_splitters():
+    tournament.play_tournament(
+        maps=[
+            'default_map.txt',
+        ],
+        lm_specs=[
+            'py:lm_ai.NearestPill()',
+            'py:lm_ai.NearestPill(straight=True)',
+        ],
+        ghost_team_specs=[
+            ['py:Splitter'],
+            ['py:RedSplitter']
+        ])

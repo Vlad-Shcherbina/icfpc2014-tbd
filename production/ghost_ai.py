@@ -199,34 +199,48 @@ class Splitter(BasePyAI):
             content = self.map.at(self.ghost.x + delta_x, self.ghost.y + delta_y)
             if self.map.lambdaman.x == self.ghost.x + delta_x and self.map.lambdaman.y == self.ghost.y + delta_y:
                 packman = [direction]
-            elif content != '#':
+            elif content != 0:
                 directions.append(direction)
         return packman, directions
 
-    def get_move(self):
+    def get_move(self, magic=None):
+        if not magic:
+            magic = self.index
         packman, directions = self.look_around()
-        # rotate directions list based on current direction
-        magic = self.ghost.direction % len(directions)
-        directions = (directions * 2)[magic:magic + len(directions)]
         if len(directions) + len(packman) < 2:
             # We have no choice
             return self.ghost.direction
         elif packman and self.ghost.vitality != game.FRIGHT:
             # Get him!
             return packman[0]
-        return directions[self.index % len(directions)]
+        # rotate directions list based on current direction
+        shift = self.ghost.direction % len(directions)
+        directions = (directions * 2)[shift:shift + len(directions)]
+        logger.info(','.join([str(i) for i in directions]))
+        return directions[magic % len(directions)]
 
 
 class RedSplitter(BasePyAI):
     def initialize(self, map, index):
         super(RedSplitter, self).initialize(map, index)
-        self.red = GhostAI_Red()
+        #self.red = GhostAI_Red()
+        with open('../data/ghosts/red.ghc') as fin:
+            code = fin.read()
+        self.red = game.GhostAI(code)
         self.splitter = Splitter()
         self.red.initialize(map, index)
         self.splitter.initialize(map, index)
 
     def get_move(self):
+        magic = 0
+        splitter = 0
         for ghost in self.map.ghosts:
-            if ghost.index != self.index and abs(ghost.x - self.ghost.x) + abs(ghost.y - self.ghost.y) < 2:
-                return self.splitter.get_move()
-        return self.red.get_move()
+            if ghost.index == self.index:
+                magic = splitter
+            elif abs(ghost.x - self.ghost.x) + abs(ghost.y - self.ghost.y) < 2:
+                splitter += 1
+        if splitter:
+            logger.info("Ghost %d in splitter mode with magic %d" % (self.index, magic))
+            return self.splitter.get_move(magic)
+        else:
+            return self.red.get_move()
