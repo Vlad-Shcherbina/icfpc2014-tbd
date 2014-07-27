@@ -18,12 +18,14 @@ class GccTest(TestCase):
     def test_st(self):
         self.gcc_machine.ldc(3)
         self.gcc_machine.dum(1)
+        self.gcc_machine.current_frame.dummy = False
         self.gcc_machine.st(0, 0)
         self.assertEquals(3, self.gcc_machine.current_frame.values[0])
 
     def test_ld(self):
         self.gcc_machine.ldc(3)
         self.gcc_machine.dum(1)
+        self.gcc_machine.current_frame.dummy = False
         self.gcc_machine.st(0, 0)
         self.gcc_machine.ld(0, 0)
         self.assertEquals(self.gcc_machine.data_stack, [3])
