@@ -127,8 +127,12 @@ class EmptyGhostAI:
 class LambdaManAI(object):
     def get_move(self, map):
         raise NotImplementedError()
+
     def initialize(self, map, undocumented):
         pass
+
+    def get_vm_statistics(self):
+        return None
 
 interactive_lambda_man_direction = None
 
@@ -452,3 +456,6 @@ class Map(object):
             if spawn <= self.current_tick < expire:
                 return self.current_tick - spawn
         return 0
+
+    def lman_vm_statistics(self):
+        return self.lambdaman.ai.get_vm_statistics()
