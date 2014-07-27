@@ -8,9 +8,10 @@ class GccException(Exception):
 
 
 class GccFrame:
-    def __init__(self, parent, size):
+    def __init__(self, parent, size, dummy=False):
         self.parent = parent
         self.values = [None] * size
+        self.dummy = dummy
 
 
 class GccClosure:
@@ -127,7 +128,7 @@ class GccMachine(GCCInterface):
         return ip
 
     def dum(self, arg):
-        self.current_frame = GccFrame(self.current_frame, arg)
+        self.current_frame = GccFrame(self.current_frame, arg, True)
 
     def st(self, arg, arg2):
         self.fetch_frame(arg).values[arg2] = self.data_stack.pop()
@@ -164,12 +165,24 @@ class GccMachine(GCCInterface):
         return ip
 
     def rap(self, arg):
+        return self.do_recursive_call(arg, False)
+
+    def trap(self, arg):
+        return self.do_recursive_call(arg, True)
+
+    def do_recursive_call(self, argc, tailcall):
         closure = self.pop_closure()
+        if not closure.frame.dummy:
+            raise GccException("FRAME_MISMATCH (RAP with non-DUM frame)")
+        if len(closure.frame.values) != argc:
+            raise GccException("FRAME_MISMATCH (wrong argument count)")
         if closure.frame != self.current_frame:
             raise GccException("FRAME_MISMATCH")
-        for i in range(arg-1, -1, -1):
+        for i in range(argc-1, -1, -1):
             closure.frame.values[i] = self.data_stack.pop()
-        self.control_stack.append((self.current_frame.parent, self.ip+1))
+        if not tailcall:
+            self.control_stack.append((self.current_frame.parent, self.ip+1))
+        closure.frame.dummy = False
         return closure.ip
 
     def dbug(self):
@@ -182,6 +195,8 @@ class GccMachine(GCCInterface):
         return result
 
     def pop_int(self):
+        if not self.data_stack:
+            raise GccException("pop int from empty stack")
         result = self.data_stack.pop()
         if type(result) != int:
             raise GccException("TAG_MISMATCH: Expected int, found " +
@@ -189,6 +204,8 @@ class GccMachine(GCCInterface):
         return result
 
     def pop_cons(self):
+        if not self.data_stack:
+            raise GccException("pop cons cell from empty stack")
         result = self.data_stack.pop()
         if type(result) != tuple:
             raise GccException("TAG_MISMATCH: Expected cons cell, found " +
@@ -196,6 +213,8 @@ class GccMachine(GCCInterface):
         return result
 
     def pop_closure(self):
+        if not self.data_stack:
+            raise GccException("pop closure from empty stack")
         closure = self.data_stack.pop()
         if not isinstance(closure, GccClosure):
             raise GccException("TAG_MISMATCH: Expected closure, found " +
