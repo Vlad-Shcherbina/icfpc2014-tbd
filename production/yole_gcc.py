@@ -227,10 +227,11 @@ class GccMachine(GCCInterface):
                     location = self.format_stacktrace()
                 else:
                     location = "at IP " + str(self.ip)
-                raise GccException("Error: {1} at {2} {3}\n{0}".format(
+                raise GccException("Error: {1} at {2} {3}\n{0}\n{4}".format(
                     location, e.message,
                     self.instructions[self.ip].instruction_name,
-                    self.instructions[self.ip].instruction_args))
+                    self.instructions[self.ip].instruction_args,
+                    self.format_frames()))
 
             if self.done:
                 break
@@ -245,4 +246,12 @@ class GccMachine(GCCInterface):
             if type(caller) == tuple:
                 caller = caller[1]
                 result += "\n  at " + self.source_map.details_for_ip(caller)
+        return result
+
+    def format_frames(self):
+        result = "Frames:\n"
+        f = self.current_frame
+        while f:
+            result += "  " + str(f.values) + "\n"
+            f = f.parent
         return result
