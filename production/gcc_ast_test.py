@@ -257,6 +257,17 @@ class GccASTTest(unittest.TestCase):
         blk.emit(builder, None)
         self.assert_code_equals("LDC 3\nATOM\n", builder.text)
 
+    def test_parameter_function_names_conflict(self):
+        program = GccProgram()
+        body = program.add_function("main", ["main"])
+        self.assertRaises(GccSyntaxError, lambda: program.emit(GccTextBuilder()))
+
+    def test_local_function_names_conflict(self):
+        program = GccProgram()
+        body = program.add_function("main", [])
+        body.add_instruction(GccAssignment("main", GccConstant(42)))
+        self.assertRaises(GccSyntaxError, lambda: program.emit(GccTextBuilder()))
+
 
 if __name__ == '__main__':
     import sys

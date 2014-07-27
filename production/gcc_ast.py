@@ -1,3 +1,7 @@
+class GccSyntaxError(Exception):
+    pass
+
+
 class GccTextBuilder(object):
     def __init__(self):
         self.lines = []
@@ -152,6 +156,8 @@ class GccFunction():
     def emit(self, builder):
         context = GccEmitContext(self)
         self.collect_local_variables(self.main_block, context)
+        if self.program:
+            self.check_name_conflicts()
         if self.local_variables:
             builder.add_instruction("dum", len(self.local_variables))
         self.main_block.emit(builder, context)
@@ -170,6 +176,14 @@ class GccFunction():
                 self.collect_local_variables(insn.true_branch, context)
                 self.collect_local_variables(insn.false_branch, context)
 
+    def check_name_conflicts(self):
+        for arg in self.args:
+            if arg in self.program.function_index:
+                raise GccSyntaxError("Name conflict (arg/function): " + arg)
+
+        for local in self.local_variables:
+            if local in self.program.function_index:
+                raise GccSyntaxError("Name conflict (local/function): " + local)
 
 class GccInline(object):
     def __init__(self, code):
