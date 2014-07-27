@@ -194,3 +194,10 @@ rtn
         code = open("../data/lms/miner.gcc").read()
         machine = GccMachine(parse_gcc(code))
         self.assertRaises(GccException, lambda: machine.call(0, 0, 0, max_ticks=3))
+
+    def test_signed_32bit(self):
+        self.gcc_machine.ldc(0xFFFFFFFF)
+        self.gcc_machine.ldc(2)
+        self.gcc_machine.mul()
+        self.assertEquals(self.gcc_machine.data_stack, [-2])
+

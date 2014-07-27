@@ -18,6 +18,11 @@ class GccClosure:
         self.ip = ip
         self.frame = frame
 
+
+def to_int32(x):
+    return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
+
+
 class GccMachine(GCCInterface):
     def __init__(self, instructions=None):
         self.data_stack = []
@@ -30,7 +35,7 @@ class GccMachine(GCCInterface):
                 self.add_instruction(insn.op.lower(), insn.args)
 
     def marshall_int(self, i):
-        return i
+        return to_int32(i)
 
     def marshall_cons(self, car, cdr):
         return car, cdr
@@ -55,20 +60,21 @@ class GccMachine(GCCInterface):
         self.data_stack.append(arg)
 
     def add(self):
-        self.data_stack.append(self.pop_int() + self.pop_int())
+        self.data_stack.append(to_int32(self.pop_int() + self.pop_int()))
 
     def sub(self):
         y = self.pop_int()
         x = self.pop_int()
-        self.data_stack.append(x - y)
+        self.data_stack.append(to_int32(x - y))
 
     def mul(self):
-        self.data_stack.append(self.pop_int() * self.pop_int())
+        self.data_stack.append(to_int32(self.pop_int() * self.pop_int()))
 
     def div(self):
         y = self.pop_int()
         x = self.pop_int()
-        self.data_stack.append(x // y)
+        self.data_stack.append(to_int32(x // y))
+
 
     def ceq(self):
         self.data_stack.append(1 if self.pop_int() == self.pop_int() else 0)
