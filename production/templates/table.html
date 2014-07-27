@@ -13,7 +13,7 @@ th {
 </style>
 
 {% macro render_result(result) -%}
-<div {% if best_among_lms(result) %}class="best"{% endif %}>
+<div {% if best_among(result) %}class="best"{% endif %}>
     <b>{{ '%0.3f' | format(result.score / result.baseline_score()) }}</b>
     ({{ result.score }}) <br>
     {{ result.ticks }} ticks <br>
@@ -62,43 +62,84 @@ Path to json file with results:
 
     <hr>
 
-    <table>
-    <tr>
-    <th>ghost team</th>
-    {% for ghosts in ghostss %}
-        <th colspan={{ lms | length }}>
-        <ul>
-        {% for ghost in ghosts %}
-          <li>{{ ghost }}</li>
-        {% endfor %}
-        </ul>
-        </th>
-    {% endfor %}
-    </tr>
-    <tr>
-    <th>lm</th>
-    {% for ghosts in ghostss %}
+    {% if by_ghosts %}
+        <table>
+        <tr>
+        <th>lm</th>
         {% for lm in lms %}
-            <th>{{ lm.replace(":", ": ") }}</th>
+            <th colspan={{ ghostss | length }}>{{ lm.replace(":", ": ") }}</th>
         {% endfor %}
-    {% endfor %}
-    </tr>
-    {% for map in maps %}
-    <tr>
-        <th>
-            <a href="https://github.com/Vlad-Shcherbina/icfpc2014-tbd/blob/master/data/maps/{{ map }}">{{ map }}</a>
-        </th>
-        {% for ghosts in ghostss %}
-            {% for lm in lms %}
-            {% set cell_results = by_map_lm_ghosts[map, lm, ghosts] %}
-            <td>
-                {% for result in cell_results %}
-                    {% call render_result(result) %} {% endcall %}
-                {% endfor %}
-            </td>
+        </tr>
+        <tr>
+        <th>ghost team</th>
+        
+        {% for lm in lms %}
+            {% for ghosts in ghostss %}
+              <th><ul>
+              {% for ghost in ghosts %}
+                <li>{{ ghost }}</li>
+              {% endfor %}
+              </ul></th>
             {% endfor %}
         {% endfor %}
-    </tr>
-    {% endfor %}
-    </table>
+        </tr>
+        {% for map in maps %}
+        <tr>
+            <th>
+                <a href="https://github.com/Vlad-Shcherbina/icfpc2014-tbd/blob/master/data/maps/{{ map }}">{{ map }}</a>
+            </th>
+            {% for lm in lms %}
+                {% for ghosts in ghostss %}
+                {% set cell_results = by_map_lm_ghosts[map, lm, ghosts] %}
+                <td>
+                    {% for result in cell_results %}
+                        {% call render_result(result) %} {% endcall %}
+                    {% endfor %}
+                </td>
+                {% endfor %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <table>
+        <tr>
+        <th>ghost team</th>
+        {% for ghosts in ghostss %}
+            <th colspan={{ lms | length }}>
+            <ul>
+            {% for ghost in ghosts %}
+              <li>{{ ghost }}</li>
+            {% endfor %}
+            </ul>
+            </th>
+        {% endfor %}
+        </tr>
+        <tr>
+        <th>lm</th>
+        {% for ghosts in ghostss %}
+            {% for lm in lms %}
+                <th>{{ lm.replace(":", ": ") }}</th>
+            {% endfor %}
+        {% endfor %}
+        </tr>
+        {% for map in maps %}
+        <tr>
+            <th>
+                <a href="https://github.com/Vlad-Shcherbina/icfpc2014-tbd/blob/master/data/maps/{{ map }}">{{ map }}</a>
+            </th>
+            {% for ghosts in ghostss %}
+                {% for lm in lms %}
+                {% set cell_results = by_map_lm_ghosts[map, lm, ghosts] %}
+                <td>
+                    {% for result in cell_results %}
+                        {% call render_result(result) %} {% endcall %}
+                    {% endfor %}
+                </td>
+                {% endfor %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
 {% endif %}

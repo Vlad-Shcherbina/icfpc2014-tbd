@@ -42,6 +42,7 @@ def index():
 def table():
     args = flask.request.args
     results_filename = args.get('results_filename')
+    by_ghosts = bool(args.get('by_ghosts'))
 
     if results_filename:
         with open(results_filename) as fin:
@@ -64,10 +65,14 @@ def table():
         by_map_lm_ghosts[result.map, result.lm_spec, ghosts].append(result)
         by_lm_ghosts[result.lm_spec, ghosts].append(result)
 
-    def best_among_lms(result):
-        ghosts = tuple(result.ghost_specs)
-        scores = [r.score for lm in lms for r in by_map_lm_ghosts[result.map, lm, ghosts]]
-        return max(scores) == result.score > min(scores)
+    def best_among(result):
+        if not by_ghosts:
+            ghosts = tuple(result.ghost_specs)
+            scores = [r.score for lm in lms for r in by_map_lm_ghosts[result.map, lm, ghosts]]
+            return max(scores) == result.score > min(scores)
+        else:
+            scores = [r.score for ghosts in ghostss for r in by_map_lm_ghosts[result.map, result.lm_spec, ghosts]]
+            return min(scores) == result.score < max(scores)
 
     return flask.render_template(
         'table.html',
