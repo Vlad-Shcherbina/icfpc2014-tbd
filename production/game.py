@@ -73,6 +73,13 @@ def ghost_ai_from_spec(ghost_spec):
 
 
 def lambda_man_ai_from_spec(lm_spec):
+    # import everything here so that modules could initialize properly
+    from vorber_gcc import VorberGCC
+    from yole_gcc import GccMachine as YoleGCC
+    import lm_ai
+    import lm_wave
+    import gcpy
+    
     type, details = lm_spec.split(':', 1)
     if type == 'interactive':
         assert details == ''
@@ -84,6 +91,12 @@ def lambda_man_ai_from_spec(lm_spec):
         with open(path, 'r') as f:
             code = f.read()
         code = parse_gcc(code)
+        interpreter = eval(interpreter)
+        interpreter = GCCWrapper(interpreter(code))
+        return interpreter
+    elif type == 'gcpy_file':
+        interpreter, path = details.split(':', 1)
+        code = gcpy.compile(path)
         interpreter = eval(interpreter)
         interpreter = GCCWrapper(interpreter(code))
         return interpreter
@@ -116,12 +129,6 @@ class LambdaManAI(object):
     def initialize(self, map, undocumented):
         pass
 
-# FIXME! fix dependencies
-
-from vorber_gcc import VorberGCC
-from yole_gcc import GccMachine as YoleGCC
-import lm_ai
-import lm_wave
 interactive_lambda_man_direction = None
 
 def set_interactive_lambda_man_direction(d):
