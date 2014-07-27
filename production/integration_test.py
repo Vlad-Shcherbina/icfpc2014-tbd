@@ -60,3 +60,10 @@ class IntegrationTest(TestCase):
         self.assertEquals(1, result)
         result = self.machine.call(0, self.world_state, 2, 2)
         self.assertEquals(0, result)
+
+    def test_is_junction(self):
+        self.prepare("default_map.txt", "is_junction.py")
+        result = self.machine.call(0, self.world_state, 5, 1)
+        self.assertEquals(1, result)
+        result = self.machine.call(0, self.world_state, 6, 1)
+        self.assertEquals(0, result)
