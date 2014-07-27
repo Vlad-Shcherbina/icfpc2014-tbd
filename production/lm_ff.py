@@ -27,12 +27,12 @@ class ForceField(game.LambdaManAI):
         logger.info('field:\n{}'.format(pprint.pformat(self.f)))
 
         best_dir = 0
-        best_score = -1
+        best = DEFAULT_CELL
         for dir in game.DIRECTIONS:
             nx = map.lambdaman.x + game.DELTA_X[dir]
             ny = map.lambdaman.y + game.DELTA_Y[dir]
-            if best_score < self.f[ny][nx]:
-                best_score = self.f[ny][nx]
+            if better(self.f[ny][nx], best):
+                best = self.f[ny][nx]
                 best_dir = dir
         logger.info('best dir {}'.format(best_dir))
         return best_dir
@@ -47,7 +47,10 @@ def diffuse(f):
     return decrement(f)
 
 
-DEFAULT_CELL = 0
+# Cell components:
+#    (pills and other food, ghosts, fruit)
+DEFAULT_CELL = (0, 0, 0)
+
 
 def shift_left(f):
     return [line[1:] + [DEFAULT_CELL] for line in f]
@@ -75,13 +78,11 @@ def decrement(f):
     return [map(decrement_cell, line) for line in f]
 
 
-def combine_cell(f1, f2):
-    return max(f1, f2)
+def combine_cell(f1_cell, f2_cell):
+    return tuple(max(e1, e2) for e1, e2 in zip(f1_cell, f2_cell))
 
 def decrement_cell(f_cell):
-    if f_cell > 0:
-        return f_cell - 1
-    return 0
+    return tuple(max(e - 1, 0) for e in f_cell)
 
 
 def merge(f, map):
@@ -90,15 +91,20 @@ def merge(f, map):
          for j in range(map.width())]
         for i in range(map.height())]
 
+
 def merge_cell(f_cell, map_cell):
     if map_cell == game.WALL:
         return DEFAULT_CELL
     elif map_cell == game.PILL:
-        return 900
+        return (900, f_cell[1], f_cell[2])
     elif map_cell == game.POWER_PILL:
-        return 905
+        return (905, f_cell[1], f_cell[2])
     elif map_cell == game.FRUIT:
-        return 910
+        # TODO: use fruit component of a field
+        # TODO: or even better, use expected fruit location even when
+        # it's not on the map, and use careful distance-based timing in
+        # better() function.
+        return (910, f_cell[1], f_cell[2])
     else:
         return f_cell
 
@@ -107,17 +113,28 @@ def merge_ghosts(f, ghosts):
     f = copy.deepcopy(f)
     for ghost in ghosts:
         if ghost.vitality == game.STANDARD:
-            f[ghost.y][ghost.x] = 0
+            # - note that ghost blocks propagation of other fields
+            # - it might be nice to know that there is ghost nearby
+            #   (within, say, 5 cells)
+            f[ghost.y][ghost.x] = (0, 5, 0)
         elif ghost.vitality == game.FRIGHT:
-            f[ghost.y][ghost.x] = 905
+            cell = f[ghost.y][ghost.x]
+            f[ghost.y][ghost.x] = (905, cell[1], cell[2])
+        # TODO: take invisible ghost into account (it's better than standard,
+        # though worse than frightened)
     return f
+
+
+def better(f_cell1, f_cell2):
+    # TODO: take into account ghost and fruit components
+    return f_cell1[0] > f_cell2[0]
 
 
 def main():
     f = [
-    [0, 0, 0],
-    [0, 9, 0],
-    [0, 0, 0],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (9, 2, 1), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0)],
     ]
 
     f = diffuse(f)
