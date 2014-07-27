@@ -3,7 +3,7 @@ ghpy supported features
 
 - Numeric constants
 - Arithmetic expressions: + - * /
-- Comparison operators: > >= ==
+- Comparison operators: > >= == < <=
 - Function declarations
 - References to functions and function parameters
 - Function calls

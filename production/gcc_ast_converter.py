@@ -74,9 +74,13 @@ def convert_python_to_gcc_ast(ast):
             return GccGt(left, right)
         if isinstance(ast.ops[0], GtE):
             return GccGte(left, right)
+        if isinstance(ast.ops[0], Lt):
+            return GccGt(right, left)
+        if isinstance(ast.ops[0], LtE):
+            return GccGte(right, left)
         if isinstance(ast.ops[0], Eq):
             return GccEq(left, right)
-        raise Exception("Unsupported compare operation type {0}".format(ast.op))
+        raise Exception("Unsupported compare operation type {0}".format(ast.ops[0]))
 
     if isinstance(ast, Name):
         return GccNameReference(ast.id)

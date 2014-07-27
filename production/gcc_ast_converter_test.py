@@ -24,6 +24,13 @@ class GccASTConverterTest(TestCase):
         self.assertEquals(3, tree.op1.value)
         self.assertEquals(4, tree.op2.value)
 
+    def test_less(self):
+        x = ast.parse("3<4").body[0].value
+        tree = convert_python_to_gcc_ast(x)
+        self.assertIsInstance(tree, GccGt)
+        self.assertEquals(4, tree.op1.value)
+        self.assertEquals(3, tree.op2.value)
+
     def test_name(self):
         x = ast.parse("a-1").body[0].value
         tree = convert_python_to_gcc_ast(x)
