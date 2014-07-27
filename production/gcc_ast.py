@@ -190,6 +190,12 @@ class GccFunction(GccASTNode):
             self.check_name_conflicts()
         if self.local_variables:
             builder.add_instruction("dum", len(self.local_variables))
+            for i in range(len(self.local_variables)):
+                builder.add_instruction("ldc", 0)
+            locals_frame_label = "$func_locals_" + self.name + "$"
+            builder.add_instruction("ldf", locals_frame_label)
+            builder.add_instruction("trap", len(self.local_variables))
+            builder.add_label(locals_frame_label)
         self.main_block.emit(builder, context)
         if not context.terminated:
             builder.add_instruction('rtn')

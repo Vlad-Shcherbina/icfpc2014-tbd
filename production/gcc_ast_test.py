@@ -240,6 +240,10 @@ class GccASTTest(unittest.TestCase):
         self.assert_code_equals("""
         ;$func_main$
             DUM 1
+            LDC 0
+            LDF 4  ; $func_locals_main$
+            TRAP 1
+        ;$func_locals_main$
             LDC 42
             ST 0 0
             LDC 239

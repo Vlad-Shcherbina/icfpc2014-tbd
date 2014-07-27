@@ -131,10 +131,16 @@ class GccMachine(GCCInterface):
         self.current_frame = GccFrame(self.current_frame, arg, True)
 
     def st(self, arg, arg2):
-        self.fetch_frame(arg).values[arg2] = self.data_stack.pop()
+        frame = self.fetch_frame(arg)
+        if frame.dummy:
+            raise GccException("FRAME_MISMATCH: can't store into dummy frame")
+        frame.values[arg2] = self.data_stack.pop()
 
     def ld(self, arg, arg2):
-        self.data_stack.append(self.fetch_frame(arg).values[arg2])
+        frame = self.fetch_frame(arg)
+        if frame.dummy:
+            raise GccException("FRAME_MISMATCH: can't load from dummy frame")
+        self.data_stack.append(frame.values[arg2])
 
     def ldf(self, arg):
         self.data_stack.append(GccClosure(arg, self.current_frame))
