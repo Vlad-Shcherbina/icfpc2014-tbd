@@ -1,6 +1,3 @@
-import sys
-sys.path.append("../production")
-
 from ast import *
 from gcc_ast import *
 

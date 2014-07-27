@@ -1,10 +1,6 @@
 from unittest import TestCase
 import ast
 
-import sys
-sys.path.append('../production')
-
-from gcc_ast import *
 from gcc_ast_converter import *
 
 class GccASTConverterTest(TestCase):
@@ -59,17 +55,17 @@ def step(state, world): return state+1, 2""")
         builder = GccTextBuilder()
         tree.emit(builder)
         self.assertEquals(""";$func_main$
-    ldc 42
-    ldf 4  ; $func_step$
-    cons
-    rtn
+    LDC 42
+    LDF 4  ; $func_step$
+    CONS
+    RTN
 ;$func_step$
-    ld 0 0
-    ldc 1
-    add
-    ldc 2
-    cons
-    rtn
+    LD 0 0
+    LDC 1
+    ADD
+    LDC 2
+    CONS
+    RTN
 """, builder.text)
 
     def test_condition(self):

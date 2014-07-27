@@ -1,5 +1,7 @@
+import os
 from unittest import TestCase
 import ast
+
 from game import POWER_PILL, PILL, GHOST
 from gcc_ast_converter import convert_python_to_gcc_module
 from gcc_ast import GccTextBuilder
@@ -8,9 +10,10 @@ from yole_gcc import GccMachine
 from map_loader import load_map
 from gcc_wrapper import GCCWrapper
 
+
 class IntegrationTest(TestCase):
     def prepare(self, map_file, script):
-        text = open(script).read()
+        text = open(os.path.join("../data/gcpy", script)).read()
         python_ast = ast.parse(text)
         gcc_program = convert_python_to_gcc_module(python_ast)
         builder = GccTextBuilder()
