@@ -20,7 +20,7 @@ class GccClosure:
 
 
 def to_int32(x):
-    return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
+    return int((x & 0xFFFFFFFF) - ((x & 0x80000000) << 1))
 
 
 class GccMachine(GCCInterface):
@@ -58,7 +58,7 @@ class GccMachine(GCCInterface):
             return result
 
     def ldc(self, arg):
-        self.data_stack.append(arg)
+        self.data_stack.append(to_int32(arg))
 
     def add(self):
         self.data_stack.append(to_int32(self.pop_int() + self.pop_int()))
@@ -204,8 +204,8 @@ class GccMachine(GCCInterface):
 
     def add_instruction(self, name, args):
         fn = getattr(GccMachine, name)
-        args = [self] + args
-        f = functools.partial(fn, *args)
+        call_args = [self] + args
+        f = functools.partial(fn, *call_args)
         f.instruction_name = name
         f.instruction_args = args
         self.instructions.append(f)
@@ -224,11 +224,13 @@ class GccMachine(GCCInterface):
                 next_ip = self.instructions[self.ip]()
             except GccException, e:
                 if self.source_map:
-                    location = self.source_map.details_for_ip(self.ip)
+                    location = self.format_stacktrace()
                 else:
-                    location = self.ip
-                raise GccException("Error at {0}: {1}".format(
-                    location, e.message))
+                    location = "at IP " + str(self.ip)
+                raise GccException("Error: {1} at {2} {3}\n{0}".format(
+                    location, e.message,
+                    self.instructions[self.ip].instruction_name,
+                    self.instructions[self.ip].instruction_args))
 
             if self.done:
                 break
@@ -236,3 +238,11 @@ class GccMachine(GCCInterface):
                 self.ip = next_ip
             else:
                 self.ip = self.ip + 1
+
+    def format_stacktrace(self):
+        result = "  at " + self.source_map.details_for_ip(self.ip)
+        for caller in self.control_stack[::-1]:
+            if type(caller) == tuple:
+                caller = caller[1]
+                result += "\n  at " + self.source_map.details_for_ip(caller)
+        return result

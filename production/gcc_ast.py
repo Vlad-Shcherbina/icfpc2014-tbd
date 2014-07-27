@@ -6,6 +6,7 @@ class GccTextBuilder(object):
     def __init__(self):
         self.lines = []
         self.labels = {}
+        self.source_locations = []
 
     @property
     def text(self):
@@ -17,11 +18,12 @@ class GccTextBuilder(object):
             result += '    ' + line + '\n'
         return result
 
-    def add_instruction(self, name, *args):
+    def add_instruction(self, name, *args, **kwargs):
         line = name.upper()
         if args:
             line += " " + " ".join(map(str, args))
         self.lines.append(line)
+        self.source_locations.append(kwargs.get('source'))
 
     def add_label(self, name):
         if name in self.labels:
@@ -60,11 +62,14 @@ class GccTextBuilder(object):
             if ip > offset > previous_label_ip:
                 label_name = name
                 previous_label_ip = offset
+        result = "IP {0}".format(ip)
         if label_name:
-            return "IP {0} (at label {1}+{2})".format(ip, label_name,
-                                                      ip-previous_label_ip)
-        return "IP {0}".format(label_name)
-
+            result += " (at label {0}+{1})".format(label_name,
+                                                   ip-previous_label_ip)
+        source = self.source_locations[ip]
+        if source:
+            result += " (at source {0}:{1})".format(source[0], source[1])
+        return result
 
 
 class GccProgram(object):
@@ -159,8 +164,14 @@ class GccEmitContext(object):
         return False
 
 
-class GccFunction():
+class GccASTNode(object):
+    def __init__(self):
+        self.source_location = None
+
+
+class GccFunction(GccASTNode):
     def __init__(self, program, name, args):
+        GccASTNode.__init__(self)
         self.program = program
         self.name = name
         self.args = args
@@ -213,16 +224,18 @@ class GccInline(object):
             builder.add_instruction(line.strip())
 
 
-class GccConstant(object):
+class GccConstant(GccASTNode):
     def __init__(self, value):
+        GccASTNode.__init__(self)
         self.value = value
 
     def emit(self, builder, context):
-        builder.add_instruction("ldc", self.value)
+        builder.add_instruction("ldc", self.value, source=self.source_location)
 
 
-class GccBinaryOp(object):
+class GccBinaryOp(GccASTNode):
     def __init__(self, op1, op2, instruction):
+        GccASTNode.__init__(self)
         self.instruction = instruction
         self.op1 = op1
         self.op2 = op2
@@ -230,7 +243,7 @@ class GccBinaryOp(object):
     def emit(self, builder, context):
         self.op1.emit(builder, context)
         self.op2.emit(builder, context)
-        builder.add_instruction(self.instruction)
+        builder.add_instruction(self.instruction, source=self.source_location)
 
 
 class GccAdd(GccBinaryOp):
@@ -268,21 +281,25 @@ class GccGte(GccBinaryOp):
         super(GccGte, self).__init__(op1, op2, "cgte")
 
 
-class GccNameReference(object):
+class GccNameReference(GccASTNode):
     def __init__(self, name):
+        super(GccNameReference, self).__init__()
         self.name = name
 
     def emit(self, builder, context):
         fn = context.resolve_function(self.name)
         if fn:
-            builder.add_instruction("ldf", "$func_{}$".format(self.name))
+            builder.add_instruction("ldf", "$func_{}$".format(self.name),
+                                    source=self.source_location)
         else:
             frame_index, var_index = context.resolve_variable(self.name)
-            builder.add_instruction("ld", frame_index, var_index)
+            builder.add_instruction("ld", frame_index, var_index,
+                                    source=self.source_location)
 
 
-class GccCall(object):
+class GccCall(GccASTNode):
     def __init__(self, callee, args):
+        super(GccCall, self).__init__()
         self.callee = callee
         self.args = args
 
@@ -292,13 +309,16 @@ class GccCall(object):
         self.callee.emit(builder, context)
         if context.is_tail(self):
             context.terminated = True
-            builder.add_instruction("tap", len(self.args))
+            insn_name = "tap"
         else:
-            builder.add_instruction("ap", len(self.args))
+            insn_name = "ap"
+        builder.add_instruction(insn_name, len(self.args),
+                                source=self.source_location)
 
 
-class GccConditionalBlock(object):
+class GccConditionalBlock(GccASTNode):
     def __init__(self, condition):
+        super(GccConditionalBlock, self).__init__()
         self.condition = condition
         self.true_branch = GccCodeBlock()
         self.false_branch = GccCodeBlock()
@@ -316,22 +336,25 @@ class GccConditionalBlock(object):
             terminator = "join"
         context.enqueue_block(self.true_branch, true_label, terminator)
         context.enqueue_block(self.false_branch, false_label, terminator)
-        builder.add_instruction(instruction, true_label, false_label)
+        builder.add_instruction(instruction, true_label, false_label,
+                                source=self.source_location)
 
 
-class GccTuple(object):
+class GccTuple(GccASTNode):
     def __init__(self, *members):
+        super(GccTuple, self).__init__()
         self.members = members
 
     def emit(self, builder, context):
         for m in self.members:
             m.emit(builder, context)
         for i in range(len(self.members)-1):
-            builder.add_instruction("cons")
+            builder.add_instruction("cons", source=self.source_location)
 
 
-class GccTupleMember(object):
+class GccTupleMember(GccASTNode):
     def __init__(self, tuple, index, expected_size):
+        super(GccTupleMember, self).__init__()
         self.tuple = tuple
         self.index = index
         self.expected_size = expected_size
@@ -339,35 +362,39 @@ class GccTupleMember(object):
     def emit(self, builder, context):
         self.tuple.emit(builder, context)
         for i in range(self.index):
-            builder.add_instruction("cdr")
+            builder.add_instruction("cdr", source=self.source_location)
         if self.index < self.expected_size-1:
-            builder.add_instruction("car")
+            builder.add_instruction("car", source=self.source_location)
 
 
-class GccPrint(object):
+class GccPrint(GccASTNode):
     def __init__(self, arg):
+        super(GccPrint, self).__init__()
         self.arg = arg
 
     def emit(self, builder, context):
         self.arg.emit(builder, context)
-        builder.add_instruction("dbug")
+        builder.add_instruction("dbug", source=self.source_location)
 
 
-class GccAssignment(object):
+class GccAssignment(GccASTNode):
     def __init__(self, name, value):
+        super(GccAssignment, self).__init__()
         self.name = name
         self.value = value
 
     def emit(self, builder, context):
         self.value.emit(builder, context)
         frame_index, var_index = context.resolve_variable(self.name)
-        builder.add_instruction("st", frame_index, var_index)
+        builder.add_instruction("st", frame_index, var_index,
+                                source=self.source_location)
 
 
-class GccAtom(object):
+class GccAtom(GccASTNode):
     def __init__(self, arg):
+        super(GccAtom, self).__init__()
         self.arg = arg
 
     def emit(self, builder, context):
         self.arg.emit(builder, context)
-        builder.add_instruction("atom")
+        builder.add_instruction("atom", source=self.source_location)

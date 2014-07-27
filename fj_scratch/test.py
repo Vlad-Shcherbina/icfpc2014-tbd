@@ -3,26 +3,17 @@ sys.path.append('../production')
 
 import logging
 log = logging.getLogger(__name__)
+from pprint import pprint
 
 import dis
 
-def f(f_p):
-    f_l = 3
-    def g(g_p):
-        g_l = f_p + f_l
-        return g_l + g_p
-    return g
-
-def long_ass_function():
-    pass
-
+def to_int32(x):
+    return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
 
 def do_stuff():
-    dis.dis(f)
-    print
-    dis.dis(f(1))
-    # long_ass
-
+    from cmath import sin
+    print eval('sin(4)') 
+    
 
 def main():
     # log from this script at debug,

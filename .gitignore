@@ -33,3 +33,6 @@ nosetests.xml
 
 # Translations
 *.mo
+
+# our stuff
+production/*.log

@@ -9,7 +9,7 @@ class GCCInterface(object):
         'Return an opaque handle representing (car, cdr)'
 
 
-class GCCWrapper:
+class GCCWrapper(object):
     def __init__(self, gcc):
         assert isinstance(gcc, GCCInterface)
         self.gcc = gcc

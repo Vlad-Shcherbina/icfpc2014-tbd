@@ -18,6 +18,7 @@ def convert_python_to_gcc_function(program, func_def):
         func = program.add_function(func_def.name, args)
     else:
         func = GccFunction(None, func_def.name, args)
+    func.source_location = (func_def.lineno, func_def.col_offset)
     for stmt in func_def.body:
         func.add_instruction(convert_python_to_gcc_statement(stmt))
     return func
@@ -36,76 +37,83 @@ def convert_python_to_gcc_statement(stmt):
         for child in stmt.orelse:
             cond.false_branch.instructions.append(
                 convert_python_to_gcc_statement(child))
-        return cond
+        result = cond
 
-    if isinstance(stmt, Print):
-        return GccPrint(convert_python_to_gcc_ast(stmt.values[0]))
+    elif isinstance(stmt, Print):
+        result = GccPrint(convert_python_to_gcc_ast(stmt.values[0]))
 
-    if isinstance(stmt, Assign):
-        return GccAssignment(stmt.targets[0].id,
-                             convert_python_to_gcc_ast(stmt.value))
-
-    raise Exception("Unsupported statement type {0}".format(stmt))
+    elif isinstance(stmt, Assign):
+        result = GccAssignment(stmt.targets[0].id,
+                               convert_python_to_gcc_ast(stmt.value))
+    else:
+        raise Exception("Unsupported statement type {0}".format(stmt))
+    result.source_location = (stmt.lineno, stmt.col_offset)
+    return result
 
 
 def convert_python_to_gcc_ast(ast):
     if isinstance(ast, Num):
-        return GccConstant(ast.n)
+        result = GccConstant(ast.n)
 
-    if isinstance(ast, BinOp):
+    elif isinstance(ast, BinOp):
         left = convert_python_to_gcc_ast(ast.left)
         right = convert_python_to_gcc_ast(ast.right)
         if isinstance(ast.op, Add):
-            return GccAdd(left, right)
-        if isinstance(ast.op, Sub):
-            return GccSub(left, right)
-        if isinstance(ast.op, Mult):
-            return GccMul(left, right)
-        if isinstance(ast.op, Div):
-            return GccDiv(left, right)
-        raise Exception("Unsupported binary operation type {0}".format(ast.op))
+            result = GccAdd(left, right)
+        elif isinstance(ast.op, Sub):
+            result = GccSub(left, right)
+        elif isinstance(ast.op, Mult):
+            result = GccMul(left, right)
+        elif isinstance(ast.op, Div):
+            result = GccDiv(left, right)
+        else:
+            raise Exception("Unsupported binary operation type {0}".format(ast.op))
 
-    if isinstance(ast, Compare):
+    elif isinstance(ast, Compare):
         if len(ast.comparators) != 1:
             raise Exception("Chained comparisons not supported")
         left = convert_python_to_gcc_ast(ast.left)
         right = convert_python_to_gcc_ast(ast.comparators[0])
         if isinstance(ast.ops[0], Gt):
-            return GccGt(left, right)
-        if isinstance(ast.ops[0], GtE):
-            return GccGte(left, right)
-        if isinstance(ast.ops[0], Lt):
-            return GccGt(right, left)
-        if isinstance(ast.ops[0], LtE):
-            return GccGte(right, left)
-        if isinstance(ast.ops[0], Eq):
-            return GccEq(left, right)
-        raise Exception("Unsupported compare operation type {0}".format(ast.ops[0]))
+            result = GccGt(left, right)
+        elif isinstance(ast.ops[0], GtE):
+            result = GccGte(left, right)
+        elif isinstance(ast.ops[0], Lt):
+            result = GccGt(right, left)
+        elif isinstance(ast.ops[0], LtE):
+            result = GccGte(right, left)
+        elif isinstance(ast.ops[0], Eq):
+            result = GccEq(left, right)
+        else:
+            raise Exception("Unsupported compare operation type {0}".format(ast.ops[0]))
 
-    if isinstance(ast, Name):
-        return GccNameReference(ast.id)
+    elif isinstance(ast, Name):
+        result = GccNameReference(ast.id)
 
-    if isinstance(ast, Tuple):
-        return GccTuple(*[convert_python_to_gcc_ast(elt) for elt in ast.elts])
+    elif isinstance(ast, Tuple):
+        result = GccTuple(*[convert_python_to_gcc_ast(elt) for elt in ast.elts])
 
-    if isinstance(ast, Subscript):
+    elif isinstance(ast, Subscript):
         value = convert_python_to_gcc_ast(ast.value)
         if isinstance(ast.slice, Slice):
             index = ast.slice.lower.n
             if ast.slice.upper:
                 raise Exception("only [N:] syntax is supported")
             # generate only a series of cdr instructions
-            return GccTupleMember(value, index, index+1)
+            result = GccTupleMember(value, index, index+1)
         else:
             # generate cdr + car
             index = ast.slice.value.n
-            return GccTupleMember(value, index, index+2)
+            result = GccTupleMember(value, index, index+2)
 
-    if isinstance(ast, Call):
+    elif isinstance(ast, Call):
         if ast.func.id == 'int':
-            return GccAtom(convert_python_to_gcc_ast(ast.args[0]))
-        callee = GccNameReference(ast.func.id)
-        return GccCall(callee,
-                       [convert_python_to_gcc_ast(arg) for arg in ast.args])
-
-    raise Exception("Unsupported Python AST node type {0}".format(ast))
+            result = GccAtom(convert_python_to_gcc_ast(ast.args[0]))
+        else:
+            callee = GccNameReference(ast.func.id)
+            result = GccCall(callee,
+                             [convert_python_to_gcc_ast(arg) for arg in ast.args])
+    else:
+        raise Exception("Unsupported Python AST node type {0}".format(ast))
+    result.source_location = (ast.lineno, ast.col_offset)
+    return result
