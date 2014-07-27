@@ -14,7 +14,7 @@ class Wavy(game.LambdaManAI):
         #dir = scores.index(ms)
         #self.last_turn_pos = (world_map.lambdaman.x, world_map.lambdaman.y)
         #return dir
-        print 'pos ', world_map.lambdaman.x, world_map.lambdaman.y
+        #print 'pos ', world_map.lambdaman.x, world_map.lambdaman.y
         dir = self.find_closest_safe_pill(world_map, self.wave_depth)
         return dir
         
@@ -50,15 +50,17 @@ class Wavy(game.LambdaManAI):
             new_front = []
             while len(front)>0:
                 (dir, (x,y)) = front.pop()
+                #print 'analyzing ', (dir, (x,y))
                 if world_map.at(x,y) == game.PILL:
                     return dir
                 visited[y][x] = True
-                neighbours = map(lambda d: self.apply_direction(d, pos[0], pos[1]), range(4))
+                neighbours = map(lambda d: self.apply_direction(d, x, y), range(4))
+                #print 'neighbours', neighbours, map(lambda n: visited[n[1]][n[0]], neighbours), map(lambda n: world_map.at(n[0],n[1]), neighbours)
                 wd = zip([dir]*4, neighbours) #maintain original direction
                 valid = filter(lambda r: (not visited[r[1][1]][r[1][0]]) and self.fits(world_map, r[1][0],r[1][1]), wd)
                 new_front+=list(valid)
             front = new_front
-        print 'no pills found!'
+        #print 'no pills found!'
         return dir
         
     def unportable_wave(self,world_map, initial_direction, max_steps):
