@@ -39,4 +39,27 @@ def call(script, func_name, *args):
 
 
 def list_length_test():
-    assert call('list_length.py', 'list_length', list_to_gcc(range(5))) == 5
+    for script in 'list_length.py', 'ff.py':
+        assert call(script, 'list_length', list_to_gcc([])) == 0
+        assert call(script, 'list_length', list_to_gcc(range(5))) == 5
+
+
+def list_append_test():
+    assert (
+        list_from_gcc(call('ff.py', 'list_append', list_to_gcc([]), 42))
+        == [42])
+
+    assert (
+        list_from_gcc(call('ff.py', 'list_append', list_to_gcc(range(3)), 42))
+        == [0, 1, 2, 42])
+
+
+def list_update_test():
+    assert (
+        list_from_gcc(call('ff.py',
+            'list_update', list_to_gcc([42]), 0, 43))
+        == [43])
+    assert (
+        list_from_gcc(call('ff.py',
+            'list_update', list_to_gcc(range(6)), 3, 42))
+        == [0, 1, 2, 42, 4, 5])
