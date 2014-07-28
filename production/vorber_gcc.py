@@ -2,6 +2,7 @@
 import sys
 from command_enums import GCC_CMD
 from gcc_wrapper import GCCInterface
+from gcc_utils import to_int32
 
 class VorberGCC(GCCInterface):
     def __init__(self, program, verbose=False):
@@ -66,26 +67,28 @@ class VorberGCC(GCCInterface):
 
     # GCCInterface methods
 
-    def marshall_int(self, i):
-        return {'tag': 'int', 'value': i}
+    def marshal(self, x):
+        if isinstance(x, (int, long)):
+            return {'tag': 'int', 'value': to_int32(x)}
+        elif type(x) == tuple:
+            return {'tag': 'cons', 'value': x}
+        else:
+            return x
+            
 
-    def marshall_cons(self, car, cdr):
-        return {'tag': 'cons', 'value': (car, cdr)}
+    def unmarshal(self, x):
+        if x['tag'] in ('int', 'tuple'):
+            return x['value']
+        else:
+            return x
+
 
     def call(self, address_or_closure, *args, **kwargs):
-        'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
-        # Implement the stuff below, OK?
-        'reset all stacks' #vorber: gcc state persists between calls, unless explicitly modified from outside
-        'put args on the data stack'
-        #[00:51] <jdreske> the lambda man cpu simulator always starts with empty data stack, but usually we will have two elements on it, world and undefined, right?
-        #[00:52] <@dcoutts> jdreske: no, function args come in via the environment, not the stack
-        #
-        #so args go on env stack, not data
         self.terminal_state = False
         self.__log('call: ' + str(self) + '::'+str(address_or_closure))
         fp = {'frame_tag':'FRAME_NO_TAG', 'parent':-1, 'values':[arg for arg in args], 'size':len(args)}
         self.ctrl_stack.append({'tag':'TAG_STOP'})
-        if isinstance(address_or_closure, int):
+        if isinstance(address_or_closure, (int, long)):
             self.env_stack.append(fp)
             self.reg_e = len(self.env_stack)-1
             self.reg_c = address_or_closure
@@ -100,23 +103,14 @@ class VorberGCC(GCCInterface):
             self.env_stack[self.reg_e] = fp
         self.run()
         'return everything on the data stack'
-        #not everything, as per spec we always return a 'pair' i.e. CONS
-        ret = self.data_stack.pop()
-        if (ret['tag'] != 'cons'):
-            self.__error('return value is not CONS')
-            return (0,0)
-        tret = self.__cons_to_tuple(ret)
-        self.__log('call: returning' + str(tret))
-
-        return tret
+        assert len(self.data_stack) == 1
+        ret = self.unmarshal(self.data_stack.pop())
+        self.__log('call: returning' + str(ret))
+        return ret
 
 
 
     #Following methods are intended for internal use only
-    def __cons_to_tuple(self, cons):
-        t = map(lambda v: v['value'] if v['tag'] == 'int' else v, cons['value'])
-        return (t[0],t[1])
-        
             
     def __log(self, s):
         if self.verbose:

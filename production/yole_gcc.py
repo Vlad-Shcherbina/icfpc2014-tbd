@@ -36,11 +36,14 @@ class GccMachine(GCCInterface):
                 self.add_instruction(insn.op.lower(), insn.args)
         self.source_map = source_map
 
-    def marshall_int(self, i):
-        return to_int32(i)
+    def marshal(self, x):
+        if isinstance(x, (int, long)):
+            return  to_int32(x)
+        return x
 
-    def marshall_cons(self, car, cdr):
-        return car, cdr
+    def unmarshal(self, x):
+        return x
+    
 
     def call(self, address_or_closure, *args, **kwargs):
         assert len(self.data_stack) == 0
@@ -52,11 +55,8 @@ class GccMachine(GCCInterface):
         self.current_frame = callee_frame
         self.ip = address_or_closure.ip
         self.run(kwargs.get('max_ticks'))
-        if self.data_stack:
-            assert len(self.data_stack) == 1
-            result = self.data_stack[0]
-            self.data_stack = []
-            return result
+        assert len(self.data_stack) == 1
+        return self.unmarshal(self.data_stack.pop())
 
     def ldc(self, arg):
         self.data_stack.append(to_int32(arg))

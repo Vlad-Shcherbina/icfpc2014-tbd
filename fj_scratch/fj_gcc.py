@@ -1,7 +1,8 @@
 from collections import namedtuple
 
-from gcc_wrapper import GCCInterface
+from gcc_wrapper import GCCInterface, InterpreterException
 from command_enums import GCC_CMD
+from gcc_utils import to_int32
 
 import logging
 log = logging.getLogger(__name__)
@@ -10,13 +11,6 @@ log = logging.getLogger(__name__)
 Frame = namedtuple('Frame', 'parent slots is_dummy') # is_dummy is a list of 0 or 1 elements
 Closure = namedtuple('Closure', 'address env')
 
-
-class InterpreterException(Exception):
-    pass
-
-
-def to_int32(x):
-    return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
 
 
 TAG_JOIN, TAG_RET, TAG_STOP = 0, 1, 2 
@@ -38,7 +32,7 @@ class Interpreter(GCCInterface):
     
     
     def call(self, address_or_closure, *args):
-        if isinstance(address_or_closure, (int, long)):
+        if isinstance(address_or_closure, int):
             self.pc = address_or_closure
             self.env_ptr = Frame(None, args, [])
         else:
@@ -50,12 +44,15 @@ class Interpreter(GCCInterface):
         return self.data_stack.pop()
     
     
+    def step(self):
+        cmd = self.program[self.pc]
+        self.pc += 1
+        return self.command_map[cmd.op](cmd.args)
+            
+    
     def run(self):
         for cycles in xrange(0, 1048570): # lift the restriction for the initialization phase?
-            cmd = self.program[self.pc]
-            self.pc += 1
-            log.debug(cmd)
-            if self.command_map[cmd.op](cmd.args):
+            if self.step():
                 break
         else:
             raise InterpreterException('OUT OF CYCLES OMG')
@@ -66,26 +63,26 @@ class Interpreter(GCCInterface):
     
     def pop_int(self):
         x = self.data_stack.pop()
-        if not isinstance(x, (int, long)):
+        if type(x) is not int:
             raise InterpreterException('TAG_MISMATCH: got {!r} instead of int'.format(x))
         return x
             
     def pop_cons(self):
         x = self.data_stack.pop()
-        if not type(x) is not tuple:
+        if type(x) is not tuple:
             raise InterpreterException('TAG_MISMATCH: got {!r} instead of tuple'.format(x))
         return x
     
     def pop_closure(self):
         x = self.data_stack.pop()
-        if not type(x) is not Closure:
+        if type(x) is not Closure:
             raise InterpreterException('TAG_MISMATCH: got {!r} instead of closure'.format(x))
         return x
     
     # instructions
     
     def eval_LDC(self, args):
-        self.data_stack.append(args[0])
+        self.data_stack.append(to_int32(args[0]))
         
     
     def eval_LD(self, args):

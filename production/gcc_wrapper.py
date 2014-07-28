@@ -1,20 +1,36 @@
 import logging
+logger = logging.getLogger(__name__)
+
+from abc import abstractmethod, ABCMeta
 
 import game
+from gcc_utils import deep_unmarshal, lto_to_cons
 
 
-logger = logging.getLogger(__name__)
+class InterpreterException(Exception):
+    pass
 
 
 class GCCInterface(object):
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
     def call(self, address_or_closure, *args, **kwargs):
-        'Call a function. Put args on the data stack, return contents of the data stack after the function returns'
+        '''Call a function. Put args into a new environment frame, return the top of the data stack after the function returns.
+        IMPORTANT! For convenience should unmarshal (shallowly) the returned value.'''
 
-    def marshall_int(self, i):
-        'Return an opaque handle representing i'
+    @abstractmethod
+    def marshal(self, x):
+        '''Return an opaque handle representing i, which can be an int or a two-element tuple.
+        Shallow, so the elements of the tuple must be marshalled handles.'''
+    
 
-    def marshall_cons(self, car, cdr):
-        'Return an opaque handle representing (car, cdr)'
+    @abstractmethod
+    def unmarshal(self, x):
+        '''If x is an opaque handle representing an int or cons, unmarshal (shallowly for cons) and return it.
+        Otherwise return the opaque handle unchanged.
+        This could cause problems for unmarshall_deep if we had a GCC representing opaque handles as raw tuples, but we don't. 
+        '''
 
     def last_call_ticks(self):
         'Return the number of ticks taken to execute the last call'
@@ -30,20 +46,22 @@ class GCCWrapper(object):
         self.moves = 0
 
     def initialize(self, world, undocumented):
-        world_state = self.marshall_world_state(world)
+        world_state = self.marshal_world_state(world)
         self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented, max_ticks=3072*1000*60)
         self.init_ticks = self.gcc.last_call_ticks()
 
     def get_move(self, world):
-        world_state = self.marshall_world_state(world)
-        self.ai_state, move = self.gcc.call(self.step_function, self.ai_state, world_state, max_ticks=3072*1000)
-        ticks = self.gcc.last_call_ticks()
+        gcc = self.gcc
+        world_state = self.marshal_world_state(world)
+        self.ai_state, move = gcc.call(self.step_function, self.ai_state, world_state, max_ticks=3072*1000)
+        ticks = gcc.last_call_ticks()
         self.moves += 1
         self.total_step_ticks += ticks
         if ticks > self.max_step_ticks:
             self.max_step_ticks = ticks
-        logger.info('ai state: {}'.format(self.ai_state))
-        return move
+        logger.info('ai state: {}'.format(deep_unmarshal(gcc, self.ai_state)))
+        return gcc.unmarshal(move)
+
 
     def get_vm_statistics(self):
         return game.GccStats(
@@ -51,43 +69,28 @@ class GCCWrapper(object):
             avg=1.0 * self.total_step_ticks / self.moves if self.moves else 0,
             total=self.max_step_ticks)
 
-    def marshall_world_state(self, world):
-        # convert world_state to the list/tuple/int representation
+
+    def marshal_world_state(self, world):
         world_state = self.convert_world_state(world)
+        return lto_to_cons(world_state, self.gcc.marshal)
 
-        gcc = self.gcc
-        def rec(item):
-            if isinstance(item, int):
-                return gcc.marshall_int(item)
-
-            if isinstance(item, tuple):
-                curr = None
-            elif isinstance(item, list):
-                curr = gcc.marshall_int(0)
-            else:
-                assert False
-
-            for it in reversed(item):
-                it = rec(it)
-                if curr is None:
-                    curr = it
-                else:
-                    curr = gcc.marshall_cons(it, curr)
-            return curr
-        return rec(world_state)
-
+    
     def convert_world_state(self, world):
+        '''convert world_state to the list/tuple/int representation'''
         return (self.encode_map(world),
                 self.encode_lman(world),
                 self.encode_ghosts(world),
                 world.remaining_fruit_ticks())
 
+    
     def encode_map(self, world):
         return [self.encode_map_row(world, y) for y in range(world.height())]
 
+    
     def encode_map_row(self, world, y):
         return [world.at(x, y) for x in range(world.width())]
 
+    
     def encode_lman(self, world):
         lman = world.lambdaman
         return (world.remaining_power_pill_ticks(),
@@ -96,6 +99,7 @@ class GCCWrapper(object):
                 lman.lives,
                 lman.score)
 
+    
     def encode_ghosts(self, world):
         return [(ghost.vitality, (ghost.x, ghost.y), ghost.direction)
                 for ghost in world.ghosts]

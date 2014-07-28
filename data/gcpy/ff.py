@@ -3,14 +3,16 @@ def fail_():
     return 0
 
 
-def list_length(l):
-    return list_length_rec(l, 0)
+### list utils
 
-def list_length_rec(l, result):
-    if int(l):
+def list_length(xs):
+    return list_length_rec(xs, 0)
+
+def list_length_rec(xs, result):
+    if int(xs):
         return result
     else:
-        return list_length_rec(l[1:], result+1)
+        return list_length_rec(xs[1:], result + 1)
 
 
 def list_append(xs, x):
@@ -28,3 +30,13 @@ def list_update(xs, idx, new_value):
             return (new_value, xs[1:])
         else:
             return (xs[0], list_update(xs[1:], idx - 1, new_value))
+
+
+def list_at(xs, idx):
+    if int(xs):
+        return fail_()
+    else:
+        if idx == 0:
+            return xs[0]
+        else:
+            return list_at(xs[1:], idx - 1)

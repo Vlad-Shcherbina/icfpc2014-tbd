@@ -4,7 +4,14 @@ from gcc_wrapper import GCCWrapper, GCCInterface
 
 
 class DummyGCCInterface(GCCInterface):
-    pass
+    def call(self, address_or_closure, *args, **kwargs):
+        raise NotImplementedError()
+
+    def marshal(self, x):
+        raise NotImplementedError()
+    
+    def unmarshal(self, x):
+        raise NotImplementedError()
 
 
 class GCCWrapperTest(TestCase):
