@@ -4,10 +4,10 @@
     LDF 4  ; $func_locals_main$
     TRAP 1
 ;$func_locals_main$
-    LDF 209  ; $func_always_default$
+    LDF 260  ; $func_always_default$
     LD 1 0
     CAR
-    LDF 597  ; $func_matrix_map$
+    LDF 664  ; $func_matrix_map$
     AP 2
     ST 0 0
     LDC 999888777
@@ -17,7 +17,7 @@
     CONS
     RTN
 ;$func_step$
-    DUM 11
+    DUM 12
     LDC 0
     LDC 0
     LDC 0
@@ -29,8 +29,9 @@
     LDC 0
     LDC 0
     LDC 0
-    LDF 30  ; $func_locals_step$
-    TRAP 11
+    LDC 0
+    LDF 31  ; $func_locals_step$
+    TRAP 12
 ;$func_locals_step$
     LD 1 0
     CDR
@@ -47,102 +48,135 @@
     CDR
     CAR
     ST 0 3
-    LDF 117  ; $func_step_propagate_field$
     LDC 10
+    LDC 256
+    MUL
     LD 0 0
-    LDF 404  ; $func_apply_n_times$
-    AP 3
+    LDF 518  ; $func_list_length$
+    AP 1
+    LD 0 0
+    CAR
+    LDF 518  ; $func_list_length$
+    AP 1
+    MUL
+    DIV
     ST 0 4
+    LD 0 4
+    LDC 10
+    CGT
+    SEL 139 142
+    LDC 1
+    LD 0 4
+    CGT
+    SEL 143 146
+    LDF 147  ; $func_step_propagate_field$
+    LD 0 4
+    LD 0 0
+    LDF 471  ; $func_apply_n_times$
+    AP 3
+    ST 0 5
     LD 0 2
     CDR
     CAR
-    ST 0 5
-    LD 0 5
-    CAR
     ST 0 6
-    LD 0 5
-    CDR
-    ST 0 7
-    LDC 0
-    LD 0 4
     LD 0 6
+    CAR
+    ST 0 7
+    LD 0 6
+    CDR
+    ST 0 8
+    LDC 0
+    LD 0 5
     LD 0 7
+    LD 0 8
     LDC 1
     SUB
-    LDF 590  ; $func_matrix_at$
+    LDF 657  ; $func_matrix_at$
     AP 3
     CONS
-    ST 0 8
+    ST 0 9
     LDC 1
-    LD 0 4
-    LD 0 6
+    LD 0 5
+    LD 0 7
     LDC 1
     ADD
-    LD 0 7
-    LDF 590  ; $func_matrix_at$
+    LD 0 8
+    LDF 657  ; $func_matrix_at$
     AP 3
     CONS
     LDC 2
-    LD 0 4
-    LD 0 6
+    LD 0 5
     LD 0 7
+    LD 0 8
     LDC 1
     ADD
-    LDF 590  ; $func_matrix_at$
+    LDF 657  ; $func_matrix_at$
     AP 3
     CONS
     LDC 3
-    LD 0 4
-    LD 0 6
+    LD 0 5
+    LD 0 7
     LDC 1
     SUB
-    LD 0 7
-    LDF 590  ; $func_matrix_at$
+    LD 0 8
+    LDF 657  ; $func_matrix_at$
     AP 3
     CONS
     LDC 0
     CONS
     CONS
     CONS
-    ST 0 9
-    LDF 194  ; $func_step_pick_best$
-    LD 0 8
-    LD 0 9
-    LDF 424  ; $func_list_fold$
-    AP 3
     ST 0 10
+    LDF 243  ; $func_step_pick_best$
+    LD 0 9
+    LD 0 10
+    LDF 491  ; $func_list_fold$
+    AP 3
+    ST 0 11
     LD 1 0
     CAR
-    LD 0 4
+    LD 0 5
     CONS
-    LD 0 10
+    LD 0 11
     CAR
     CONS
     RTN
+;$label_4$
+    LDC 10
+    ST 0 4
+    JOIN
+;$label_5$
+    JOIN
+;$label_6$
+    LDC 1
+    ST 0 4
+    JOIN
+;$label_7$
+    JOIN
 ;$func_step_propagate_field$
     DUM 3
     LDC 0
     LDC 0
     LDC 0
-    LDF 123  ; $func_locals_propagate_field$
+    LDF 153  ; $func_locals_propagate_field$
     TRAP 3
 ;$func_locals_propagate_field$
     LD 1 0
-    LDF 364  ; $func_diffuse$
+    LDF 431  ; $func_diffuse$
     AP 1
     ST 0 0
-    LDF 257  ; $func_merge_cell$
+    LDF 320  ; $func_merge_cell$
     LD 0 0
     LD 2 1
-    LDF 621  ; $func_matrix_zip$
+    LDF 688  ; $func_matrix_zip$
     AP 2
-    LDF 597  ; $func_matrix_map$
+    LDF 664  ; $func_matrix_map$
     AP 2
     ST 0 1
-    LDF 143  ; $func_step_propagate_field_apply_ghost$
+    LDF 173  ; $func_step_propagate_field_apply_ghost$
     LD 0 1
     LD 2 3
-    LDF 424  ; $func_list_fold$
+    LDF 491  ; $func_list_fold$
     AP 3
     ST 0 2
     LD 0 2
@@ -155,7 +189,7 @@
     LDC 0
     LDC 0
     LDC 0
-    LDF 152  ; $func_locals_apply_ghost$
+    LDF 182  ; $func_locals_apply_ghost$
     TRAP 6
 ;$func_locals_apply_ghost$
     LD 1 1
@@ -174,32 +208,53 @@
     LD 1 0
     LD 0 2
     LD 0 3
-    LDF 590  ; $func_matrix_at$
+    LDF 657  ; $func_matrix_at$
     AP 3
     ST 0 4
     LD 0 0
     LDC 1
     CEQ
-    SEL 181 190
+    SEL 211 224
     LD 1 0
     LD 0 2
     LD 0 3
     LD 0 5
-    LDF 609  ; $func_matrix_update$
+    LDF 676  ; $func_matrix_update$
     TAP 4
-;$label_8$
+;$label_12$
     LD 0 4
     CAR
     LDC 905
-    LDF 396  ; $func_max$
+    LDF 463  ; $func_max$
     AP 2
+    LD 0 4
+    CDR
+    CAR
     LDC 0
+    CONS
     CONS
     ST 0 5
     JOIN
-;$label_9$
-    LDF 205  ; $func_default$
-    AP 0
+;$label_13$
+    LD 0 0
+    LDC 0
+    CEQ
+    SEL 229 236
+    JOIN
+;$label_14$
+    LDC 0
+    LDC 2
+    LDC 0
+    CONS
+    CONS
+    ST 0 5
+    JOIN
+;$label_15$
+    LDC 0
+    LDC 1
+    LDC 0
+    CONS
+    CONS
     ST 0 5
     JOIN
 ;$func_step_pick_best$
@@ -207,73 +262,87 @@
     CDR
     LD 0 1
     CDR
-    LDF 211  ; $func_better$
+    LDF 262  ; $func_better$
     AP 2
-    TSEL 201 203
-;$label_11$
+    TSEL 250 252
+;$label_17$
     LD 0 0
     RTN
-;$label_12$
+;$label_18$
     LD 0 1
     RTN
 ;$func_default$
     LDC 0
     LDC 0
+    LDC 0
+    CONS
     CONS
     RTN
 ;$func_always_default$
-    LDF 205  ; $func_default$
+    LDF 254  ; $func_default$
     TAP 0
 ;$func_better$
     LD 0 0
     CAR
+    LDC 100
+    LD 0 0
+    CDR
+    CAR
+    MUL
+    SUB
     LD 0 1
     CAR
+    LDC 100
+    LD 0 1
+    CDR
+    CAR
+    MUL
+    SUB
     CGT
     RTN
 ;$func_shift_up$
     LD 0 0
     CDR
-    LDF 209  ; $func_always_default$
+    LDF 260  ; $func_always_default$
     LD 0 0
     CAR
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     AP 2
-    LDF 467  ; $func_list_append$
+    LDF 534  ; $func_list_append$
     TAP 2
 ;$func_shift_down$
-    LDF 209  ; $func_always_default$
+    LDF 260  ; $func_always_default$
     LD 0 0
     CAR
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     AP 2
     LD 0 0
-    LDF 566  ; $func_list_drop_last$
+    LDF 633  ; $func_list_drop_last$
     AP 1
     CONS
     RTN
 ;$func_shift_left$
-    LDF 240  ; $func_shift_left_shift_row_left$
+    LDF 303  ; $func_shift_left_shift_row_left$
     LD 0 0
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_shift_left_shift_row_left$
     LD 0 0
     CDR
-    LDF 205  ; $func_default$
+    LDF 254  ; $func_default$
     AP 0
-    LDF 467  ; $func_list_append$
+    LDF 534  ; $func_list_append$
     TAP 2
 ;$func_shift_right$
-    LDF 250  ; $func_shift_right_shift_row_right$
+    LDF 313  ; $func_shift_right_shift_row_right$
     LD 0 0
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_shift_right_shift_row_right$
-    LDF 205  ; $func_default$
+    LDF 254  ; $func_default$
     AP 0
     LD 0 0
-    LDF 566  ; $func_list_drop_last$
+    LDF 633  ; $func_list_drop_last$
     AP 1
     CONS
     RTN
@@ -281,7 +350,7 @@
     DUM 2
     LDC 0
     LDC 0
-    LDF 262  ; $func_locals_merge_cell$
+    LDF 325  ; $func_locals_merge_cell$
     TRAP 2
 ;$func_locals_merge_cell$
     LD 1 0
@@ -293,79 +362,83 @@
     LD 0 1
     LDC 0
     CEQ
-    TSEL 272 276
-;$label_24$
+    TSEL 335 341
+;$label_30$
+    LDC 0
     LDC 0
     LDC 0
     CONS
+    CONS
     RTN
-;$label_25$
+;$label_31$
     LD 0 1
     LDC 2
     CEQ
-    TSEL 280 288
-;$label_26$
+    TSEL 345 354
+;$label_32$
     LD 0 0
     CAR
     LDC 900
-    LDF 396  ; $func_max$
+    LDF 463  ; $func_max$
     AP 2
-    LDC 0
+    LD 0 0
+    CDR
     CONS
     RTN
-;$label_27$
+;$label_33$
     LD 0 1
     LDC 3
     CEQ
-    TSEL 292 300
-;$label_28$
+    TSEL 358 367
+;$label_34$
     LD 0 0
     CAR
     LDC 905
-    LDF 396  ; $func_max$
+    LDF 463  ; $func_max$
     AP 2
-    LDC 0
+    LD 0 0
+    CDR
     CONS
     RTN
-;$label_29$
+;$label_35$
     LD 0 0
     RTN
 ;$func_decrement$
-    LDF 306  ; $func_decrement_cell_dec$
+    LDF 373  ; $func_decrement_cell_dec$
     LD 0 0
-    LDF 597  ; $func_matrix_map$
+    LDF 664  ; $func_matrix_map$
     TAP 2
 ;$func_decrement_cell_dec$
-    LDF 310  ; $func_decrement_cell_dec_dec$
+    LDF 377  ; $func_decrement_cell_dec_dec$
     LD 0 0
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_decrement_cell_dec_dec$
     LD 0 0
     LDC 0
     CEQ
-    TSEL 314 316
-;$label_33$
+    TSEL 381 383
+;$label_39$
     LDC 0
     RTN
-;$label_34$
+;$label_40$
     LD 0 0
     LDC 1
     SUB
     RTN
 ;$func_combine$
-    LDF 327  ; $func_combine_cell_max$
+    LDF 394  ; $func_combine_cell_max$
     LD 0 0
     LD 0 1
-    LDF 621  ; $func_matrix_zip$
+    LDF 688  ; $func_matrix_zip$
     AP 2
-    LDF 597  ; $func_matrix_map$
+    LDF 664  ; $func_matrix_map$
     TAP 2
 ;$func_combine_cell_max$
     DUM 2
     LDC 0
     LDC 0
-    LDF 332  ; $func_locals_cell_max$
+    LDF 399  ; $func_locals_cell_max$
     TRAP 2
 ;$func_locals_cell_max$
     LD 1 0
@@ -374,18 +447,18 @@
     LD 1 0
     CDR
     ST 0 1
-    LDF 345  ; $func_combine_cell_max_max_of_pair$
+    LDF 412  ; $func_combine_cell_max_max_of_pair$
     LD 0 0
     LD 0 1
-    LDF 548  ; $func_list_zip$
+    LDF 615  ; $func_list_zip$
     AP 2
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_combine_cell_max_max_of_pair$
     DUM 2
     LDC 0
     LDC 0
-    LDF 350  ; $func_locals_max_of_pair$
+    LDF 417  ; $func_locals_max_of_pair$
     TRAP 2
 ;$func_locals_max_of_pair$
     LD 1 0
@@ -397,40 +470,40 @@
     LD 0 0
     LD 0 1
     CGT
-    TSEL 360 362
-;$label_40$
+    TSEL 427 429
+;$label_46$
     LD 0 0
     RTN
-;$label_41$
+;$label_47$
     LD 0 1
     RTN
 ;$func_diffuse$
     DUM 2
     LDC 0
     LDC 0
-    LDF 369  ; $func_locals_diffuse$
+    LDF 436  ; $func_locals_diffuse$
     TRAP 2
 ;$func_locals_diffuse$
     LD 1 0
-    LDF 236  ; $func_shift_left$
+    LDF 299  ; $func_shift_left$
     AP 1
     LD 1 0
-    LDF 217  ; $func_shift_up$
+    LDF 280  ; $func_shift_up$
     AP 1
-    LDF 320  ; $func_combine$
+    LDF 387  ; $func_combine$
     AP 2
     ST 0 0
     LD 0 0
-    LDF 226  ; $func_shift_down$
+    LDF 289  ; $func_shift_down$
     AP 1
-    LDF 246  ; $func_shift_right$
+    LDF 309  ; $func_shift_right$
     AP 1
     ST 0 1
     LD 0 0
     LD 0 1
-    LDF 320  ; $func_combine$
+    LDF 387  ; $func_combine$
     AP 2
-    LDF 302  ; $func_decrement$
+    LDF 369  ; $func_decrement$
     TAP 1
 ;$func_fail_$
     LDC 0
@@ -444,22 +517,22 @@
     LD 0 0
     LD 0 1
     CGT
-    TSEL 400 402
-;$label_47$
+    TSEL 467 469
+;$label_53$
     LD 0 0
     RTN
-;$label_48$
+;$label_54$
     LD 0 1
     RTN
 ;$func_apply_n_times$
     LD 0 1
     LDC 0
     CEQ
-    TSEL 408 410
-;$label_50$
+    TSEL 475 477
+;$label_56$
     LD 0 2
     RTN
-;$label_51$
+;$label_57$
     LD 0 0
     LD 0 1
     LDC 1
@@ -467,22 +540,22 @@
     LD 0 2
     LD 0 0
     AP 1
-    LDF 404  ; $func_apply_n_times$
+    LDF 471  ; $func_apply_n_times$
     TAP 3
 ;$func_inc_n_times_for_test$
-    LDF 392  ; $func_inc$
+    LDF 459  ; $func_inc$
     LD 0 0
     LD 0 1
-    LDF 404  ; $func_apply_n_times$
+    LDF 471  ; $func_apply_n_times$
     TAP 3
 ;$func_list_fold$
     LD 0 2
     ATOM
-    TSEL 427 429
-;$label_54$
+    TSEL 494 496
+;$label_60$
     LD 0 1
     RTN
-;$label_55$
+;$label_61$
     LD 0 0
     LD 0 1
     LD 0 2
@@ -491,7 +564,7 @@
     AP 2
     LD 0 2
     CDR
-    LDF 424  ; $func_list_fold$
+    LDF 491  ; $func_list_fold$
     TAP 3
 ;$func_mk_pair$
     LD 0 0
@@ -499,10 +572,10 @@
     CONS
     RTN
 ;$func_fold_mk_pair_for_test$
-    LDF 439  ; $func_mk_pair$
+    LDF 506  ; $func_mk_pair$
     LD 0 0
     LD 0 1
-    LDF 424  ; $func_list_fold$
+    LDF 491  ; $func_list_fold$
     TAP 3
 ;$func_list_tail$
     LD 0 0
@@ -511,61 +584,61 @@
 ;$func_list_length$
     LD 0 0
     LDC 0
-    LDF 455  ; $func_list_length_rec$
+    LDF 522  ; $func_list_length_rec$
     TAP 2
 ;$func_list_length_rec$
     LD 0 0
     ATOM
-    TSEL 458 460
-;$label_61$
+    TSEL 525 527
+;$label_67$
     LD 0 1
     RTN
-;$label_62$
+;$label_68$
     LD 0 0
     CDR
     LD 0 1
     LDC 1
     ADD
-    LDF 455  ; $func_list_length_rec$
+    LDF 522  ; $func_list_length_rec$
     TAP 2
 ;$func_list_append$
     LD 0 0
     ATOM
-    TSEL 470 474
-;$label_64$
+    TSEL 537 541
+;$label_70$
     LD 0 1
     LDC 0
     CONS
     RTN
-;$label_65$
+;$label_71$
     LD 0 0
     CAR
     LD 0 0
     CDR
     LD 0 1
-    LDF 467  ; $func_list_append$
+    LDF 534  ; $func_list_append$
     AP 2
     CONS
     RTN
 ;$func_list_update$
     LD 0 0
     ATOM
-    TSEL 486 488
-;$label_67$
-    LDF 390  ; $func_fail_$
+    TSEL 553 555
+;$label_73$
+    LDF 457  ; $func_fail_$
     TAP 0
-;$label_68$
+;$label_74$
     LD 0 1
     LDC 0
     CEQ
-    TSEL 492 497
-;$label_69$
+    TSEL 559 564
+;$label_75$
     LD 0 2
     LD 0 0
     CDR
     CONS
     RTN
-;$label_70$
+;$label_76$
     LD 0 0
     CAR
     LD 0 0
@@ -574,42 +647,42 @@
     LDC 1
     SUB
     LD 0 2
-    LDF 483  ; $func_list_update$
+    LDF 550  ; $func_list_update$
     AP 3
     CONS
     RTN
 ;$func_list_at$
     LD 0 0
     ATOM
-    TSEL 512 514
-;$label_72$
-    LDF 390  ; $func_fail_$
+    TSEL 579 581
+;$label_78$
+    LDF 457  ; $func_fail_$
     TAP 0
-;$label_73$
+;$label_79$
     LD 0 1
     LDC 0
     CEQ
-    TSEL 518 521
-;$label_74$
+    TSEL 585 588
+;$label_80$
     LD 0 0
     CAR
     RTN
-;$label_75$
+;$label_81$
     LD 0 0
     CDR
     LD 0 1
     LDC 1
     SUB
-    LDF 509  ; $func_list_at$
+    LDF 576  ; $func_list_at$
     TAP 2
 ;$func_list_map$
     LD 0 1
     ATOM
-    TSEL 531 533
-;$label_77$
+    TSEL 598 600
+;$label_83$
     LD 0 1
     RTN
-;$label_78$
+;$label_84$
     LD 0 1
     CAR
     LD 0 0
@@ -617,23 +690,23 @@
     LD 0 0
     LD 0 1
     CDR
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     AP 2
     CONS
     RTN
 ;$func_list_inc_for_test$
-    LDF 392  ; $func_inc$
+    LDF 459  ; $func_inc$
     LD 0 0
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_list_zip$
     LD 0 0
     ATOM
-    TSEL 551 553
-;$label_81$
+    TSEL 618 620
+;$label_87$
     LDC 0
     RTN
-;$label_82$
+;$label_88$
     LD 0 0
     CAR
     LD 0 1
@@ -643,89 +716,89 @@
     CDR
     LD 0 1
     CDR
-    LDF 548  ; $func_list_zip$
+    LDF 615  ; $func_list_zip$
     AP 2
     CONS
     RTN
 ;$func_list_drop_last$
     DUM 1
     LDC 0
-    LDF 570  ; $func_locals_list_drop_last$
+    LDF 637  ; $func_locals_list_drop_last$
     TRAP 1
 ;$func_locals_list_drop_last$
     LD 1 0
     ATOM
-    TSEL 573 575
-;$label_85$
-    LDF 390  ; $func_fail_$
+    TSEL 640 642
+;$label_91$
+    LDF 457  ; $func_fail_$
     TAP 0
-;$label_86$
+;$label_92$
     LD 1 0
     CDR
     ST 0 0
     LD 0 0
     ATOM
-    TSEL 581 583
-;$label_87$
+    TSEL 648 650
+;$label_93$
     LDC 0
     RTN
-;$label_88$
+;$label_94$
     LD 1 0
     CAR
     LD 0 0
-    LDF 566  ; $func_list_drop_last$
+    LDF 633  ; $func_list_drop_last$
     AP 1
     CONS
     RTN
 ;$func_matrix_at$
     LD 0 0
     LD 0 2
-    LDF 509  ; $func_list_at$
+    LDF 576  ; $func_list_at$
     AP 2
     LD 0 1
-    LDF 509  ; $func_list_at$
+    LDF 576  ; $func_list_at$
     TAP 2
 ;$func_matrix_map$
-    LDF 601  ; $func_matrix_map_line_map$
+    LDF 668  ; $func_matrix_map_line_map$
     LD 0 1
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_matrix_map_line_map$
     LD 1 0
     LD 0 0
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_matrix_inc_for_test$
-    LDF 392  ; $func_inc$
+    LDF 459  ; $func_inc$
     LD 0 0
-    LDF 597  ; $func_matrix_map$
+    LDF 664  ; $func_matrix_map$
     TAP 2
 ;$func_matrix_update$
     LD 0 0
     LD 0 2
     LD 0 0
     LD 0 2
-    LDF 509  ; $func_list_at$
+    LDF 576  ; $func_list_at$
     AP 2
     LD 0 1
     LD 0 3
-    LDF 483  ; $func_list_update$
+    LDF 550  ; $func_list_update$
     AP 3
-    LDF 483  ; $func_list_update$
+    LDF 550  ; $func_list_update$
     TAP 3
 ;$func_matrix_zip$
-    LDF 628  ; $func_matrix_zip_lines_zip$
+    LDF 695  ; $func_matrix_zip_lines_zip$
     LD 0 0
     LD 0 1
-    LDF 548  ; $func_list_zip$
+    LDF 615  ; $func_list_zip$
     AP 2
-    LDF 528  ; $func_list_map$
+    LDF 595  ; $func_list_map$
     TAP 2
 ;$func_matrix_zip_lines_zip$
     DUM 2
     LDC 0
     LDC 0
-    LDF 633  ; $func_locals_lines_zip$
+    LDF 700  ; $func_locals_lines_zip$
     TRAP 2
 ;$func_locals_lines_zip$
     LD 1 0
@@ -736,6 +809,6 @@
     ST 0 1
     LD 0 0
     LD 0 1
-    LDF 548  ; $func_list_zip$
+    LDF 615  ; $func_list_zip$
     TAP 2
 

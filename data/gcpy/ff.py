@@ -36,7 +36,12 @@ def step(state, world):
 
         return f3
 
-    field = apply_n_times(propagate_field, 10, old_field)
+    num_iterations = 10 * 256 / (list_length(old_field) * list_length(old_field[0]))
+    if num_iterations > 10:
+        num_iterations = 10
+    if num_iterations < 1:
+        num_iterations = 1
+    field = apply_n_times(propagate_field, num_iterations, old_field)
 
     my_coords = me[1]
     my_x = my_coords[0]
@@ -116,6 +121,9 @@ def decrement(field):
 
 def combine(field1, field2):
     def cell_max(pair):
+        #x = pair[0]
+        #y = pair[1:]
+        #return (max(x[0], y[0]), max(x[1], y[1]), 0)
         xs = pair[0]
         ys = pair[1:]
         def max_of_pair(pair):

@@ -136,25 +136,28 @@ def main():
         #     'gen/hz.txt',
         #     '../../twigil_scratch/map_91_91_100_10.txt',
         #],
-        maps=all_rotations(all_maps(max_size=1500)),
+        #maps=all_rotations(all_maps(max_size=1500)),
+        maps=all_maps(max_size=500),
         lm_specs=[
             #'py:lm_ai.Oscillating(frequency=5)',
             #'py:lm_ai.NearestPill()',
             #'gcc_file:YoleGCC:../data/lms/right.gcc',
-            'py:lm_ai.NearestPill(straight=True)',
-            'py:lm_ai.TunnelDigger()',
-            'py:lm_wave.Wavy(50)',
+            #'py:lm_ai.NearestPill(straight=True)',
+            #'py:lm_ai.TunnelDigger()',
+            #'py:lm_wave.Wavy(50)',
             'py:lm_ff.ForceField()',
+            'gcpy_file:YoleGCC:ff.py',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
         ],
         ghost_team_specs=[
-            ['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
-            ['py:GhostAI_Shortest'],
-            ['py:GhostAI_Red', 'py:GhostAI_Pink'],
-            ['py:GhostAI_Red'],
+            #['py:GhostAI_Random', 'ghc:miner.ghc', 'ghc:fickle.ghc', 'ghc:flipper.ghc'],  # degenerate scum
+            #['py:GhostAI_Shortest'],
+            #['py:GhostAI_Red', 'py:GhostAI_Pink'],
+            #['py:GhostAI_Red'],
             ['ghosthon:../data/ghosts/red.ghy'],
+            ['ghosthon:../data/ghosts/redsplitt.ghy'],
             #['ghc:red.ghc'],
-            ['py:Hunter'],
+            #['py:Hunter'],
         ],
         parallel=True)
 
