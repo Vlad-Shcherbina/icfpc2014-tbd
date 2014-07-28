@@ -25,9 +25,11 @@ def step(state, world):
             ghost_y = coords[1:]
             old_cell = matrix_at(ff, ghost_x, ghost_y)
             if vitality == 1:  # fright mode
-                new_cell = (max(old_cell[0], 905), 0)
-            else:
-                new_cell = default()
+                new_cell = (max(old_cell[0], 905), old_cell[1], 0)
+            elif vitality == 0:  # standard
+                new_cell = (0, 2, 0)
+            else:  # invisible
+                new_cell = (0, 1, 0)
             return matrix_update(ff, ghost_x, ghost_y, new_cell)
 
         f3 = list_fold(apply_ghost, f2, ghosts)
@@ -59,14 +61,14 @@ def step(state, world):
 
 
 def default():
-    return (0, 0)
+    return (0, 0, 0)
 
 def always_default(x):
     return default()
 
 
 def better(f_cell1, f_cell2):
-    return f_cell1[0] > f_cell2[0]
+    return f_cell1[0] - 100*f_cell1[1] > f_cell2[0] - 100*f_cell2[1]
 
 
 def shift_up(mat):
@@ -90,11 +92,11 @@ def merge_cell(pair):
     f_cell = pair[0]
     map_cell = pair[1:]
     if map_cell == 0:  # WALL
-        return (0, 0)
+        return (0, 0, 0)
     elif map_cell == 2:  # PILL
-        return (max(f_cell[0], 900), 0)
+        return (max(f_cell[0], 900), f_cell[1:])
     elif map_cell == 3:  # POWER_PILL
-        return (max(f_cell[0], 905), 0)
+        return (max(f_cell[0], 905), f_cell[1:])
     # elif map_cell == 4:  # FRUIT
     #     return (max(f_cell[0], 910), 0)
     else:
