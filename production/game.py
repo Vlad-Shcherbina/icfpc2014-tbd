@@ -7,6 +7,9 @@ import ghost_ai
 from asm_parser import parse_gcc
 import ghosthon
 
+MAX_TICKS = 3072 * 1000
+MAX_TICKS_INIT = MAX_TICKS * 60
+
 
 UP = 0
 RIGHT = 1

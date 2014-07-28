@@ -47,13 +47,13 @@ class GCCWrapper(object):
 
     def initialize(self, world, undocumented):
         world_state = self.marshal_world_state(world)
-        self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented, max_ticks=3072*1000*60)
+        self.ai_state, self.step_function = self.gcc.call(0, world_state, undocumented, max_ticks=game.MAX_TICKS_INIT)
         self.init_ticks = self.gcc.last_call_ticks()
 
     def get_move(self, world):
         gcc = self.gcc
         world_state = self.marshal_world_state(world)
-        self.ai_state, move = gcc.call(self.step_function, self.ai_state, world_state, max_ticks=3072*1000)
+        self.ai_state, move = gcc.call(self.step_function, self.ai_state, world_state, max_ticks=game.MAX_TICKS)
         ticks = gcc.last_call_ticks()
         self.moves += 1
         self.total_step_ticks += ticks
