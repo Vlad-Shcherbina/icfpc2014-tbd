@@ -37,7 +37,7 @@ def lto_to_cons(x, marshal=lambda x: x):
         curr = marshal(0)
     else:
         return marshal(x)
-        
+
     for it in reversed(x):
         it = lto_to_cons(it, marshal)
         if curr is None:
@@ -45,7 +45,7 @@ def lto_to_cons(x, marshal=lambda x: x):
         else:
             curr = marshal((it, curr))
     return curr
-    
+
 
 def cons_to_tuple(x, length):
     '''
@@ -71,6 +71,10 @@ def cons_to_list(x):
         elem, x = x
         result.append(elem)
     return result
+
+
+def is_cons(x):
+    return type(x) == tuple
 
 
 if __name__ == "__main__":

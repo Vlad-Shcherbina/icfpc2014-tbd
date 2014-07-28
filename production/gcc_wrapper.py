@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from abc import abstractmethod, ABCMeta
 
 import game
-from gcc_utils import deep_unmarshal, lto_to_cons
+from gcc_utils import deep_unmarshal, lto_to_cons, is_cons, cons_to_list
 
 
 class InterpreterException(Exception):
@@ -13,7 +13,7 @@ class InterpreterException(Exception):
 
 class GCCInterface(object):
     __metaclass__ = ABCMeta
-    
+
     @abstractmethod
     def call(self, address_or_closure, *args, **kwargs):
         '''Call a function. Put args into a new environment frame, return the top of the data stack after the function returns.
@@ -23,13 +23,13 @@ class GCCInterface(object):
     def marshal(self, x):
         '''Return an opaque handle representing i, which can be an int or a two-element tuple.
         Shallow, so the elements of the tuple must be marshalled handles.'''
-    
+
 
     @abstractmethod
     def unmarshal(self, x):
         '''If x is an opaque handle representing an int or cons, unmarshal (shallowly for cons) and return it.
         Otherwise return the opaque handle unchanged.
-        This could cause problems for unmarshall_deep if we had a GCC representing opaque handles as raw tuples, but we don't. 
+        This could cause problems for unmarshall_deep if we had a GCC representing opaque handles as raw tuples, but we don't.
         '''
 
     def last_call_ticks(self):
@@ -59,8 +59,24 @@ class GCCWrapper(object):
         self.total_step_ticks += ticks
         if ticks > self.max_step_ticks:
             self.max_step_ticks = ticks
-        logger.info('ai state: {}'.format(deep_unmarshal(gcc, self.ai_state)))
+
+        self.log_ai_state(deep_unmarshal(gcc, self.ai_state))
         return gcc.unmarshal(move)
+
+
+    @staticmethod
+    def log_ai_state(ai_state):
+        if is_cons(ai_state) and ai_state[0] == 999888777: # password from ff.py
+            field = ai_state[1]
+            field = map(cons_to_list, cons_to_list(field))
+            logger.info('ff field state:')
+            for line in field:
+                s = ''
+                for e in line:
+                    s += '{:3}'.format(e)
+                logger.info(s)
+        else:
+            logger.info('ai state: {}'.format(ai_state))
 
 
     def get_vm_statistics(self):
@@ -74,7 +90,7 @@ class GCCWrapper(object):
         world_state = self.convert_world_state(world)
         return lto_to_cons(world_state, self.gcc.marshal)
 
-    
+
     def convert_world_state(self, world):
         '''convert world_state to the list/tuple/int representation'''
         return (self.encode_map(world),
@@ -82,15 +98,15 @@ class GCCWrapper(object):
                 self.encode_ghosts(world),
                 world.remaining_fruit_ticks())
 
-    
+
     def encode_map(self, world):
         return [self.encode_map_row(world, y) for y in range(world.height())]
 
-    
+
     def encode_map_row(self, world, y):
         return [world.at(x, y) for x in range(world.width())]
 
-    
+
     def encode_lman(self, world):
         lman = world.lambdaman
         return (world.remaining_power_pill_ticks(),
@@ -99,7 +115,7 @@ class GCCWrapper(object):
                 lman.lives,
                 lman.score)
 
-    
+
     def encode_ghosts(self, world):
         return [(ghost.vitality, (ghost.x, ghost.y), ghost.direction)
                 for ghost in world.ghosts]

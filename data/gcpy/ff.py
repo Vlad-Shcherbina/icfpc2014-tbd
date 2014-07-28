@@ -1,3 +1,14 @@
+def main(world, _ghosts):
+  return ((999888777, world[0]), step)
+
+
+def step(state, world):
+    return (state, 1)
+
+
+################################################
+
+
 def fail_():
     # TODO, like assert False
     return 0
