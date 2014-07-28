@@ -1,4 +1,4 @@
-# gcpy.py -p ff.py -c -o ff.gcc
+# python gcpy.py -p ff.py -c -o ../data/lms/ff.gcc
 
 def main(world, _ghosts):
     field = matrix_map(always_default, world[0])
