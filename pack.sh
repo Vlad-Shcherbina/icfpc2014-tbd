@@ -30,5 +30,5 @@ sha1sum $FILENAME.gz
 echo "secret token for submission: 69ce5cb1-66e0-4a5b-b1dd-ac97269b74e3"
 
 echo "will now upload file"
-#curl --form "file=@$FILENAME.gz" "http://f.nn.lv/?f=rest"
+curl --form "file=@$FILENAME.gz" "http://f.nn.lv/?f=rest"
 echo ""
