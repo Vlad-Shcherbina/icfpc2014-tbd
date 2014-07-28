@@ -310,6 +310,17 @@ class GccConstant(GccASTNode):
         builder.add_instruction("ldc", self.value, source=self.source_location)
 
 
+class GccNot(GccASTNode):
+    def __init__(self, operand):
+        GccASTNode.__init__(self)
+        self.operand = operand
+
+    def emit(self, builder, context):
+        self.operand.emit(builder, context)
+        builder.add_instruction('ldc', 0, source=self.source_location)
+        builder.add_instruction('ceq', source=self.source_location)
+
+
 class GccBinaryOp(GccASTNode):
     def __init__(self, op1, op2, instruction):
         GccASTNode.__init__(self)
@@ -426,6 +437,44 @@ class GccConditionalBlock(GccASTNode):
         context.enqueue_block(self.false_branch, false_label, terminator)
         builder.add_instruction(instruction, true_label, false_label,
                                 source=self.source_location)
+
+
+class GccWhileBlock(GccASTNode):
+    def __init__(self, condition):
+        super(GccWhileBlock, self).__init__()
+        self.condition = condition
+        self.code = GccCodeBlock()
+
+    def emit(self, builder, context):
+        condition, code = self.condition, self.code
+        begin_label = builder.allocate_label()
+        end_label = builder.allocate_label()
+        not_condition = isinstance(condition, GccNot)
+        # optimize not away
+        if not_condition:        
+            condition.operand.emit(builder, context)
+            builder.add_instruction('tsel', end_label, begin_label,
+                                    source=self.source_location)
+        else:
+            condition.emit(builder, context)
+            builder.add_instruction('tsel', end_label, begin_label,
+                                    source=self.source_location)
+            
+        builder.resolve_label(begin_label)
+        code.emit(builder, context)
+        
+        if not_condition:        
+            condition.operand.emit(builder, context)
+            builder.add_instruction('tsel', end_label, begin_label, 
+                                    source=self.source_location)
+        else:
+            condition.emit(builder, context)
+            builder.add_instruction('tsel', end_label, begin_label, 
+                                    source=self.source_location)
+        
+        builder.resolve_label(end_label)
+        
+        
 
 
 class GccTuple(GccASTNode):

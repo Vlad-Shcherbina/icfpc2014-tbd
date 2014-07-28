@@ -67,6 +67,15 @@ def convert_python_to_gcc_statement(stmt):
     elif isinstance(stmt, Assign):
         result = GccAssignment(stmt.targets[0].id,
                                convert_python_to_gcc_ast(stmt.value))
+    elif isinstance(stmt, While):
+        test = convert_python_to_gcc_ast(stmt.test)
+        cond = GccWhileBlock(test)
+        for child in stmt.body:
+            if isinstance(child, Pass):
+                continue
+            cond.code.instructions.append(
+                convert_python_to_gcc_statement(child))
+        result = cond
     else:
         raise Exception("Unsupported statement type {0}".format(stmt))
     result.source_location = (stmt.lineno, stmt.col_offset)
@@ -81,6 +90,13 @@ def convert_python_to_gcc_ast(ast):
             raise Exception("Integer literal out of range: {}".format(ast.n))
         result = GccConstant(ast.n)
 
+    elif isinstance(ast, UnaryOp):
+        operand = convert_python_to_gcc_ast(ast.operand)
+        if isinstance(ast.op, Not):
+            result = GccNot(operand)
+        else:
+            raise Exception("Unsupported binary operation type {0}".format(ast.op))
+        
     elif isinstance(ast, BinOp):
         left = convert_python_to_gcc_ast(ast.left)
         right = convert_python_to_gcc_ast(ast.right)

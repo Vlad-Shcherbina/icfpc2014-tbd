@@ -62,6 +62,10 @@ def list_length_test():
         assert call(script, 'list_length', lto_to_cons([])) == 0
         assert call(script, 'list_length', lto_to_cons(range(5))) == 5
 
+def list_length_fast_test():
+    for script in 'list_length.py', 'ff.py':
+        assert call(script, 'list_length_fast', lto_to_cons([])) == 0
+        assert call(script, 'list_length_fast', lto_to_cons(range(5))) == 5
 
 def list_append_test():
     assert (

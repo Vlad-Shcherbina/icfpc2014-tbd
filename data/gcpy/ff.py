@@ -193,6 +193,12 @@ def list_length_rec(xs, result):
     else:
         return list_length_rec(xs[1:], result + 1)
 
+def list_length_fast(xs):
+    res = 0
+    while not nil(xs):
+        xs = cdr(xs)
+        res = res + 1
+    return res
 
 def list_append(xs, x):
     if nil(xs):
