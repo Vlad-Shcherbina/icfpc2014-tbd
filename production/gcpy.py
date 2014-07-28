@@ -40,7 +40,7 @@ def main():
     machine = GccMachine(parse_gcc(builder.text))
     wrapper = GCCWrapper(machine)
     map = load_map(args.map)
-    world_state = wrapper.marshall_world_state(map)
+    world_state = wrapper.marshal_world_state(map)
     pp.pprint(machine.call(0, world_state, *(args.args)))
 
 if __name__ == "__main__":

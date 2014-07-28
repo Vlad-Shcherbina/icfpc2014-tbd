@@ -2,7 +2,7 @@
 import sys
 from command_enums import GCC_CMD
 from gcc_wrapper import GCCInterface
-from gcc_utils import to_int32
+from gcc_utils import to_int32, deep_marshal, deep_unmarshal
 
 class VorberGCC(GCCInterface):
     def __init__(self, program, verbose=False):
@@ -77,7 +77,8 @@ class VorberGCC(GCCInterface):
             
 
     def unmarshal(self, x):
-        if x['tag'] in ('int', 'tuple'):
+        print x
+        if x['tag'] in ('int', 'cons'):
             return x['value']
         else:
             return x
@@ -86,7 +87,7 @@ class VorberGCC(GCCInterface):
     def call(self, address_or_closure, *args, **kwargs):
         self.terminal_state = False
         self.__log('call: ' + str(self) + '::'+str(address_or_closure))
-        fp = {'frame_tag':'FRAME_NO_TAG', 'parent':-1, 'values':[arg for arg in args], 'size':len(args)}
+        fp = {'frame_tag':'FRAME_NO_TAG', 'parent':-1, 'values':[deep_marshal(self.marshal, arg) for arg in args], 'size':len(args)}
         self.ctrl_stack.append({'tag':'TAG_STOP'})
         if isinstance(address_or_closure, (int, long)):
             self.env_stack.append(fp)
@@ -102,11 +103,10 @@ class VorberGCC(GCCInterface):
             self.env_stack = self.env_stack[:self.reg_e+1]
             self.env_stack[self.reg_e] = fp
         self.run()
-        'return everything on the data stack'
         assert len(self.data_stack) == 1
-        ret = self.unmarshal(self.data_stack.pop())
+        ret = self.data_stack.pop()
         self.__log('call: returning' + str(ret))
-        return ret
+        return deep_unmarshal(self.unmarshal, ret)
 
 
 
@@ -140,7 +140,7 @@ class VorberGCC(GCCInterface):
         if self.terminal_state:
             return
         y = x['value'][idx]
-        self.data_stack.append({'tag':'int', 'value':y})
+        self.data_stack.append(y)
         self.reg_c += 1
 
     def __match_tag(self, x,tag):
@@ -190,14 +190,15 @@ class VorberGCC(GCCInterface):
         elif op == GCC_CMD.CAR:
             self.__process_extract_cons(0)
         elif op == GCC_CMD.CDR:
-            self.__process_extract_cons(0)
-        elif op == GCC_CMD.SEL:
+            self.__process_extract_cons(1)
+        elif op == GCC_CMD.SEL or op == GCC_CMD.TSEL:
             x = self.data_stack.pop()
             self.__match_tag(x, 'int')
             if self.terminal_state:
                 return
-            self.ctrl_stack.append({'tag':'join', 'value':self.reg_c+1})
-            self.reg_c = cmd.args[x == 0]
+            if op == GCC_CMD.SEL:
+                self.ctrl_stack.append({'tag':'join', 'value':self.reg_c+1})
+            self.reg_c = cmd.args[x["value"] == 0]
         elif op == GCC_CMD.JOIN:
             x = self.ctrl_stack.pop()
             if x['tag'] != 'join':
@@ -208,7 +209,7 @@ class VorberGCC(GCCInterface):
             closure = (cmd.args[0], self.reg_e)
             self.data_stack.append({'tag':'closure','value':closure})
             self.reg_c += 1
-        elif op == GCC_CMD.AP:
+        elif op == GCC_CMD.AP or op == GCC_CMD.TAP:
             x = self.data_stack.pop()
             self.__match_tag(x,'closure')
             if self.terminal_state:
@@ -221,8 +222,9 @@ class VorberGCC(GCCInterface):
                 y = self.data_stack.pop()
                 fp['values'][i] = y
                 i -= 1
-            self.ctrl_stack.append({'tag':'WTFNOTAG!11AP', 'value':self.reg_e})
-            self.ctrl_stack.append({'tag':'TAG_RET', 'value':self.reg_c+1})
+            if op == GCC_CMD.AP:
+                self.ctrl_stack.append({'tag':'WTFNOTAG!11AP', 'value':self.reg_e})
+                self.ctrl_stack.append({'tag':'TAG_RET', 'value':self.reg_c+1})
             self.env_stack.append(fp)
             self.reg_e += 1 #len(self.env_stack) - 1
             self.reg_c = f

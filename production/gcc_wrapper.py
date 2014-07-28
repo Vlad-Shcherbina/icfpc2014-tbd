@@ -17,7 +17,7 @@ class GCCInterface(object):
     @abstractmethod
     def call(self, address_or_closure, *args, **kwargs):
         '''Call a function. Put args into a new environment frame, return the top of the data stack after the function returns.
-        IMPORTANT! For convenience should unmarshal (shallowly) the returned value.'''
+        Args and the return value are automatically marshalled.'''
 
     @abstractmethod
     def marshal(self, x):
@@ -60,8 +60,8 @@ class GCCWrapper(object):
         if ticks > self.max_step_ticks:
             self.max_step_ticks = ticks
 
-        self.log_ai_state(deep_unmarshal(gcc, self.ai_state))
-        return gcc.unmarshal(move)
+        logger.info('ai state: {}'.format(self.ai_state))
+        return move
 
 
     @staticmethod
@@ -88,7 +88,7 @@ class GCCWrapper(object):
 
     def marshal_world_state(self, world):
         world_state = self.convert_world_state(world)
-        return lto_to_cons(world_state, self.gcc.marshal)
+        return lto_to_cons(world_state)
 
 
     def convert_world_state(self, world):

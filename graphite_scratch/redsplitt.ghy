@@ -1,4 +1,4 @@
-; python ghosthon.py <../data/ghosts/red.ghy >../data/ghosts/red.ghc
+; python ghosthon.py <../graphite_scratch/redsplitt.ghy >../graphite_scratch/redsplitt.ghc
 
 ; This strategy combines red ghost from original pacman
 ; and splitter mode when ghosts are too close
@@ -30,6 +30,13 @@ alias deltax [100]
 alias deltay [101]
 alias cnt [102]
 alias curdir [103]
+; Variables introduced by cyberdervish [150-164]
+alias pacmannear [150]
+
+; Constants
+alias ghostvision 1
+alias false 0
+alias true 1
 
 ; Get self info: position, vitality, direction
 
@@ -47,6 +54,25 @@ mov opposite, b
 xor opposite, 2
 
 ; Check if pacman is near
+!lambdaman
+ifnot a > xx
+    mov deltax, xx
+    sub deltax, a
+else
+    mov deltax, a
+    sub deltax, xx
+ifnot b > yy
+    mov deltay, yy
+    sub deltay, b
+else
+    mov deltay, b
+    sub deltay, yy
+mov pacmannear, deltax
+add pacmannear, deltay
+if pacmannear > ghostvision
+    mov pacmannear, false
+else
+    mov pacmannear, true
 
 ; Check if another ghost is here
 ; Iterate over max 20 ghosts
