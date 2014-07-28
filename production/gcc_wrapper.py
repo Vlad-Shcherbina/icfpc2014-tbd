@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from abc import abstractmethod, ABCMeta
 
 import game
-from gcc_utils import deep_unmarshal, lto_to_cons, is_cons, cons_to_list
+from gcc_utils import deep_unmarshal, lto_to_cons, is_cons, cons_to_list, cons_to_mat
 
 
 class InterpreterException(Exception):
@@ -68,12 +68,13 @@ class GCCWrapper(object):
     def log_ai_state(ai_state):
         if is_cons(ai_state) and ai_state[0] == 999888777: # password from ff.py
             field = ai_state[1]
-            field = map(cons_to_list, cons_to_list(field))
+            field = [cons_to_mat(row)
+                     for row in cons_to_list(field)]
             logger.info('ff field state:')
             for line in field:
                 s = ''
                 for e in line:
-                    s += '{:3}'.format(e)
+                    s += '{:10}'.format(e)
                 logger.info(s)
         else:
             logger.info('ai state: {}'.format(ai_state))
