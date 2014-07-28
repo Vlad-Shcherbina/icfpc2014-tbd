@@ -1,7 +1,9 @@
+import sys
 import os
 import unittest
 import ast
 import pprint
+import nose
 
 from gcc_utils import lto_to_cons, cons_to_list, cons_to_tuple, deep_unmarshal
 from gcc_ast_converter import convert_python_to_gcc_module
@@ -63,3 +65,14 @@ def list_update_test():
         cons_to_list(call('ff.py',
             'list_update', lto_to_cons(range(6)), 3, 42))
         == [0, 1, 2, 42, 4, 5])
+
+
+def list_at_test():
+    assert call('ff.py', 'list_at', lto_to_cons(range(0, 100, 10)), 5) == 50
+
+
+if __name__ == '__main__':
+    nose.run_exit(argv=[
+        sys.argv[0], __file__,
+        '--verbose', '--with-doctest', '--logging-level=DEBUG'
+    ])
