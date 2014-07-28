@@ -131,13 +131,6 @@ def fetch_element(list, n):
         self.assertIsInstance(assignment, GccAssignment)
         self.assertEquals("x", assignment.name)
 
-    def test_atom(self):
-        x = ast.parse("def f(x): int(x)")
-        tree = convert_python_to_gcc_function(None, x.body[0])
-        assignment = tree.main_block.instructions[0]
-        self.assertIsInstance(assignment, GccAtom)
-        self.assertEquals("x", assignment.arg.name)
-
     def test_nested_function(self):
         x = ast.parse("""
 def f(x):

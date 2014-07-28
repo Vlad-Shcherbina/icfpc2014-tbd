@@ -1,5 +1,7 @@
 # python gcpy.py -p ff.py -c -o ../data/lms/ff.gcc
 
+from intrinsics import car, cdr, nil
+
 def main(world, _ghosts):
     field = matrix_map(always_default, world[0])
     # password for logging
@@ -165,7 +167,7 @@ def inc_n_times_for_test(n, x):
 
 
 def list_fold(f, initial, xs):
-    if int(xs):
+    if nil(xs):
         return initial
     else:
         return list_fold(f, f(initial, xs[0]), xs[1:])
@@ -184,21 +186,21 @@ def list_length(xs):
     return list_length_rec(xs, 0)
 
 def list_length_rec(xs, result):
-    if int(xs):
+    if nil(xs):
         return result
     else:
         return list_length_rec(xs[1:], result + 1)
 
 
 def list_append(xs, x):
-    if int(xs):
+    if nil(xs):
         return (x, 0)
     else:
         return (xs[0], list_append(xs[1:], x))
 
 
 def list_update(xs, idx, new_value):
-    if int(xs):
+    if nil(xs):
         return fail_()
     else:
         if idx == 0:
@@ -208,7 +210,7 @@ def list_update(xs, idx, new_value):
 
 
 def list_at(xs, idx):
-    if int(xs):
+    if nil(xs):
         return fail_()
     else:
         if idx == 0:
@@ -218,7 +220,7 @@ def list_at(xs, idx):
 
 
 def list_map(f, xs):
-    if int(xs):
+    if nil(xs):
         return xs
     else:
         return (f(xs[0]), list_map(f, xs[1:]))
@@ -229,18 +231,18 @@ def list_inc_for_test(xs):
 
 
 def list_zip(xs, ys):
-    if int(xs):
+    if nil(xs):
         return 0
     else:
         return (xs[0], ys[0]), list_zip(xs[1:], ys[1:])
 
 
 def list_drop_last(xs):
-    if int(xs):
+    if nil(xs):
         return fail_()
     else:
         t = xs[1:]
-        if int(t):
+        if nil(t):
             return 0
         else:
             return (xs[0], list_drop_last(t))

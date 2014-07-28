@@ -16,10 +16,13 @@ def convert_python_to_gcc_module(module):
 
 def convert_python_to_gcc_import(program, module, names):
     if module != 'intrinsics':
-        raise Exception('Only import from intrinsics allowed ({!r})'.format(module))
+        raise Exception('Only import from intrinsics allowed: {}'.format(module))
     for it in names:
         if it.asname is not None:
-            raise Exception('import ... as ... syntax not allowed ({!r})'.format(it.asname))
+            raise Exception('import ... as ... syntax not allowed {}'.format(it.asname))
+        if it.name not in GccIntrinsic.variants:
+            raise Exception('Unknown intrinsic: {}'.format(it.name))
+        program.add_imported_intrinsic(it.name)
 
 
 def convert_python_to_gcc_function(program, func_def, parent_function=None):
@@ -133,8 +136,10 @@ def convert_python_to_gcc_ast(ast):
             result = GccTupleMember(value, index, index+2)
 
     elif isinstance(ast, Call):
-        if ast.func.id == 'int':
-            result = GccAtom(convert_python_to_gcc_ast(ast.args[0]))
+        if ast.func.id in GccIntrinsic.variants:
+            if len(ast.args) != 1:
+                raise Exception("{} expects 1 argument, got {}".format(ast.func.id, len(ast.args)))
+            result = GccIntrinsic(ast.func.id, convert_python_to_gcc_ast(ast.args[0]))
         else:
             callee = GccNameReference(ast.func.id)
             result = GccCall(callee,

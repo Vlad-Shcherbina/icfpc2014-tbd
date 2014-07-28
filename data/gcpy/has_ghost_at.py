@@ -1,8 +1,10 @@
+from intrinsics import car, cdr, nil
+
 def has_ghost_at(world, x, y):
     return has_ghost_from_list(world[2], x, y)
 
 def has_ghost_from_list(ghost_list, x, y):
-    if int(ghost_list):
+    if nil(ghost_list):
         return 0
     else:
         ghost = ghost_list[0]

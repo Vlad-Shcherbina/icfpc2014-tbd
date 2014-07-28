@@ -7,7 +7,7 @@ class GccTextBuilder(object):
         self.lines = []
         self.labels = {}
         self.source_locations = []
-        self.imported_intrinsics = {}
+        self.imported_intrinsics = set()
 
     @property
     def text(self):
@@ -72,14 +72,15 @@ class GccTextBuilder(object):
             result += " (at source {0}:{1})".format(source[0], source[1])
         return result
     
-    def add_imported_intrinsic(self, intrinsic):
-        self.imported_intrinsics.add(intrinsic)
-
 
 class GccProgram(object):
     def __init__(self):
         self.functions = []
         self.function_index = {}
+        self.imported_intrinsics = set()
+
+    def add_imported_intrinsic(self, intrinsic):
+        self.imported_intrinsics.add(intrinsic)
 
     def add_function(self, name, args):
         if name in self.function_index:
@@ -101,6 +102,7 @@ class GccProgram(object):
         # no need for return, it will be added automatically
 
     def emit(self, builder, **kwargs):
+        builder.imported_intrinsics = self.imported_intrinsics
         for f in self.functions:
             f.emit(builder, **kwargs)
         builder.fixup_labels()
@@ -266,14 +268,38 @@ class GccInline(object):
         for line in self.code.strip().splitlines():
             builder.add_instruction(line.strip())
 
+        
 class GccIntrinsic(object):
-    def __init__(self, name, value):
+    def __init__(self, name, arg):
+        super(GccIntrinsic, self).__init__()
         self.name = name
-        self.value = value
+        self.arg = arg
 
     def emit(self, builder, context):
-        for line in self.code.strip().splitlines():
-            builder.add_instruction(line.strip())
+        if self.name not in builder.imported_intrinsics:
+            raise GccSyntaxError("Intrinsic {} not imported".format(self.name))
+        self.variants[self.name](self, builder, context)
+    
+    def emit_car(self, builder, context):
+        self.arg.emit(builder, context)
+        builder.add_instruction("car", source=self.source_location)
+    
+    def emit_my_other_car(self, builder, context):
+        self.arg.emit(builder, context)
+        builder.add_instruction("cdr", source=self.source_location)
+    
+    def emit_nil(self, builder, context):
+        self.arg.emit(builder, context)
+        builder.add_instruction("atom", source=self.source_location)
+        # we don't have "dup" and that int isn't allowed to be nonzero anyway
+    
+    variants = {
+            'car': emit_car,
+            'cdr': emit_my_other_car,
+            'nil': emit_nil,
+            }
+    
+    
 
 class GccConstant(GccASTNode):
     def __init__(self, value):
@@ -410,7 +436,7 @@ class GccTuple(GccASTNode):
     def emit(self, builder, context):
         for m in self.members:
             m.emit(builder, context)
-        for i in range(len(self.members)-1):
+        for _ in range(len(self.members)-1):
             builder.add_instruction("cons", source=self.source_location)
 
 
@@ -423,7 +449,7 @@ class GccTupleMember(GccASTNode):
 
     def emit(self, builder, context):
         self.tuple.emit(builder, context)
-        for i in range(self.index):
+        for _ in range(self.index):
             builder.add_instruction("cdr", source=self.source_location)
         if self.index < self.expected_size-1:
             builder.add_instruction("car", source=self.source_location)
@@ -452,11 +478,3 @@ class GccAssignment(GccASTNode):
                                 source=self.source_location)
 
 
-class GccAtom(GccASTNode):
-    def __init__(self, arg):
-        super(GccAtom, self).__init__()
-        self.arg = arg
-
-    def emit(self, builder, context):
-        self.arg.emit(builder, context)
-        builder.add_instruction("atom", source=self.source_location)
