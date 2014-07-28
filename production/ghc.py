@@ -269,6 +269,7 @@ class GHC:
         self.halted = False
         self.new_direction = None
         while not self.halted and (cycles < 1024):
+            assert cycles < 1000  # just in case
             pc = self.registers[PC]
             self.execute(self.code[pc])
             if self.registers[PC] == pc:
