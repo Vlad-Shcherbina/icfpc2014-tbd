@@ -116,10 +116,14 @@ def merge_ghosts(f, ghosts):
             # - note that ghost blocks propagation of other fields
             # - it might be nice to know that there is ghost nearby
             #   (within, say, 5 cells)
-            f[ghost.y][ghost.x] = (0, 5, 0)
+            f[ghost.y][ghost.x] = (0, 2, 0)
         elif ghost.vitality == game.FRIGHT:
             cell = f[ghost.y][ghost.x]
             f[ghost.y][ghost.x] = (max(905, cell[0]), cell[1], cell[2])
+        elif ghost.vitality == game.INVISIBLE:
+            f[ghost.y][ghost.x] = (0, 1, 0)
+        else:
+            assert False
         # TODO: take invisible ghost into account (it's better than standard,
         # though worse than frightened)
     return f
@@ -127,7 +131,7 @@ def merge_ghosts(f, ghosts):
 
 def better(f_cell1, f_cell2):
     # TODO: take into account ghost and fruit components
-    return f_cell1[0] > f_cell2[0]
+    return f_cell1[0] - 100 * f_cell1[1] > f_cell2[0] - 100 * f_cell2[1]
 
 
 def main():
