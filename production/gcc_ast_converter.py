@@ -102,6 +102,9 @@ def convert_python_to_gcc_ast(ast):
     elif isinstance(ast, Tuple):
         result = GccTuple(*[convert_python_to_gcc_ast(elt) for elt in ast.elts])
 
+    elif isinstance(ast, List):
+        result = GccTuple(*([convert_python_to_gcc_ast(elt) for elt in ast.elts] + [GccConstant(0)]))
+
     elif isinstance(ast, Subscript):
         value = convert_python_to_gcc_ast(ast.value)
         if isinstance(ast.slice, Slice):
