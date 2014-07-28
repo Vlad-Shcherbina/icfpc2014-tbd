@@ -17,7 +17,7 @@ def main():
         # ],
         maps=tournament.all_rotations(tournament.all_maps(max_size=1500)),
         lm_specs=[
-            'py:lm_ai.NearestPill(straight=True)',
+            #'py:lm_ai.NearestPill(straight=True)',
             'py:lm_ai.TunnelDigger()',
             'py:lm_wave.Wavy(50)',
             'py:lm_ff.ForceField()',
