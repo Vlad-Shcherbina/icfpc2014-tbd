@@ -36,7 +36,7 @@ def lto_to_cons(x):
         curr = 0
     else:
         return x
-        
+
     for it in reversed(x):
         it = lto_to_cons(it)
         if curr is None:
@@ -74,6 +74,13 @@ def cons_to_list(x):
 
 def is_cons(x):
     return type(x) == tuple
+
+
+def mat_to_cons(mat):
+    return lto_to_cons(map(lto_to_cons, mat))
+
+def cons_to_mat(x):
+    return map(cons_to_list, cons_to_list(x))
 
 
 if __name__ == "__main__":

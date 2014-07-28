@@ -1,9 +1,16 @@
 def main(world, _ghosts):
-  return ((999888777, world[0]), step)
+    def always_default(x):
+        return default_cell()
+    field = matrix_map(always_default, world[0])
+    return ((999888777, field), step)
 
 
 def step(state, world):
     return (state, 1)
+
+
+def default_cell():
+    return (0, 0)
 
 
 ################################################
@@ -51,3 +58,28 @@ def list_at(xs, idx):
             return xs[0]
         else:
             return list_at(xs[1:], idx - 1)
+
+
+def list_map(f, xs):
+    if int(xs):
+        return xs
+    else:
+        return (f(xs[0]), list_map(f, xs[1:]))
+
+
+def list_inc_for_test(xs):
+    def inc(x):
+        return x + 1
+    return list_map(inc, xs)
+
+
+def matrix_map(f, mat):
+    def line_map(line):
+        return list_map(f, line)
+    return list_map(line_map, mat)
+
+
+def matrix_inc_for_test(mat):
+    def inc(x):
+        return x + 1
+    return matrix_map(inc, mat)

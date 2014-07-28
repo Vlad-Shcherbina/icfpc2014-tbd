@@ -4,8 +4,9 @@ import unittest
 import ast
 import pprint
 import nose
+from nose.tools import eq_
 
-from gcc_utils import lto_to_cons, cons_to_list, cons_to_tuple
+from gcc_utils import lto_to_cons, cons_to_list, cons_to_tuple, mat_to_cons, cons_to_mat
 from gcc_ast_converter import convert_python_to_gcc_module
 from gcc_ast import GccTextBuilder
 from asm_parser import parse_gcc
@@ -20,7 +21,7 @@ def call(script, func_name, *args):
     gcc_program = convert_python_to_gcc_module(python_ast)
     builder = GccTextBuilder()
     gcc_program.emit(builder)
-    print builder.text
+    #print builder.text
 
     addr = builder.labels['$func_{}$'.format(func_name)]
     assert isinstance(addr, int)
@@ -69,6 +70,19 @@ def list_update_test():
 
 def list_at_test():
     assert call('ff.py', 'list_at', lto_to_cons(range(0, 100, 10)), 5) == 50
+
+
+def link_map_test():
+    assert (
+        cons_to_list(call('ff.py',
+            'list_inc_for_test', lto_to_cons(range(5))))
+        == range(1, 6))
+
+
+def link_map_test():
+    result = cons_to_mat(call('ff.py',
+            'matrix_inc_for_test', mat_to_cons([[1, 2], [8, 7]])))
+    eq_(result, [[2, 3], [9, 8]])
 
 
 if __name__ == '__main__':
