@@ -55,6 +55,13 @@ def fold_test():
         (((42, 0), 1), 2))
 
 
+# misc tests
+
+def while_test():
+    assert call('list_length.py', 'while_test1', 7) == 14
+    assert call('list_length.py', 'while_test2', 7) == 14
+    assert call('list_length.py', 'while_test3', 7) == 14
+
 #### list tests
 
 def list_length_test():
