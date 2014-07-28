@@ -96,15 +96,15 @@ def merge_cell(f_cell, map_cell):
     if map_cell == game.WALL:
         return DEFAULT_CELL
     elif map_cell == game.PILL:
-        return (900, f_cell[1], f_cell[2])
+        return (max(900, f_cell[0]), f_cell[1], f_cell[2])
     elif map_cell == game.POWER_PILL:
-        return (905, f_cell[1], f_cell[2])
+        return (max(905, f_cell[0]), f_cell[1], f_cell[2])
     elif map_cell == game.FRUIT:
         # TODO: use fruit component of a field
         # TODO: or even better, use expected fruit location even when
         # it's not on the map, and use careful distance-based timing in
         # better() function.
-        return (910, f_cell[1], f_cell[2])
+        return (max(910, f_cell[0]), f_cell[1], f_cell[2])
     else:
         return f_cell
 
@@ -119,7 +119,7 @@ def merge_ghosts(f, ghosts):
             f[ghost.y][ghost.x] = (0, 5, 0)
         elif ghost.vitality == game.FRIGHT:
             cell = f[ghost.y][ghost.x]
-            f[ghost.y][ghost.x] = (905, cell[1], cell[2])
+            f[ghost.y][ghost.x] = (max(905, cell[0]), cell[1], cell[2])
         # TODO: take invisible ghost into account (it's better than standard,
         # though worse than frightened)
     return f
