@@ -1,7 +1,7 @@
 def main(world, _ghosts):
     field = matrix_map(always_default, world[0])
     # password for logging
-    return ((999888777, field), step)
+    return (999888777, field), step
 
 
 def step(state, world):
@@ -13,14 +13,27 @@ def step(state, world):
         f1 = diffuse(f)
         return matrix_map(merge_cell, matrix_zip(f1, map))
 
-    # TODO: increase number of iterations
-    field = apply_n_times(propagate_field, 2, old_field)
+    field = apply_n_times(propagate_field, 10, old_field)
 
     my_coords = me[1]
     my_x = my_coords[0]
     my_y = my_coords[1:]
 
-    return ((state[0], field), 0)
+    candidate0 = \
+        (0, matrix_at(field, my_x, my_y - 1))
+    candidates = (
+        (1, matrix_at(field, my_x + 1, my_y)),
+        (2, matrix_at(field, my_x, my_y + 1)),
+        (3, matrix_at(field, my_x - 1, my_y)),
+        0)
+    def pick_best(c1, c2):
+        if better(c1[1:], c2[1:]):
+            return c1
+        else:
+            return c2
+    best = list_fold(pick_best, candidate0, candidates)
+
+    return (state[0], field), best[0]
 
 
 def default():
@@ -199,7 +212,7 @@ def list_zip(xs, ys):
     if int(xs):
         return 0
     else:
-        return ((xs[0], ys[0]), list_zip(xs[1:], ys[1:]))
+        return (xs[0], ys[0]), list_zip(xs[1:], ys[1:])
 
 
 def list_drop_last(xs):
