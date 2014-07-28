@@ -7,6 +7,7 @@ class GccTextBuilder(object):
         self.lines = []
         self.labels = {}
         self.source_locations = []
+        self.imported_intrinsics = {}
 
     @property
     def text(self):
@@ -70,6 +71,9 @@ class GccTextBuilder(object):
         if source:
             result += " (at source {0}:{1})".format(source[0], source[1])
         return result
+    
+    def add_imported_intrinsic(self, intrinsic):
+        self.imported_intrinsics.add(intrinsic)
 
 
 class GccProgram(object):
@@ -262,6 +266,14 @@ class GccInline(object):
         for line in self.code.strip().splitlines():
             builder.add_instruction(line.strip())
 
+class GccIntrinsic(object):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def emit(self, builder, context):
+        for line in self.code.strip().splitlines():
+            builder.add_instruction(line.strip())
 
 class GccConstant(GccASTNode):
     def __init__(self, value):

@@ -123,7 +123,7 @@ class GhostAI:
 
 
 class EmptyGhostAI:
-    def initialize(*shit):
+    def initialize(self, *shit):
         pass
     def get_move(self, *shit):
         return DOWN
@@ -206,7 +206,8 @@ class LambdaMan(Actor):
             self.speed = LAMBDAMAN_SPEED
 
     def eat(self, score):
-        self.map.clear(self.x, self.y)
+        if self.map.at(self.x, self.y) != FRUIT:
+            self.map.clear(self.x, self.y)
         self.score += score
         self.speed = LAMBDAMAN_EATING_SPEED
 
@@ -278,15 +279,10 @@ class FruitSpawnpoint(Actor):
     def move(self):
         if self.state == 0 or self.state == 2:
             lman = self.map.lambdaman
-            if lman and lman.x == self.x and lman.y == self.y:
-                # next move has been scheduled already so the speed change
-                # will not affect time of next move
-                lman.eat(self.map.fruit_score())
-            else:
-                self.map.spawn(self.x, self.y, FRUIT)
+            # what if we spawned on top of the LM
+            lman.check_collisions()
             self.speed = FRUIT_EXPIRE_TIMES[self.state/2] - FRUIT_SPAWN_TIMES[self.state/2]
         else:
-            self.map.clear(self.x, self.y)
             if self.state == 3:
                 self.expired = True
             else:
@@ -330,7 +326,7 @@ class Map(object):
                 elif contents == FRUIT:
                     spawnpoint = FruitSpawnpoint(self, x, y)
                     self.schedule(spawnpoint)
-                    contents = EMPTY
+                    contents = FRUIT
                 line_cells.append(contents)
             self.cells.append(line_cells)
 

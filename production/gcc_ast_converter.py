@@ -7,9 +7,19 @@ def convert_python_to_gcc_module(module):
     for node in module.body:
         if isinstance(node, FunctionDef):
             convert_python_to_gcc_function(program, node)
+        elif isinstance(node, ImportFrom):
+            print convert_python_to_gcc_import(program, node.module, node.names)
         else:
             raise Exception("Unsupported module child type {0}".format(node))
     return program
+
+
+def convert_python_to_gcc_import(program, module, names):
+    if module != 'intrinsics':
+        raise Exception('Only import from intrinsics allowed ({!r})'.format(module))
+    for it in names:
+        if it.asname is not None:
+            raise Exception('import ... as ... syntax not allowed ({!r})'.format(it.asname))
 
 
 def convert_python_to_gcc_function(program, func_def, parent_function=None):
