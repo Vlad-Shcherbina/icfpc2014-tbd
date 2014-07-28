@@ -72,17 +72,41 @@ def list_at_test():
     assert call('ff.py', 'list_at', lto_to_cons(range(0, 100, 10)), 5) == 50
 
 
-def link_map_test():
+def list_map_test():
     assert (
         cons_to_list(call('ff.py',
             'list_inc_for_test', lto_to_cons(range(5))))
         == range(1, 6))
 
 
-def link_map_test():
+def list_zip_test():
+    result = cons_to_list(call('ff.py',
+            'list_zip',
+            lto_to_cons([1, 2]),
+            lto_to_cons([10, 20])))
+    eq_(result, [(1, 10), (2, 20)])
+
+
+#### matrix tests
+
+
+def matrix_map_test():
     result = cons_to_mat(call('ff.py',
             'matrix_inc_for_test', mat_to_cons([[1, 2], [8, 7]])))
     eq_(result, [[2, 3], [9, 8]])
+
+
+def matrix_update_test():
+    result = cons_to_mat(call('ff.py',
+            'matrix_update', mat_to_cons([
+                [1, 2],
+                [8, 7]]), 0, 1, 42))
+    eq_(result, [
+        [1, 2],
+        [42, 7]])
+
+
+############# ff tests
 
 
 def shift_up_test():

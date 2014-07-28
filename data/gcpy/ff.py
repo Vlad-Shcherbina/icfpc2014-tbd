@@ -1,5 +1,6 @@
 def main(world, _ghosts):
     field = matrix_map(always_default, world[0])
+    # password for logging
     return ((999888777, field), step)
 
 
@@ -81,6 +82,16 @@ def list_inc_for_test(xs):
     return list_map(inc, xs)
 
 
+def list_zip(xs, ys):
+    if int(xs):
+        return 0
+    else:
+        return ((xs[0], ys[0]), list_zip(xs[1:], ys[1:]))
+
+
+# matrix utils
+
+
 def matrix_map(f, mat):
     def line_map(line):
         return list_map(f, line)
@@ -91,3 +102,7 @@ def matrix_inc_for_test(mat):
     def inc(x):
         return x + 1
     return matrix_map(inc, mat)
+
+
+def matrix_update(mat, x, y, new_value):
+    list_update(mat, y, list_update(list_at(mat, y), x, new_value))
