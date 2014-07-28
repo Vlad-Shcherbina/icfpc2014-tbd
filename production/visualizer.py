@@ -39,6 +39,9 @@ def main():
         level=logging.INFO,
         format='%(levelname)8s:%(name)15s: %(message)s',
         filename='visualizer_debug.log')
+    import ghc
+    ghc.logger.setLevel(logging.WARNING)
+
     decorate_handlers()
 
     parser = argparse.ArgumentParser()
