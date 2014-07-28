@@ -1,0 +1,741 @@
+;$func_main$
+    DUM 1
+    LDC 0
+    LDF 4  ; $func_locals_main$
+    TRAP 1
+;$func_locals_main$
+    LDF 209  ; $func_always_default$
+    LD 1 0
+    CAR
+    LDF 597  ; $func_matrix_map$
+    AP 2
+    ST 0 0
+    LDC 999888777
+    LD 0 0
+    CONS
+    LDF 16  ; $func_step$
+    CONS
+    RTN
+;$func_step$
+    DUM 11
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDF 30  ; $func_locals_step$
+    TRAP 11
+;$func_locals_step$
+    LD 1 0
+    CDR
+    ST 0 0
+    LD 1 1
+    CAR
+    ST 0 1
+    LD 1 1
+    CDR
+    CAR
+    ST 0 2
+    LD 1 1
+    CDR
+    CDR
+    CAR
+    ST 0 3
+    LDF 117  ; $func_step_propagate_field$
+    LDC 10
+    LD 0 0
+    LDF 404  ; $func_apply_n_times$
+    AP 3
+    ST 0 4
+    LD 0 2
+    CDR
+    CAR
+    ST 0 5
+    LD 0 5
+    CAR
+    ST 0 6
+    LD 0 5
+    CDR
+    ST 0 7
+    LDC 0
+    LD 0 4
+    LD 0 6
+    LD 0 7
+    LDC 1
+    SUB
+    LDF 590  ; $func_matrix_at$
+    AP 3
+    CONS
+    ST 0 8
+    LDC 1
+    LD 0 4
+    LD 0 6
+    LDC 1
+    ADD
+    LD 0 7
+    LDF 590  ; $func_matrix_at$
+    AP 3
+    CONS
+    LDC 2
+    LD 0 4
+    LD 0 6
+    LD 0 7
+    LDC 1
+    ADD
+    LDF 590  ; $func_matrix_at$
+    AP 3
+    CONS
+    LDC 3
+    LD 0 4
+    LD 0 6
+    LDC 1
+    SUB
+    LD 0 7
+    LDF 590  ; $func_matrix_at$
+    AP 3
+    CONS
+    LDC 0
+    CONS
+    CONS
+    CONS
+    ST 0 9
+    LDF 194  ; $func_step_pick_best$
+    LD 0 8
+    LD 0 9
+    LDF 424  ; $func_list_fold$
+    AP 3
+    ST 0 10
+    LD 1 0
+    CAR
+    LD 0 4
+    CONS
+    LD 0 10
+    CAR
+    CONS
+    RTN
+;$func_step_propagate_field$
+    DUM 3
+    LDC 0
+    LDC 0
+    LDC 0
+    LDF 123  ; $func_locals_propagate_field$
+    TRAP 3
+;$func_locals_propagate_field$
+    LD 1 0
+    LDF 364  ; $func_diffuse$
+    AP 1
+    ST 0 0
+    LDF 257  ; $func_merge_cell$
+    LD 0 0
+    LD 2 1
+    LDF 621  ; $func_matrix_zip$
+    AP 2
+    LDF 597  ; $func_matrix_map$
+    AP 2
+    ST 0 1
+    LDF 143  ; $func_step_propagate_field_apply_ghost$
+    LD 0 1
+    LD 2 3
+    LDF 424  ; $func_list_fold$
+    AP 3
+    ST 0 2
+    LD 0 2
+    RTN
+;$func_step_propagate_field_apply_ghost$
+    DUM 6
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDC 0
+    LDF 152  ; $func_locals_apply_ghost$
+    TRAP 6
+;$func_locals_apply_ghost$
+    LD 1 1
+    CAR
+    ST 0 0
+    LD 1 1
+    CDR
+    CAR
+    ST 0 1
+    LD 0 1
+    CAR
+    ST 0 2
+    LD 0 1
+    CDR
+    ST 0 3
+    LD 1 0
+    LD 0 2
+    LD 0 3
+    LDF 590  ; $func_matrix_at$
+    AP 3
+    ST 0 4
+    LD 0 0
+    LDC 1
+    CEQ
+    SEL 181 190
+    LD 1 0
+    LD 0 2
+    LD 0 3
+    LD 0 5
+    LDF 609  ; $func_matrix_update$
+    TAP 4
+;$label_8$
+    LD 0 4
+    CAR
+    LDC 905
+    LDF 396  ; $func_max$
+    AP 2
+    LDC 0
+    CONS
+    ST 0 5
+    JOIN
+;$label_9$
+    LDF 205  ; $func_default$
+    AP 0
+    ST 0 5
+    JOIN
+;$func_step_pick_best$
+    LD 0 0
+    CDR
+    LD 0 1
+    CDR
+    LDF 211  ; $func_better$
+    AP 2
+    TSEL 201 203
+;$label_11$
+    LD 0 0
+    RTN
+;$label_12$
+    LD 0 1
+    RTN
+;$func_default$
+    LDC 0
+    LDC 0
+    CONS
+    RTN
+;$func_always_default$
+    LDF 205  ; $func_default$
+    TAP 0
+;$func_better$
+    LD 0 0
+    CAR
+    LD 0 1
+    CAR
+    CGT
+    RTN
+;$func_shift_up$
+    LD 0 0
+    CDR
+    LDF 209  ; $func_always_default$
+    LD 0 0
+    CAR
+    LDF 528  ; $func_list_map$
+    AP 2
+    LDF 467  ; $func_list_append$
+    TAP 2
+;$func_shift_down$
+    LDF 209  ; $func_always_default$
+    LD 0 0
+    CAR
+    LDF 528  ; $func_list_map$
+    AP 2
+    LD 0 0
+    LDF 566  ; $func_list_drop_last$
+    AP 1
+    CONS
+    RTN
+;$func_shift_left$
+    LDF 240  ; $func_shift_left_shift_row_left$
+    LD 0 0
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_shift_left_shift_row_left$
+    LD 0 0
+    CDR
+    LDF 205  ; $func_default$
+    AP 0
+    LDF 467  ; $func_list_append$
+    TAP 2
+;$func_shift_right$
+    LDF 250  ; $func_shift_right_shift_row_right$
+    LD 0 0
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_shift_right_shift_row_right$
+    LDF 205  ; $func_default$
+    AP 0
+    LD 0 0
+    LDF 566  ; $func_list_drop_last$
+    AP 1
+    CONS
+    RTN
+;$func_merge_cell$
+    DUM 2
+    LDC 0
+    LDC 0
+    LDF 262  ; $func_locals_merge_cell$
+    TRAP 2
+;$func_locals_merge_cell$
+    LD 1 0
+    CAR
+    ST 0 0
+    LD 1 0
+    CDR
+    ST 0 1
+    LD 0 1
+    LDC 0
+    CEQ
+    TSEL 272 276
+;$label_24$
+    LDC 0
+    LDC 0
+    CONS
+    RTN
+;$label_25$
+    LD 0 1
+    LDC 2
+    CEQ
+    TSEL 280 288
+;$label_26$
+    LD 0 0
+    CAR
+    LDC 900
+    LDF 396  ; $func_max$
+    AP 2
+    LDC 0
+    CONS
+    RTN
+;$label_27$
+    LD 0 1
+    LDC 3
+    CEQ
+    TSEL 292 300
+;$label_28$
+    LD 0 0
+    CAR
+    LDC 905
+    LDF 396  ; $func_max$
+    AP 2
+    LDC 0
+    CONS
+    RTN
+;$label_29$
+    LD 0 0
+    RTN
+;$func_decrement$
+    LDF 306  ; $func_decrement_cell_dec$
+    LD 0 0
+    LDF 597  ; $func_matrix_map$
+    TAP 2
+;$func_decrement_cell_dec$
+    LDF 310  ; $func_decrement_cell_dec_dec$
+    LD 0 0
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_decrement_cell_dec_dec$
+    LD 0 0
+    LDC 0
+    CEQ
+    TSEL 314 316
+;$label_33$
+    LDC 0
+    RTN
+;$label_34$
+    LD 0 0
+    LDC 1
+    SUB
+    RTN
+;$func_combine$
+    LDF 327  ; $func_combine_cell_max$
+    LD 0 0
+    LD 0 1
+    LDF 621  ; $func_matrix_zip$
+    AP 2
+    LDF 597  ; $func_matrix_map$
+    TAP 2
+;$func_combine_cell_max$
+    DUM 2
+    LDC 0
+    LDC 0
+    LDF 332  ; $func_locals_cell_max$
+    TRAP 2
+;$func_locals_cell_max$
+    LD 1 0
+    CAR
+    ST 0 0
+    LD 1 0
+    CDR
+    ST 0 1
+    LDF 345  ; $func_combine_cell_max_max_of_pair$
+    LD 0 0
+    LD 0 1
+    LDF 548  ; $func_list_zip$
+    AP 2
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_combine_cell_max_max_of_pair$
+    DUM 2
+    LDC 0
+    LDC 0
+    LDF 350  ; $func_locals_max_of_pair$
+    TRAP 2
+;$func_locals_max_of_pair$
+    LD 1 0
+    CAR
+    ST 0 0
+    LD 1 0
+    CDR
+    ST 0 1
+    LD 0 0
+    LD 0 1
+    CGT
+    TSEL 360 362
+;$label_40$
+    LD 0 0
+    RTN
+;$label_41$
+    LD 0 1
+    RTN
+;$func_diffuse$
+    DUM 2
+    LDC 0
+    LDC 0
+    LDF 369  ; $func_locals_diffuse$
+    TRAP 2
+;$func_locals_diffuse$
+    LD 1 0
+    LDF 236  ; $func_shift_left$
+    AP 1
+    LD 1 0
+    LDF 217  ; $func_shift_up$
+    AP 1
+    LDF 320  ; $func_combine$
+    AP 2
+    ST 0 0
+    LD 0 0
+    LDF 226  ; $func_shift_down$
+    AP 1
+    LDF 246  ; $func_shift_right$
+    AP 1
+    ST 0 1
+    LD 0 0
+    LD 0 1
+    LDF 320  ; $func_combine$
+    AP 2
+    LDF 302  ; $func_decrement$
+    TAP 1
+;$func_fail_$
+    LDC 0
+    RTN
+;$func_inc$
+    LD 0 0
+    LDC 1
+    ADD
+    RTN
+;$func_max$
+    LD 0 0
+    LD 0 1
+    CGT
+    TSEL 400 402
+;$label_47$
+    LD 0 0
+    RTN
+;$label_48$
+    LD 0 1
+    RTN
+;$func_apply_n_times$
+    LD 0 1
+    LDC 0
+    CEQ
+    TSEL 408 410
+;$label_50$
+    LD 0 2
+    RTN
+;$label_51$
+    LD 0 0
+    LD 0 1
+    LDC 1
+    SUB
+    LD 0 2
+    LD 0 0
+    AP 1
+    LDF 404  ; $func_apply_n_times$
+    TAP 3
+;$func_inc_n_times_for_test$
+    LDF 392  ; $func_inc$
+    LD 0 0
+    LD 0 1
+    LDF 404  ; $func_apply_n_times$
+    TAP 3
+;$func_list_fold$
+    LD 0 2
+    ATOM
+    TSEL 427 429
+;$label_54$
+    LD 0 1
+    RTN
+;$label_55$
+    LD 0 0
+    LD 0 1
+    LD 0 2
+    CAR
+    LD 0 0
+    AP 2
+    LD 0 2
+    CDR
+    LDF 424  ; $func_list_fold$
+    TAP 3
+;$func_mk_pair$
+    LD 0 0
+    LD 0 1
+    CONS
+    RTN
+;$func_fold_mk_pair_for_test$
+    LDF 439  ; $func_mk_pair$
+    LD 0 0
+    LD 0 1
+    LDF 424  ; $func_list_fold$
+    TAP 3
+;$func_list_tail$
+    LD 0 0
+    CDR
+    RTN
+;$func_list_length$
+    LD 0 0
+    LDC 0
+    LDF 455  ; $func_list_length_rec$
+    TAP 2
+;$func_list_length_rec$
+    LD 0 0
+    ATOM
+    TSEL 458 460
+;$label_61$
+    LD 0 1
+    RTN
+;$label_62$
+    LD 0 0
+    CDR
+    LD 0 1
+    LDC 1
+    ADD
+    LDF 455  ; $func_list_length_rec$
+    TAP 2
+;$func_list_append$
+    LD 0 0
+    ATOM
+    TSEL 470 474
+;$label_64$
+    LD 0 1
+    LDC 0
+    CONS
+    RTN
+;$label_65$
+    LD 0 0
+    CAR
+    LD 0 0
+    CDR
+    LD 0 1
+    LDF 467  ; $func_list_append$
+    AP 2
+    CONS
+    RTN
+;$func_list_update$
+    LD 0 0
+    ATOM
+    TSEL 486 488
+;$label_67$
+    LDF 390  ; $func_fail_$
+    TAP 0
+;$label_68$
+    LD 0 1
+    LDC 0
+    CEQ
+    TSEL 492 497
+;$label_69$
+    LD 0 2
+    LD 0 0
+    CDR
+    CONS
+    RTN
+;$label_70$
+    LD 0 0
+    CAR
+    LD 0 0
+    CDR
+    LD 0 1
+    LDC 1
+    SUB
+    LD 0 2
+    LDF 483  ; $func_list_update$
+    AP 3
+    CONS
+    RTN
+;$func_list_at$
+    LD 0 0
+    ATOM
+    TSEL 512 514
+;$label_72$
+    LDF 390  ; $func_fail_$
+    TAP 0
+;$label_73$
+    LD 0 1
+    LDC 0
+    CEQ
+    TSEL 518 521
+;$label_74$
+    LD 0 0
+    CAR
+    RTN
+;$label_75$
+    LD 0 0
+    CDR
+    LD 0 1
+    LDC 1
+    SUB
+    LDF 509  ; $func_list_at$
+    TAP 2
+;$func_list_map$
+    LD 0 1
+    ATOM
+    TSEL 531 533
+;$label_77$
+    LD 0 1
+    RTN
+;$label_78$
+    LD 0 1
+    CAR
+    LD 0 0
+    AP 1
+    LD 0 0
+    LD 0 1
+    CDR
+    LDF 528  ; $func_list_map$
+    AP 2
+    CONS
+    RTN
+;$func_list_inc_for_test$
+    LDF 392  ; $func_inc$
+    LD 0 0
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_list_zip$
+    LD 0 0
+    ATOM
+    TSEL 551 553
+;$label_81$
+    LDC 0
+    RTN
+;$label_82$
+    LD 0 0
+    CAR
+    LD 0 1
+    CAR
+    CONS
+    LD 0 0
+    CDR
+    LD 0 1
+    CDR
+    LDF 548  ; $func_list_zip$
+    AP 2
+    CONS
+    RTN
+;$func_list_drop_last$
+    DUM 1
+    LDC 0
+    LDF 570  ; $func_locals_list_drop_last$
+    TRAP 1
+;$func_locals_list_drop_last$
+    LD 1 0
+    ATOM
+    TSEL 573 575
+;$label_85$
+    LDF 390  ; $func_fail_$
+    TAP 0
+;$label_86$
+    LD 1 0
+    CDR
+    ST 0 0
+    LD 0 0
+    ATOM
+    TSEL 581 583
+;$label_87$
+    LDC 0
+    RTN
+;$label_88$
+    LD 1 0
+    CAR
+    LD 0 0
+    LDF 566  ; $func_list_drop_last$
+    AP 1
+    CONS
+    RTN
+;$func_matrix_at$
+    LD 0 0
+    LD 0 2
+    LDF 509  ; $func_list_at$
+    AP 2
+    LD 0 1
+    LDF 509  ; $func_list_at$
+    TAP 2
+;$func_matrix_map$
+    LDF 601  ; $func_matrix_map_line_map$
+    LD 0 1
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_matrix_map_line_map$
+    LD 1 0
+    LD 0 0
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_matrix_inc_for_test$
+    LDF 392  ; $func_inc$
+    LD 0 0
+    LDF 597  ; $func_matrix_map$
+    TAP 2
+;$func_matrix_update$
+    LD 0 0
+    LD 0 2
+    LD 0 0
+    LD 0 2
+    LDF 509  ; $func_list_at$
+    AP 2
+    LD 0 1
+    LD 0 3
+    LDF 483  ; $func_list_update$
+    AP 3
+    LDF 483  ; $func_list_update$
+    TAP 3
+;$func_matrix_zip$
+    LDF 628  ; $func_matrix_zip_lines_zip$
+    LD 0 0
+    LD 0 1
+    LDF 548  ; $func_list_zip$
+    AP 2
+    LDF 528  ; $func_list_map$
+    TAP 2
+;$func_matrix_zip_lines_zip$
+    DUM 2
+    LDC 0
+    LDC 0
+    LDF 633  ; $func_locals_lines_zip$
+    TRAP 2
+;$func_locals_lines_zip$
+    LD 1 0
+    CAR
+    ST 0 0
+    LD 1 0
+    CDR
+    ST 0 1
+    LD 0 0
+    LD 0 1
+    LDF 548  ; $func_list_zip$
+    TAP 2
+
