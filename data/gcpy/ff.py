@@ -22,11 +22,18 @@ def always_default(x):
 def shift_up(mat):
     return list_append(mat[1:], list_map(always_default, mat[0]))
 
-
 def shift_down(mat):
-    return (list_map(always_default, mat[0]), )
-    #return list_append(mat[1:], list_map(always_default, mat[0]))
+    return (list_map(always_default, mat[0]), list_drop_last(mat))
 
+def shift_left(mat):
+    def shift_row_left(xs):
+        list_append(xs[1:], default())
+    return list_map(shift_row_left, mat)
+
+def shift_right(mat):
+    def shift_row_right(xs):
+        return (default(), list_drop_last(xs))
+    return list_map(shift_row_right, mat)
 
 
 def merge_cell(pair):

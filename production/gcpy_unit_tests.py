@@ -149,6 +149,35 @@ def shift_up_test():
         [8, 7],
         [d, d]])
 
+def shift_down_test():
+    d = call('ff.py', 'default')
+    result = cons_to_mat(call('ff.py',
+            'shift_down', mat_to_cons([
+                [1, 2],
+                [8, 7]])))
+    eq_(result, [
+        [d, d],
+        [1, 2]])
+
+def shift_left_test():
+    d = call('ff.py', 'default')
+    result = cons_to_mat(call('ff.py',
+            'shift_left', mat_to_cons([
+                [1, 2],
+                [8, 7]])))
+    eq_(result, [
+        [2, d],
+        [7, d]])
+
+def shift_right_test():
+    d = call('ff.py', 'default')
+    result = cons_to_mat(call('ff.py',
+            'shift_right', mat_to_cons([
+                [1, 2],
+                [8, 7]])))
+    eq_(result, [
+        [d, 1],
+        [d, 8]])
 
 
 if __name__ == '__main__':
