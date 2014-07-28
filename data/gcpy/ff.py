@@ -23,6 +23,12 @@ def shift_up(mat):
     return list_append(mat[1:], list_map(always_default, mat[0]))
 
 
+def shift_down(mat):
+    return (list_map(always_default, mat[0]), )
+    #return list_append(mat[1:], list_map(always_default, mat[0]))
+
+
+
 def merge_cell(pair):
     f_cell = pair[0]
     map_cell = pair[1:]
@@ -136,6 +142,17 @@ def list_zip(xs, ys):
         return 0
     else:
         return ((xs[0], ys[0]), list_zip(xs[1:], ys[1:]))
+
+
+def list_drop_last(xs):
+    if int(xs):
+        return fail_()
+    else:
+        t = xs[1:]
+        if int(t):
+            return 0
+        else:
+            return (xs[0], list_drop_last(t))
 
 
 # matrix utils
