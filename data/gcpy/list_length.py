@@ -9,4 +9,11 @@ def list_length_rec(l, result):
     else:
         return list_length_rec(l[1:], result+1)
 
+def list_length_fast(xs):
+    res = 0
+    while not nil(xs):
+        xs = cdr(xs)
+        res = res + 1
+    return res
+
 
