@@ -48,6 +48,13 @@ def apply_n_times_test():
     assert call('ff.py', 'inc_n_times_for_test', 10, 5) == 15
 
 
+def fold_test():
+    eq_(call('ff.py', 'fold_mk_pair_for_test', 42, lto_to_cons([])),
+        42)
+    eq_(call('ff.py', 'fold_mk_pair_for_test', 42, lto_to_cons(range(3))),
+        (((42, 0), 1), 2))
+
+
 #### list tests
 
 def list_length_test():

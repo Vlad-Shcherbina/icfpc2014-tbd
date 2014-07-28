@@ -7,13 +7,18 @@ def main(world, _ghosts):
 def step(state, world):
     old_field = state[1:]
     map = world[0]
+    me = world[1]
 
     def propagate_field(f):
         f1 = diffuse(f)
         return matrix_map(merge_cell, matrix_zip(f1, map))
 
-    # TODO: increase
+    # TODO: increase number of iterations
     field = apply_n_times(propagate_field, 2, old_field)
+
+    my_coords = me[1]
+    my_x = my_coords[0]
+    my_y = my_coords[1:]
 
     return ((state[0], field), 0)
 
@@ -23,6 +28,10 @@ def default():
 
 def always_default(x):
     return default()
+
+
+def better(f_cell1, f_cell2):
+    return f_cell1[0] > f_cell2[0]
 
 
 def shift_up(mat):
@@ -46,7 +55,7 @@ def merge_cell(pair):
     f_cell = pair[0]
     map_cell = pair[1:]
     if map_cell == 0:  # WALL
-        return (-1, 0)
+        return (0, 0)
     elif map_cell == 2:  # PILL
         return (max(f_cell[0], 900), 0)
     elif map_cell == 3:  # POWER_PILL
@@ -120,6 +129,20 @@ def inc_n_times_for_test(n, x):
 
 
 ### list utils
+
+
+def list_fold(f, initial, xs):
+    if int(xs):
+        return initial
+    else:
+        return list_fold(f, f(initial, xs[0]), xs[1:])
+
+def mk_pair(x, y):
+    return (x, y)
+
+def fold_mk_pair_for_test(initial, xs):
+    return list_fold(mk_pair, initial, xs)
+
 
 def list_tail(xs):
     return xs[1:]
