@@ -10,6 +10,8 @@ alias direction [167]
 alias xx [168]
 alias yy [169]
 alias opposite [170]
+alias pacmannear [171]
+alias pacmandir [172]
 
 
 ; Variables for red mode [200-242]
@@ -17,6 +19,7 @@ alias opposite [170]
 alias up [220]
 alias down [221]
 alias left [210]
+
 alias right [211]
 
 alias hor [200]
@@ -30,18 +33,29 @@ alias deltax [100]
 alias deltay [101]
 alias cnt [102]
 alias curdir [103]
-; Variables introduced by cyberdervish [150-164]
-alias pacmannear [150]
+
 
 ; Constants
-alias ghostvision 1
-alias false 0
-alias true 1
+alias GHOSTVISION 1
+alias FALSE 0
+alias TRUE 1
+alias FRIGHTENED 1
+alias GOUP 0
+alias GORIGHT 1
+alias GODOWN 2
+alias GOLEFT 3
+alias GONOWHERE 255
 
 ; Get self info: position, vitality, direction
 
 !myindex
 mov selfindex, a
+; selfindex = selfindex mod 6
+mov cnt, selfindex
+div cnt, 6
+mul cnt, 6
+sub selfindex, cnt
+
 !ghostpos
 mov xx, a
 mov yy, b
@@ -58,21 +72,33 @@ xor opposite, 2
 ifnot a > xx
     mov deltax, xx
     sub deltax, a
+    ifnot deltax = 0
+        mov pacmandir, GOLEFT
 else
     mov deltax, a
     sub deltax, xx
+    ifnot deltax = 0
+        mov pacmandir, GORIGHT
 ifnot b > yy
     mov deltay, yy
     sub deltay, b
+    ifnot deltay = 0
+        mov pacmandir, GODOWN
 else
     mov deltay, b
     sub deltay, yy
+    ifnot deltay = 0
+        mov pacmandir, GOUP
+
 mov pacmannear, deltax
 add pacmannear, deltay
-if pacmannear > ghostvision
-    mov pacmannear, false
+ifnot pacmannear > GHOSTVISION
+    ifnot vitality = FRIGHTENED
+        ; Yummy!
+        mov a, pacmandir
+        !report
 else
-    mov pacmannear, true
+    mov pacmandir, GONOWHERE
 
 ; Check if another ghost is here
 ; Iterate over max 20 ghosts
@@ -95,10 +121,10 @@ whilenot cnt = 20
             else
                 mov deltay, b
                 sub deltay, yy
-            ifnot deltax > 1
-                ifnot deltay > 1
+            ifnot deltax > GHOSTVISION
+                ifnot deltay > GHOSTVISION
                     add deltax, deltay
-                    ifnot deltax > 1
+                    ifnot deltax > GHOSTVISION
                         jmp /splitter/
         else
             jmp /red/
@@ -128,7 +154,7 @@ else
 
 
 ; flip if frightened
-if vitality = 1
+if vitality = FRIGHTENED
     mov d, left
     mov left, right
     mov right, d
@@ -172,7 +198,10 @@ add cnt, direction
 mov curdir, 0
 whilenot cnt = 0
     ifnot curdir = opposite
-        mov a, curdir
+        ; this only happens if pacman is near
+        ; and the ghost is frightened
+        ifnot curdir = pacmandir
+            mov a, curdir
     inc curdir
     if curdir = 4
         mov curdir, 0
