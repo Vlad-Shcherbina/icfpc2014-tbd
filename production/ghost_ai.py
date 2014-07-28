@@ -192,7 +192,6 @@ class Splitter(BasePyAI):
     def look_around(self):
         directions = []
         packman = []
-        # *2 and slice is here to rotate based on the direction
         for delta_x, delta_y, direction in zip(game.DELTA_X, game.DELTA_Y, game.DIRECTIONS):
             if direction == game.OPPOSITE_DIRECTIONS[self.ghost.direction]:
                 continue

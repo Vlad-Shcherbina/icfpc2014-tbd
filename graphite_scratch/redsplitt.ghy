@@ -3,12 +3,16 @@
 ; This strategy combines red ghost from original pacman
 ; and splitter mode when ghosts are too close
 
-; General varibles [201-220]
-alias selfindex [201]
+; General varibles [165-200]
+alias selfindex [165]
+alias vitality [166]
+alias direction [167]
+alias xx [168]
+alias yy [169]
+alias opposite [170]
 
-; Variables for red mode [227-242]
-alias xx [227]
-alias yy [228]
+
+; Variables for red mode [200-242]
 
 alias up [220]
 alias down [221]
@@ -20,21 +24,27 @@ alias ver [201]
 alias hordir [203]
 alias verdir [204]
 
-alias vitality [240]
-alias direction [241]
-alias opposite [242]
 
-; Variables for splitter mode [100-200]
+; Variables for splitter mode [100-164]
 alias deltax [100]
 alias deltay [101]
 alias cnt [102]
+alias curdir [103]
 
+; Get self info: position, vitality, direction
 
 !myindex
 mov selfindex, a
 !ghostpos
 mov xx, a
 mov yy, b
+
+!myindex
+!ghoststats
+mov vitality, a
+mov direction, b
+mov opposite, b
+xor opposite, 2
 
 ; Check if pacman is near
 
@@ -90,10 +100,6 @@ else
 
 
 ; flip if frightened
-!myindex
-!ghoststats
-mov vitality, a
-mov direction, b
 if vitality = 1
     mov d, left
     mov left, right
@@ -124,8 +130,6 @@ else
 
 
 ; If algorithm suggests to turn around, pick some other direction instead.
-mov opposite, direction
-xor opposite, 2
 if opposite = a
     add a, 1
     if a = 4
@@ -134,5 +138,16 @@ if opposite = a
 !report
 
 ; Switch to splitter mode
+; Magic happens here
+mov cnt, selfindex | splitter
+add cnt, direction
+mov curdir, 0
+whilenot cnt = 0
+    ifnot curdir = opposite
+        mov a, curdir
+    inc curdir
+    if curdir = 4
+        mov curdir, 0
+    dec cnt
 
-!report | splitter
+!report
