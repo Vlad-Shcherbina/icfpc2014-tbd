@@ -1,6 +1,4 @@
 def main(world, _ghosts):
-    def always_default(x):
-        return default_cell()
     field = matrix_map(always_default, world[0])
     return ((999888777, field), step)
 
@@ -9,8 +7,15 @@ def step(state, world):
     return (state, 1)
 
 
-def default_cell():
+def default():
     return (0, 0)
+
+def always_default(x):
+    return default()
+
+
+def shift_up(mat):
+    return list_append(mat[1:], list_map(always_default, mat[0]))
 
 
 ################################################
@@ -22,6 +27,9 @@ def fail_():
 
 
 ### list utils
+
+def list_tail(xs):
+    return xs[1:]
 
 def list_length(xs):
     return list_length_rec(xs, 0)

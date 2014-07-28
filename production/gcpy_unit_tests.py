@@ -85,6 +85,18 @@ def link_map_test():
     eq_(result, [[2, 3], [9, 8]])
 
 
+def shift_up_test():
+    d = call('ff.py', 'default')
+    result = cons_to_mat(call('ff.py',
+            'shift_up', mat_to_cons([
+                [1, 2],
+                [8, 7]])))
+    eq_(result, [
+        [8, 7],
+        [d, d]])
+
+
+
 if __name__ == '__main__':
     nose.run_exit(argv=[
         sys.argv[0], __file__,

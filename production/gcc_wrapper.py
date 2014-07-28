@@ -60,7 +60,7 @@ class GCCWrapper(object):
         if ticks > self.max_step_ticks:
             self.max_step_ticks = ticks
 
-        logger.info('ai state: {}'.format(self.ai_state))
+        self.log_ai_state(self.ai_state)
         return move
 
 
