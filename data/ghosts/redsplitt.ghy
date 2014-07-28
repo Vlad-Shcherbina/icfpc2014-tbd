@@ -205,9 +205,9 @@ whilenot cnt = 0
         ; and the ghost is frightened
         ifnot curdir = pacmandir
             mov a, curdir
+            dec cnt
     inc curdir
     if curdir = 4
         mov curdir, 0
-    dec cnt
 
 !report
