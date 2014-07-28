@@ -74,11 +74,13 @@ whilenot cnt = 20
                     add deltax, deltay
                     ifnot deltax > 1
                         jmp /splitter/
+        else
+            jmp /red/
     inc cnt
 
 ; Original red ghost mode
 
-!lambdaman
+!lambdaman | red
 
 if xx < a
     mov right, a
