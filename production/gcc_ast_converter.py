@@ -12,15 +12,20 @@ def convert_python_to_gcc_module(module):
     return program
 
 
-def convert_python_to_gcc_function(program, func_def):
+def convert_python_to_gcc_function(program, func_def, parent_function=None):
     args = [a.id for a in func_def.args.args]
-    if program:
+    if parent_function:
+        func = parent_function.add_nested_function(func_def.name, args)
+    elif program:
         func = program.add_function(func_def.name, args)
     else:
         func = GccFunction(None, func_def.name, args)
     func.source_location = (func_def.lineno, func_def.col_offset)
     for stmt in func_def.body:
-        func.add_instruction(convert_python_to_gcc_statement(stmt))
+        if isinstance(stmt, FunctionDef):
+            convert_python_to_gcc_function(program, stmt, func)
+        else:
+            func.add_instruction(convert_python_to_gcc_statement(stmt))
     return func
 
 

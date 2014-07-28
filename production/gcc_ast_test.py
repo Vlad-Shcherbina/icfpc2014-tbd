@@ -48,7 +48,13 @@ class GccASTTest(unittest.TestCase):
         expr = GccAdd(var_ref, var_ref)
         body.add_instruction(expr)
         body.emit(builder)
-        self.assert_code_equals("LD 0 0\nLD 0 0\nADD\nRTN\n", builder.text)
+        self.assert_code_equals("""
+        ;$func_body$
+            LD 0 0
+            LD 0 0
+            ADD
+            RTN
+        """, builder.text)
 
     def test_function_reference(self):
         program = GccProgram()
@@ -271,6 +277,23 @@ class GccASTTest(unittest.TestCase):
         body = program.add_function("main", [])
         body.add_instruction(GccAssignment("main", GccConstant(42)))
         self.assertRaises(GccSyntaxError, lambda: program.emit(GccTextBuilder()))
+
+    def test_nested_functions(self):
+        program = GccProgram()
+        body = program.add_function("main", ["x"])
+        body.add_instruction(GccCall(GccNameReference("nested"), []))
+        nested = body.add_nested_function("nested", [])
+        nested.add_instruction(GccNameReference("x"))
+        builder = GccTextBuilder()
+        program.emit(builder)
+        self.assert_code_equals("""
+        ;$func_main$
+            LDF 2  ; $func_main_nested$
+            TAP 0
+        ;$func_main_nested$
+            LD 1 0
+            RTN
+            """, builder.text)
 
 
 if __name__ == '__main__':

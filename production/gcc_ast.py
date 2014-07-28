@@ -98,7 +98,6 @@ class GccProgram(object):
 
     def emit(self, builder, **kwargs):
         for f in self.functions:
-            builder.add_label("$func_{}$".format(f.name))
             f.emit(builder, **kwargs)
         builder.fixup_labels()
 
@@ -121,16 +120,31 @@ class GccEmitContext(object):
 
     def resolve_variable(self, name):
         args_frame_index = 0
-        if self.function.local_variables:
+        fn = self.function
+        while fn:
+            if fn.local_variables:
+                try:
+                    return args_frame_index, fn.local_variables.index(name)
+                except ValueError:
+                    pass  # ignore, continue lookup
+                args_frame_index += 1
             try:
-                return 0, self.function.local_variables.index(name)
+                index = fn.args.index(name)
+                return args_frame_index, index
             except ValueError:
-                pass  # ignore, continue lookup
+                pass
+            fn = fn.parent_function
             args_frame_index += 1
-        index = self.function.args.index(name)
-        return args_frame_index, index
+        raise GccSyntaxError("Cannot resolve variable name '{0}'".format(name))
 
     def resolve_function(self, name):
+        parent_function = self.function
+        while parent_function:
+            for f in parent_function.nested_functions:
+                if f.name == name:
+                    return f
+            parent_function = parent_function.parent_function
+
         if not self.function.program:
             return None
         return self.function.program.function_index.get(name, None)
@@ -177,11 +191,20 @@ class GccFunction(GccASTNode):
         self.args = args
         self.main_block = GccCodeBlock()
         self.local_variables = []
+        self.parent_function = None
+        self.nested_functions = []
 
     def add_instruction(self, insn):
         self.main_block.instructions.append(insn)
 
+    def add_nested_function(self, name, args):
+        fn = GccFunction(self.program, name, args)
+        fn.parent_function = self
+        self.nested_functions.append(fn)
+        return fn
+
     def emit(self, builder, **kwargs):
+        builder.add_label(self.build_label())
         context = GccEmitContext(self)
         if 'disable_tco' in kwargs:
             context.disable_tco = True
@@ -200,13 +223,15 @@ class GccFunction(GccASTNode):
         if not context.terminated:
             builder.add_instruction('rtn')
         context.resolve_queue(builder)
+        for f in self.nested_functions:
+            f.emit(builder, **kwargs)
 
     def collect_local_variables(self, block, context):
         for insn in block.instructions:
             if isinstance(insn, GccAssignment):
                 try:
                     context.resolve_variable(insn.name)
-                except ValueError:
+                except GccSyntaxError:
                     self.local_variables.append(insn.name)
             elif isinstance(insn, GccConditionalBlock):
                 self.collect_local_variables(insn.true_branch, context)
@@ -220,6 +245,15 @@ class GccFunction(GccASTNode):
         for local in self.local_variables:
             if local in self.program.function_index:
                 raise GccSyntaxError("Name conflict (local/function): " + local)
+
+    def build_label(self):
+        return "$func_" + self.build_label_chain() + "$"
+
+    def build_label_chain(self):
+        if self.parent_function:
+            return self.parent_function.build_label_chain() + "_" + self.name
+        return self.name
+
 
 class GccInline(object):
     def __init__(self, code):
@@ -295,7 +329,7 @@ class GccNameReference(GccASTNode):
     def emit(self, builder, context):
         fn = context.resolve_function(self.name)
         if fn:
-            builder.add_instruction("ldf", "$func_{}$".format(self.name),
+            builder.add_instruction("ldf", fn.build_label(),
                                     source=self.source_location)
         else:
             frame_index, var_index = context.resolve_variable(self.name)
