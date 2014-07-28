@@ -273,6 +273,28 @@ class GHC:
                 self.registers[PC] = (self.registers[PC] + 1) % 256
             cycles += 1
         # Debug for splitter
+        labels = {
+            165: 'selfindex' ,
+            166: 'vitality' ,
+            167: 'direction' ,
+            168: 'xx' ,
+            169: 'yy' ,
+            170: 'opposite' ,
+            171: 'pacmannear' ,
+            172: 'pacmandir' ,
+            220: 'up' ,
+            221: 'down' ,
+            210: 'left' ,
+            211: 'right' ,
+            200: 'hor' ,
+            201: 'ver' ,
+            203: 'hordir' ,
+            204: 'verdir' ,
+            100: 'deltax' ,
+            101: 'deltay' ,
+            102: 'cnt' ,
+            103: 'curdir' 
+        }
         logging.info("Register dump:")
         registers = "ABCDEFGHP"
         msg = ""
@@ -282,7 +304,10 @@ class GHC:
         logging.info("Memory dump:")
         for i in range(len(self.data)):
             if(self.data[i] != 0):
-                logging.info("[" + str(i) + "]: " + str(self.data[i]))
+                label = str(i)
+                if labels[i]:
+                    label = labels[i]
+                logging.info("[" + label + "]: " + str(self.data[i]))
         logging.info("New direction:")
         logging.info(str(self.new_direction))
         return self.new_direction
