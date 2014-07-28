@@ -91,6 +91,9 @@ def list_zip(xs, ys):
 
 # matrix utils
 
+def matrix_at(mat, x, y):
+    return list_at(list_at(mat, y), x)
+
 
 def matrix_map(f, mat):
     def line_map(line):
@@ -106,3 +109,11 @@ def matrix_inc_for_test(mat):
 
 def matrix_update(mat, x, y, new_value):
     list_update(mat, y, list_update(list_at(mat, y), x, new_value))
+
+
+def matrix_zip(mat1, mat2):
+    def lines_zip(line_pair):
+        line1 = line_pair[0]
+        line2 = line_pair[1:]
+        return list_zip(line1, line2)
+    return list_map(lines_zip, list_zip(mat1, mat2))

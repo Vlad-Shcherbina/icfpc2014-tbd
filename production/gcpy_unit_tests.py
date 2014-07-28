@@ -90,6 +90,14 @@ def list_zip_test():
 #### matrix tests
 
 
+def matrix_at_test():
+    result = call('ff.py',
+            'matrix_at', mat_to_cons([
+                [1, 2],
+                [8, 7]]), 0, 1)
+    eq_(result, 8)
+
+
 def matrix_map_test():
     result = cons_to_mat(call('ff.py',
             'matrix_inc_for_test', mat_to_cons([[1, 2], [8, 7]])))
@@ -104,6 +112,18 @@ def matrix_update_test():
     eq_(result, [
         [1, 2],
         [42, 7]])
+
+
+def matrix_zip_test():
+    result = cons_to_mat(call('ff.py',
+            'matrix_zip', mat_to_cons([
+                [1, 2],
+                [3, 4]]),mat_to_cons([
+                [10, 20],
+                [30, 40]])))
+    eq_(result, [
+        [(1, 10), (2, 20)],
+        [(3, 30), (4, 40)]])
 
 
 ############# ff tests
