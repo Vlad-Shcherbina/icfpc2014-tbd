@@ -62,6 +62,10 @@ def convert_python_to_gcc_statement(stmt):
 
 def convert_python_to_gcc_ast(ast):
     if isinstance(ast, Num):
+        if not isinstance(ast.n, (int, long)):
+            raise Exception("Unsupported literal type: {} ({!r})".format(type(ast.n), ast.n))
+        if ast.n < -2**31 - 1 or ast.n > 2**31:
+            raise Exception("Integer literal out of range: {}".format(ast.n))
         result = GccConstant(ast.n)
 
     elif isinstance(ast, BinOp):

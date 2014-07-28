@@ -206,8 +206,7 @@ class GccFunction(GccASTNode):
     def emit(self, builder, **kwargs):
         builder.add_label(self.build_label())
         context = GccEmitContext(self)
-        if 'disable_tco' in kwargs:
-            context.disable_tco = True
+        context.disable_tco = kwargs.get('disable_tco', False)
         self.collect_local_variables(self.main_block, context)
         if self.program:
             self.check_name_conflicts()
