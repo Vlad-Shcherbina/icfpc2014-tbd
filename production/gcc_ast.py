@@ -269,7 +269,7 @@ class GccInline(object):
             builder.add_instruction(line.strip())
 
         
-class GccIntrinsic(object):
+class GccIntrinsic(GccASTNode):
     def __init__(self, name, arg):
         super(GccIntrinsic, self).__init__()
         self.name = name

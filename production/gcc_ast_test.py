@@ -260,6 +260,14 @@ class GccASTTest(unittest.TestCase):
             RTN
             """, builder.text)
 
+    def test_intrinsic(self):
+        blk = GccCodeBlock()
+        blk.instructions.append(GccIntrinsic("nil", GccConstant(3)))
+        builder = GccTextBuilder()
+        builder.imported_intrinsics.add("nil")
+        blk.emit(builder, None)
+        self.assert_code_equals("LDC 3\nATOM\n", builder.text)
+
     def test_parameter_function_names_conflict(self):
         program = GccProgram()
         body = program.add_function("main", ["main"])

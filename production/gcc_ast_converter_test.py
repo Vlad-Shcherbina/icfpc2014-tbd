@@ -131,6 +131,14 @@ def fetch_element(list, n):
         self.assertIsInstance(assignment, GccAssignment)
         self.assertEquals("x", assignment.name)
 
+    def test_atom(self):
+        x = ast.parse("from intrinsics import nil\ndef f(x): nil(x)")
+        tree = convert_python_to_gcc_module(x)
+        call = tree.functions[0].main_block.instructions[0]
+        self.assertIsInstance(call, GccIntrinsic)
+        self.assertEquals("nil", call.name)
+        self.assertEquals("x", call.arg.name)
+
     def test_nested_function(self):
         x = ast.parse("""
 def f(x):
