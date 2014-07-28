@@ -137,3 +137,12 @@ def fetch_element(list, n):
         assignment = tree.main_block.instructions[0]
         self.assertIsInstance(assignment, GccAtom)
         self.assertEquals("x", assignment.arg.name)
+
+    def test_nested_function(self):
+        x = ast.parse("""
+def f(x):
+    def nested():
+        return x
+    return nested""")
+        tree = convert_python_to_gcc_function(None, x.body[0])
+        self.assertEquals("nested", tree.nested_functions[0].name)
