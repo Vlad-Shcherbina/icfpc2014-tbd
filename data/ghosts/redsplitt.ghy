@@ -50,11 +50,6 @@ alias GONOWHERE 255
 
 !myindex
 mov selfindex, a
-; selfindex = selfindex mod 6
-mov cnt, selfindex
-div cnt, 6
-mul cnt, 6
-sub selfindex, cnt
 
 !ghostpos
 mov xx, a
@@ -100,6 +95,7 @@ ifnot pacmannear > GHOSTVISION
         ; Yummy!
         mov a, pacmandir
         !report
+        hlt
 else
     mov pacmandir, GONOWHERE
 
@@ -167,17 +163,17 @@ if vitality = FRIGHTENED
 
 
 if left > right
-    mov hordir, 3
+    mov hordir, GOLEFT
     mov hor, left
 else
-    mov hordir, 1
+    mov hordir, GORIGHT
     mov hor, right
 
 if up > down
-    mov verdir, 0
+    mov verdir, GOUP
     mov ver, up
 else
-    mov verdir, 2
+    mov verdir, GODOWN
     mov ver, down
 
 if hor > ver
@@ -193,10 +189,18 @@ if opposite = a
         mov a, 0
 
 !report
+hlt
 
 ; Switch to splitter mode
 ; Magic happens here
+
+; selfindex = selfindex mod 6
 mov cnt, selfindex | splitter
+div cnt, 6
+mul cnt, 6
+sub selfindex, cnt
+
+mov cnt, selfindex
 add cnt, direction
 mov curdir, 0
 whilenot cnt = 0
