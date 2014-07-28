@@ -74,7 +74,7 @@ class GCCWrapper(object):
             for line in field:
                 s = ''
                 for e in line:
-                    s += '{:10}'.format(e)
+                    s += '{:6}'.format(e)
                 logger.info(s)
         else:
             logger.info('ai state: {}'.format(ai_state))

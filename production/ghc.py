@@ -2,6 +2,8 @@ import logging
 import pprint
 pp = pprint.PrettyPrinter(indent=2)
 
+logger = logging.getLogger(__name__)
+
 REGISTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'pc']
 PC = REGISTERS.index('pc')
 
@@ -90,7 +92,7 @@ class GHC:
         'an assertion that will halt the GHC if the condition is false'
         if not cond:
             self.halted = True
-            logging.debug('assertion failed: %s, %s', cond, message)
+            logger.debug('assertion failed: %s, %s', cond, message)
 
     def _get_value(self, arg):
         if arg[0] == 'reg':
@@ -222,7 +224,7 @@ class GHC:
             self.registers[0] = self.gamemap.lambdaman.x
             self.registers[1] = self.gamemap.lambdaman.y
         elif which == 2:
-            logging.debug('INT2 called when there is only one lambdaman')
+            logger.debug('INT2 called when there is only one lambdaman')
             self.registers[0] = 255
             self.registers[1] = 255
         elif which == 3:
@@ -246,9 +248,9 @@ class GHC:
             x, y = self.registers[0:2]
             self.registers[0] = self.gamemap.cells[y][x]
         elif which == 8:
-            logging.debug('ghost %s outputting registers: %s %s', self.index, int(self.registers[PC]),
+            logger.debug('ghost %s outputting registers: %s %s', self.index, int(self.registers[PC]),
                 map(int, self.registers[:-1]))
-            logging.debug('ghost %s outputting data: %s', self.index, map(int, self.data[:5]))
+            logger.debug('ghost %s outputting data: %s', self.index, map(int, self.data[:5]))
 
 
     def exec_hlt(self, args):
@@ -293,23 +295,23 @@ class GHC:
             100: 'deltax' ,
             101: 'deltay' ,
             102: 'cnt' ,
-            103: 'curdir' 
+            103: 'curdir'
         }
-        logging.info("Register dump:")
+        logger.info("Register dump:")
         registers = "ABCDEFGHP"
         msg = ""
         for i in range(len(self.registers)):
             msg = msg + registers[i] + ": " + str(self.registers[i]) + ";  "
-        logging.info(msg)
-        logging.info("Memory dump:")
+        logger.info(msg)
+        logger.info("Memory dump:")
         for i in range(len(self.data)):
             if(self.data[i] != 0):
                 label = str(i)
                 if i in labels.keys():
                     label = labels[i]
-                logging.info("[" + label + "]: " + str(self.data[i]))
-        logging.info("New direction:")
-        logging.info(str(self.new_direction))
+                logger.info("[" + label + "]: " + str(self.data[i]))
+        logger.info("New direction:")
+        logger.info(str(self.new_direction))
         return self.new_direction
 
 
