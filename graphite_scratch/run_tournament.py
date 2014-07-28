@@ -33,7 +33,7 @@ def main():
             #['py:GhostAI_Red', 'py:Splitters', 'py:Splitters', 'py:Splitters'],
             #['ghosthon:../data/ghosts/red.ghy'],
             ['ghc:red.ghc'],
-            ['ghc:redsplitt.ghc'],
+            ['ghosthon:../data/ghosts/redsplitt.ghy'],
             #['py:Hunter'],
         ],
         parallel=True)
