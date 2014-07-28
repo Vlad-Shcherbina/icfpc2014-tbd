@@ -1,4 +1,5 @@
-; python ghosthon.py <../graphite_scratch/redsplitt.ghy >../graphite_scratch/redsplitt.ghc
+; python ghosthon.py <../data/ghosts/redsplitt.ghy >../data/ghosts/redsplitt.ghc
+
 
 ; This strategy combines red ghost from original pacman
 ; and splitter mode when ghosts are too close
