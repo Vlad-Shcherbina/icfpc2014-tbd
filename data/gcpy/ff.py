@@ -23,7 +23,7 @@ def step(state, world):
             if vitality == 1:  # fright mode
                 new_cell = (max(old_cell[0], 905), 0)
             else:
-                new_cell = (-1, 0)#default()
+                new_cell = default()
             return matrix_update(ff, ghost_x, ghost_y, new_cell)
 
         f3 = list_fold(apply_ghost, f2, ghosts)
