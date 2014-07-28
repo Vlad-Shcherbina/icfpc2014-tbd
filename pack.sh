@@ -19,8 +19,9 @@ cp README			submission/code/
 rm -f submission/code/data/id_rsa*
 rm -f submission/code/some_results.json
 
+find submission -exec touch -t 1401010000 {} \;
 tar -czf $FILENAME -C submission solution code
-#rm -rf submission
+rm -rf submission
 
 echo "saved submission in $FILENAME"
 sha1sum $FILENAME
