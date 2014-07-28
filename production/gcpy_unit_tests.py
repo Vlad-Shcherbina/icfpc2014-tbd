@@ -41,6 +41,15 @@ def call(script, func_name, *args):
     return result
 
 
+################
+
+
+def apply_n_times_test():
+    assert call('ff.py', 'inc_n_times_for_test', 10, 5) == 15
+
+
+#### list tests
+
 def list_length_test():
     for script in 'list_length.py', 'ff.py':
         assert call(script, 'list_length', lto_to_cons([])) == 0

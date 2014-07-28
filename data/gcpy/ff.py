@@ -40,8 +40,7 @@ def merge_cell(pair):
     f_cell = pair[0]
     map_cell = pair[1:]
     if map_cell == 0:  # WALL
-        #return (-1, 0)
-        return f_cell  ## :()
+        return (-1, 0)
     elif map_cell == 2:  # PILL
         return (900, 0)
     # TODO
@@ -76,9 +75,9 @@ def combine(field1, field2):
 
 
 def diffuse(field):
-    field1 = shift_up(field)
-    t = combine(field, field1)
-    return decrement(t)
+    t = combine(shift_left(field), shift_up(field))
+    t2 = shift_right(shift_down(t))
+    return decrement(combine(t, t2))
 
 
 ################################################
@@ -87,6 +86,21 @@ def diffuse(field):
 def fail_():
     # TODO, like assert False
     return 0
+
+
+def inc(x):
+    return x + 1
+
+
+def apply_n_times(f, n, x):
+    if n == 0:
+        return x
+    else:
+        return apply_n_times(f, n - 1, f(x))
+
+
+def inc_n_times_for_test(n, x):
+    return apply_n_times(inc, n, x)
 
 
 ### list utils
@@ -139,8 +153,6 @@ def list_map(f, xs):
 
 
 def list_inc_for_test(xs):
-    def inc(x):
-        return x + 1
     return list_map(inc, xs)
 
 
@@ -175,8 +187,6 @@ def matrix_map(f, mat):
 
 
 def matrix_inc_for_test(mat):
-    def inc(x):
-        return x + 1
     return matrix_map(inc, mat)
 
 
