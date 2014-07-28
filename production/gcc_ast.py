@@ -457,7 +457,7 @@ class GccWhileBlock(GccASTNode):
                                     source=self.source_location)
         else:
             condition.emit(builder, context)
-            builder.add_instruction('tsel', end_label, begin_label,
+            builder.add_instruction('tsel', begin_label, end_label,
                                     source=self.source_location)
             
         builder.resolve_label(begin_label)
@@ -469,7 +469,7 @@ class GccWhileBlock(GccASTNode):
                                     source=self.source_location)
         else:
             condition.emit(builder, context)
-            builder.add_instruction('tsel', end_label, begin_label, 
+            builder.add_instruction('tsel', begin_label, end_label,
                                     source=self.source_location)
         
         builder.resolve_label(end_label)
