@@ -14,7 +14,8 @@ def test_no_ghosts():
         ])
     assert result.score > 1000, result.score
 
-def test_no_ghosts():
+
+def test_some_map():
     [result] = tournament.play_tournament(
         maps=[
             'map_15_19_4_4.txt',
