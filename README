@@ -3,19 +3,30 @@ Submission by team TBD.
 Code repository (will become public after the contest):
   https://github.com/Vlad-Shcherbina/icfpc2014-tbd/
 
-Our ghost:
+The sources for our ghost:
   data/ghosts/redsplitt.py  --  see comments
 
-Our lamdaman:
+The sources for our lamdaman:
   production/lm_ff.py  --  prototype in complete python
   data/gcpy/ff.py  --  actual strategy in python subset we compiled
   production/gcpy_unit_tests  --  unit tests to data/gcpy/ff.py
 Strategy idea: food propagates "force field" which attracts lambdaman.
 Ghosts block its propagation.
 
-Our infrastructure allows to automatically play tournaments between lambdamen
-(in all three languages: python, python subset and gcc) and ghosts (both in
-ghosthon and in ghc).
+Ghosts were implemented in Ghosthon, a kind of a macro language for the GHC
+assembler that added some bells and whistles like labels for jumps, aliases
+for data locations, whiles and ifs, etc. See production/ghosthon.py for more
+information. Ghosthon sources have extension ".ghy".
+
+The Lambdaman was implemented in Greatly Castrated Python, a Python subset
+that we could compile into GCC code. This was done by using Python's built-in
+AST-parsing capabilities, then converting the generated AST into an AST of our
+own kind, then compiling that AST into GCC code. This is done by production/gcpy.py.
+
+Our infrastructure allowed us to automatically play tournaments between lambdamen
+(in python, gcpy, and gcc) and ghosts (in python, ghosthon, and ghc). The fact that
+the tournament system allowed us to run pure Python AIs allowed us to quickly
+prototype and benchmark our AIs even before our compiler toolchain was working properly.
 
 In the tournament, we used each our map in four orientations. We believe that it
 significantly increased variety of situations we explored.
@@ -25,6 +36,7 @@ Results of the tournament can be viewed by running
 and visiting the following addresss:
   http://127.0.0.1:5000/table?results_filename=../data/example_results.json
 
-The code has been implemented in Python 2.7.
+Everything was implemented in Python 2.7.
 Everything should be run from production/ as current directory.
-If test_all.py fails, you have missing dependencies.
+If test_all.py fails, you have missing dependencies. `nose` seems to be the only
+external dependency, required for running unittests.
