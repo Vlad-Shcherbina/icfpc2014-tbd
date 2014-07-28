@@ -5,11 +5,17 @@ def main(world, _ghosts):
 
 
 def step(state, world):
-    field = state[1:]
+    old_field = state[1:]
     map = world[0]
-    field1 = diffuse(field)
-    field2 = matrix_map(merge_cell, matrix_zip(field1, map))
-    return ((state[0], field2), 0)
+
+    def propagate_field(f):
+        f1 = diffuse(f)
+        return matrix_map(merge_cell, matrix_zip(f1, map))
+
+    # TODO: increase
+    field = apply_n_times(propagate_field, 2, old_field)
+
+    return ((state[0], field), 0)
 
 
 def default():
@@ -42,8 +48,11 @@ def merge_cell(pair):
     if map_cell == 0:  # WALL
         return (-1, 0)
     elif map_cell == 2:  # PILL
-        return (900, 0)
-    # TODO
+        return (max(f_cell[0], 900), 0)
+    elif map_cell == 3:  # POWER_PILL
+        return (max(f_cell[0], 905), 0)
+    elif map_cell == 4:  # FRUIT
+        return (max(f_cell[0], 910), 0)
     else:
         return f_cell
 
@@ -63,14 +72,14 @@ def combine(field1, field2):
     def cell_max(pair):
         xs = pair[0]
         ys = pair[1:]
-        def max(pair):
+        def max_of_pair(pair):
             x = pair[0]
             y = pair[1:]
             if x > y:
                 return x
             else:
                 return y
-        return list_map(max, list_zip(xs, ys))
+        return list_map(max_of_pair, list_zip(xs, ys))
     return matrix_map(cell_max, matrix_zip(field1, field2))
 
 
@@ -90,6 +99,13 @@ def fail_():
 
 def inc(x):
     return x + 1
+
+
+def max(x, y):
+    if x > y:
+        return x
+    else:
+        return y
 
 
 def apply_n_times(f, n, x):
