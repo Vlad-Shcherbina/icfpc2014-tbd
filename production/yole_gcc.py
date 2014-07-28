@@ -1,5 +1,6 @@
 import functools
 from gcc_wrapper import GCCInterface
+from gcc_utils import deep_unmarshal, deep_marshal
 
 
 class GccException(Exception):
@@ -51,12 +52,12 @@ class GccMachine(GCCInterface):
             address_or_closure = GccClosure(address_or_closure, None)
         callee_frame = GccFrame(address_or_closure.frame, len(args))
         for i in range(len(args)):
-            callee_frame.values[i] = args[i]
+            callee_frame.values[i] = deep_marshal(self.marshal, args[i])
         self.current_frame = callee_frame
         self.ip = address_or_closure.ip
         self.run(kwargs.get('max_ticks'))
         assert len(self.data_stack) == 1
-        return self.unmarshal(self.data_stack.pop())
+        return deep_unmarshal(self.unmarshal, self.data_stack.pop())
 
     def ldc(self, arg):
         self.data_stack.append(to_int32(arg))

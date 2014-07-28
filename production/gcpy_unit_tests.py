@@ -5,7 +5,7 @@ import ast
 import pprint
 import nose
 
-from gcc_utils import lto_to_cons, cons_to_list, cons_to_tuple, deep_unmarshal
+from gcc_utils import lto_to_cons, cons_to_list, cons_to_tuple
 from gcc_ast_converter import convert_python_to_gcc_module
 from gcc_ast import GccTextBuilder
 from asm_parser import parse_gcc
@@ -32,7 +32,7 @@ def call(script, func_name, *args):
 
     machine = GccMachine(parse_gcc(builder.text), builder)
 
-    result = deep_unmarshal(machine, machine.call(addr, *args))
+    result = machine.call(addr, *args)
 
     print '** got result'
     pprint.pprint(result)

@@ -3,47 +3,46 @@ def to_int32(x):
     return int((x & 0xFFFFFFFF) - ((x & 0x80000000) << 1))
 
 
-def deep_marshal(gcc, x):
+def deep_marshal(marshal, x):
+    '''Apply marshal to all items in the cons tree'''
     if type(x) == tuple:
         a, b = x
-        x = (deep_marshal(gcc, a), deep_marshal(gcc, b))
-        return gcc.marshal(x)
+        x = (deep_marshal(marshal, a), deep_marshal(marshal, b))
+        return marshal(x)
     elif isinstance(x, (int, long)):
-        return gcc.marshal(x)
+        return marshal(x)
     else:
         return x
 
 
-def deep_unmarshal(gcc, x):
-    x = gcc.unmarshal(x)
+def deep_unmarshal(unmarshal, x):
+    x = unmarshal(x)
     if type(x) == tuple:
         a, b = x
-        x = (deep_unmarshal(gcc, a), deep_unmarshal(gcc, b))
+        x = (deep_unmarshal(unmarshal, a), deep_unmarshal(unmarshal, b))
         return x
     else:
         return x
 
 
-def lto_to_cons(x, marshal=lambda x: x):
+def lto_to_cons(x):
     '''Convert a recursive list/tuple/object structure to cons representation.
-    If marshal is specified (should be gcc.marshal), everything is marshalled automatically,
-    which is more efficient than calling deep_marshal on the result.
     Lists and tuples must be exact types, everything else is considered to be an "object"
     '''
 
     if type(x) == tuple:
         curr = None
     elif type(x) == list:
-        curr = marshal(0)
+        curr = 0
     else:
-        return marshal(x)
-
+        return x
+        
     for it in reversed(x):
-        it = lto_to_cons(it, marshal)
+        it = lto_to_cons(it)
         if curr is None:
             curr = it
         else:
-            curr = marshal((it, curr))
+            curr = (it, curr)
     return curr
 
 
