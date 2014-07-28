@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILENAME="icfpc_tbd.tar.gz"
+FILENAME="icfpc_tbd.tar"
 
 mkdir -p submission/solution
 mkdir submission/code
@@ -20,13 +20,15 @@ rm -f submission/code/data/id_rsa*
 rm -f submission/code/some_results.json
 
 find submission -exec touch -t 1401010000 {} \;
-tar -czf $FILENAME -C submission solution code
+tar -cf $FILENAME -C submission solution code
 rm -rf submission
+gzip -f -n $FILENAME
+rm $FILENAME
 
-echo "saved submission in $FILENAME"
-sha1sum $FILENAME
+echo "saved submission in $FILENAME.gz"
+sha1sum $FILENAME.gz
 echo "secret token for submission: 69ce5cb1-66e0-4a5b-b1dd-ac97269b74e3"
 
 echo "will now upload file"
-#curl --form "file=@$FILENAME" "http://f.nn.lv/?f=rest"
+#curl --form "file=@$FILENAME.gz" "http://f.nn.lv/?f=rest"
 echo ""
