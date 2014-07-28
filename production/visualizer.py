@@ -91,8 +91,12 @@ def main():
             #for i, ghost in enumerate(args.ghost):
 
             stdscr.addstr(
-                5, map.width() + 1,
+                len(map.ghosts) + 1, map.width() + 1,
                 'pill: {}    '.format(map.remaining_power_pill_ticks()),
+                curses.color_pair(1))
+            stdscr.addstr(
+                len(map.ghosts) + 2, map.width() + 1,
+                'lives: {}    '.format(map.lambdaman.lives),
                 curses.color_pair(1))
 
             stdscr.addstr(map.height(), 0, "Tick {0} Score {1}   ".format(
