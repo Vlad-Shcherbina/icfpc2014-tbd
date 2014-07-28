@@ -93,8 +93,8 @@ def merge_cell(pair):
         return (max(f_cell[0], 900), 0)
     elif map_cell == 3:  # POWER_PILL
         return (max(f_cell[0], 905), 0)
-    elif map_cell == 4:  # FRUIT
-        return (max(f_cell[0], 910), 0)
+    # elif map_cell == 4:  # FRUIT
+    #     return (max(f_cell[0], 910), 0)
     else:
         return f_cell
 

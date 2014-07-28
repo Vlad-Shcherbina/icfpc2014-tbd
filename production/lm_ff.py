@@ -99,12 +99,12 @@ def merge_cell(f_cell, map_cell):
         return (max(900, f_cell[0]), f_cell[1], f_cell[2])
     elif map_cell == game.POWER_PILL:
         return (max(905, f_cell[0]), f_cell[1], f_cell[2])
-    elif map_cell == game.FRUIT:
-        # TODO: use fruit component of a field
-        # TODO: or even better, use expected fruit location even when
-        # it's not on the map, and use careful distance-based timing in
-        # better() function.
-        return (max(910, f_cell[0]), f_cell[1], f_cell[2])
+    # elif map_cell == game.FRUIT:
+    #     # TODO: use fruit component of a field
+    #     # TODO: or even better, use expected fruit location even when
+    #     # it's not on the map, and use careful distance-based timing in
+    #     # better() function.
+    #     return (max(910, f_cell[0]), f_cell[1], f_cell[2])
     else:
         return f_cell
 
