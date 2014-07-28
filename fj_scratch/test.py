@@ -4,6 +4,7 @@ sys.path.append('../production')
 import logging
 log = logging.getLogger(__name__)
 from pprint import pprint
+from gcc_utils import cons_to_list  
 
 import dis
 
@@ -11,9 +12,9 @@ def to_int32(x):
     return (x & 0xFFFFFFFF) - ((x & 0x80000000) << 1)
 
 def do_stuff():
-    from cmath import sin
-    print eval('sin(4)') 
-    
+    code, field = (999888777, (((0, 0), ((0, 0), ((0, 0), ((0, 0), ((0, 0), 0))))), (((0, 0), ((0, 0), ((0, 0), ((0, 0), ((0, 0), 0))))), (((0, 0), ((0, 0), ((0, 0), ((0, 0), ((0, 0), 0))))), (((0, 0), ((0, 0), ((0, 0), ((0, 0), ((0, 0), 0))))), (((0, 0), ((0, 0), ((0, 0), ((0, 0), ((0, 0), 0))))), 0))))))
+    pprint([cons_to_list(line) for line in cons_to_list(field)])
+    pprint(map(cons_to_list, cons_to_list(field)))
 
 def main():
     # log from this script at debug,
