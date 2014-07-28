@@ -8,10 +8,27 @@ def step(state, world):
     old_field = state[1:]
     map = world[0]
     me = world[1]
+    ghosts = world[2]
 
     def propagate_field(f):
         f1 = diffuse(f)
-        return matrix_map(merge_cell, matrix_zip(f1, map))
+        f2 = matrix_map(merge_cell, matrix_zip(f1, map))
+
+        def apply_ghost(ff, ghost):
+            vitality = ghost[0]
+            coords = ghost[1]
+            ghost_x = coords[0]
+            ghost_y = coords[1:]
+            old_cell = matrix_at(ff, ghost_x, ghost_y)
+            if vitality == 1:  # fright mode
+                new_cell = (max(old_cell[0], 905), 0)
+            else:
+                new_cell = (-1, 0)#default()
+            return matrix_update(ff, ghost_x, ghost_y, new_cell)
+
+        f3 = list_fold(apply_ghost, f2, ghosts)
+
+        return f3
 
     field = apply_n_times(propagate_field, 10, old_field)
 
@@ -34,6 +51,7 @@ def step(state, world):
     best = list_fold(pick_best, candidate0, candidates)
 
     return (state[0], field), best[0]
+    #return ghosts[0], 0
 
 
 def default():
