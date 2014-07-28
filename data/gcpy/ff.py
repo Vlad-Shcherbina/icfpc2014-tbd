@@ -5,7 +5,11 @@ def main(world, _ghosts):
 
 
 def step(state, world):
-    return (state, 1)
+    field = state[1:]
+    map = world[0]
+    field1 = diffuse(field)
+    field2 = matrix_map(merge_cell, matrix_zip(field1, map))
+    return ((state[0], field2), 0)
 
 
 def default():
@@ -17,6 +21,57 @@ def always_default(x):
 
 def shift_up(mat):
     return list_append(mat[1:], list_map(always_default, mat[0]))
+
+
+def shift_down(mat):
+    return (list_map(always_default, mat[0]), )
+    #return list_append(mat[1:], list_map(always_default, mat[0]))
+
+
+
+def merge_cell(pair):
+    f_cell = pair[0]
+    map_cell = pair[1:]
+    if map_cell == 0:  # WALL
+        #return (-1, 0)
+        return f_cell  ## :()
+    elif map_cell == 2:  # PILL
+        return (900, 0)
+    # TODO
+    else:
+        return f_cell
+
+
+def decrement(field):
+    def cell_dec(xs):
+        def dec(x):
+            if x == 0:
+                return 0
+            else:
+                return x - 1
+        return list_map(dec, xs)
+    return matrix_map(cell_dec, field)
+
+
+def combine(field1, field2):
+    def cell_max(pair):
+        xs = pair[0]
+        ys = pair[1:]
+        def max(pair):
+            x = pair[0]
+            y = pair[1:]
+            if x > y:
+                return x
+            else:
+                return y
+        return list_map(max, list_zip(xs, ys))
+    return matrix_map(cell_max, matrix_zip(field1, field2))
+
+
+def diffuse(field):
+    field1 = shift_up(field)
+    t = combine(field, field1)
+    return decrement(t)
 
 
 ################################################
@@ -87,6 +142,17 @@ def list_zip(xs, ys):
         return 0
     else:
         return ((xs[0], ys[0]), list_zip(xs[1:], ys[1:]))
+
+
+def list_drop_last(xs):
+    if int(xs):
+        return fail_()
+    else:
+        t = xs[1:]
+        if int(t):
+            return 0
+        else:
+            return (xs[0], list_drop_last(t))
 
 
 # matrix utils

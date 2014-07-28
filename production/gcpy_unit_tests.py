@@ -57,6 +57,16 @@ def list_append_test():
         == [0, 1, 2, 42])
 
 
+def list_drop_last_test():
+    assert (
+        cons_to_list(call('ff.py', 'list_drop_last', lto_to_cons([42])))
+        == [])
+
+    assert (
+        cons_to_list(call('ff.py', 'list_drop_last', lto_to_cons(range(5))))
+        == range(4))
+
+
 def list_update_test():
     assert (
         cons_to_list(call('ff.py',
