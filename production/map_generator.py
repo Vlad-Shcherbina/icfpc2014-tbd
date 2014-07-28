@@ -52,16 +52,12 @@ def save_map(map, filename):
 
 
 def main():
-    cnt = 0
-    for num_loops in 3, 4, 5:
-        for block_size in 4, 5, 6:
-            map = manhattan(num_loops * block_size + 3, block_size + 3, block_size)
-            place(map, r'\%====' + 'o' * num_loops, seed=cnt)
-            cnt += 1
-            fill_with_pills(map, 0.5)
-            save_map(map, 'braid4gh_{0}x{1}x{1}.txt'.format(
-                num_loops,
-                block_size))
+    for size in 16, 32, 64, 128, 256:
+        map = manhattan(size, size, 2)
+        place(map, r'\%')
+        place(map, 'o='*size)
+        fill_with_pills(map, 0.8)
+        save_map(map, 'stress{0}x{0}.txt'.format(size))
 
 
 if __name__ == '__main__':
