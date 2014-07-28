@@ -1,4 +1,6 @@
 import logging
+import pprint
+pp = pprint.PrettyPrinter(indent=2)
 
 REGISTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'pc']
 PC = REGISTERS.index('pc')
@@ -270,7 +272,21 @@ class GHC:
             if self.registers[PC] == pc:
                 self.registers[PC] = (self.registers[PC] + 1) % 256
             cycles += 1
+        # Debug for splitter
+        logging.info("Register dump:")
+        registers = "ABCDEFGHP"
+        msg = ""
+        for i in range(len(self.registers)):
+            msg = msg + registers[i] + ": " + str(self.registers[i]) + ";  "
+        logging.info(msg)
+        logging.info("Memory dump:")
+        for i in range(len(self.data)):
+            if(self.data[i] != 0):
+                logging.info("[" + str(i) + "]: " + str(self.data[i]))
+        logging.info("New direction:")
+        logging.info(str(self.new_direction))
         return self.new_direction
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
