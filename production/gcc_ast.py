@@ -346,14 +346,25 @@ class GccCall(GccASTNode):
     def emit(self, builder, context):
         for arg in self.args:
             arg.emit(builder, context)
+        recursive = self.is_call_in_same_closure(context)
+        if recursive:
+            builder.add_instruction("dum", len(self.args))
         self.callee.emit(builder, context)
         if context.is_tail(self):
             context.terminated = True
-            insn_name = "tap"
+            insn_name = "trap" if recursive else "tap"
         else:
-            insn_name = "ap"
+            insn_name = "rap" if recursive else "ap"
         builder.add_instruction(insn_name, len(self.args),
                                 source=self.source_location)
+
+    def is_call_in_same_closure(self, context):
+        if isinstance(self.callee, GccNameReference):
+            fn = context.resolve_function(self.callee.name)
+            if fn:
+                return (fn.parent_function and
+                        fn.parent_function == context.function.parent_function)
+        return False
 
 
 class GccConditionalBlock(GccASTNode):

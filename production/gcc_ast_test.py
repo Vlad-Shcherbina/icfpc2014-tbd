@@ -295,6 +295,24 @@ class GccASTTest(unittest.TestCase):
             RTN
             """, builder.text)
 
+    def test_nested_function_recursive(self):
+        program = GccProgram()
+        body = program.add_function("main", ["x"])
+        body.add_instruction(GccCall(GccNameReference("nested"), []))
+        nested = body.add_nested_function("nested", [])
+        nested.add_instruction(GccCall(GccNameReference("nested"), []))
+        builder = GccTextBuilder()
+        program.emit(builder)
+        self.assert_code_equals("""
+        ;$func_main$
+            LDF 2  ; $func_main_nested$
+            TAP 0
+        ;$func_main_nested$
+            DUM 0
+            LDF 2  ; $func_main_nested$
+            TRAP 0
+            """, builder.text)
+
 
 if __name__ == '__main__':
     import sys
