@@ -4,6 +4,7 @@ import os
 import glob
 import multiprocessing
 import copy
+import itertools
 
 import game
 import map_loader
@@ -98,11 +99,16 @@ def play_tournament(maps, lm_specs, ghost_team_specs, parallel=False):
                 results.append(result)
 
     if parallel:
-        results = multiprocessing.Pool().map(play, results)
+        results_generator = multiprocessing.Pool().imap_unordered(play, results)
     else:
-        results = map(play, results)
+        results_generator = itertools.imap(play, results)
 
-    return results
+    rs = []
+    for i, result in enumerate(results_generator):
+        logger.warning('{}/{}, {}%'.format(i, len(results), 100 * i // len(results)))
+        rs.append(result)
+
+    return rs
 
 
 def save_results(results, filename):
@@ -127,7 +133,7 @@ def all_rotations(maps):
 
 def main():
     logging.basicConfig(level=logging.WARNING)
-    logger.setLevel(logging.INFO)
+    #logger.setLevel(logging.INFO)
     results = play_tournament(
         # maps=[
         #     'map_21_9_10_3_0.7.txt#2'
@@ -136,15 +142,15 @@ def main():
         #     'gen/hz.txt',
         #     '../../twigil_scratch/map_91_91_100_10.txt',
         #],
-        #maps=all_rotations(all_maps(max_size=1500)),
-        maps=all_maps(max_size=500),
+        maps=all_rotations(all_maps(max_size=2500)),
+        #maps=all_maps(max_size=500),
         lm_specs=[
             #'py:lm_ai.Oscillating(frequency=5)',
             #'py:lm_ai.NearestPill()',
             #'gcc_file:YoleGCC:../data/lms/right.gcc',
             #'py:lm_ai.NearestPill(straight=True)',
-            #'py:lm_ai.TunnelDigger()',
-            #'py:lm_wave.Wavy(50)',
+            'py:lm_ai.TunnelDigger()',
+            'py:lm_wave.Wavy(50)',
             'py:lm_ff.ForceField()',
             'gcpy_file:YoleGCC:ff.py',
             #'gcc_file:VorberGCC:../data/lms/right.gcc',
