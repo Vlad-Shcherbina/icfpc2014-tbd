@@ -83,15 +83,18 @@ ifnot b > yy
     mov deltay, yy
     sub deltay, b
     ifnot deltay = 0
-        mov pacmandir, GODOWN
+        mov pacmandir, GOUP
 else
     mov deltay, b
     sub deltay, yy
     ifnot deltay = 0
-        mov pacmandir, GOUP
+        mov pacmandir, GODOWN
 
-mov pacmannear, deltax
-add pacmannear, deltay
+mov pacmannear, 255
+ifnot deltax > GHOSTVISION
+    ifnot deltay > GHOSTVISION
+        mov pacmannear, deltax
+        add pacmannear, deltay
 ifnot pacmannear > GHOSTVISION
     ifnot vitality = FRIGHTENED
         ; Yummy!
