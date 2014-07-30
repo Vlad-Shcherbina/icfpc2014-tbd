@@ -1,8 +1,8 @@
 import sys
 import nose
-from nose.tools import eq_
+from nose.tools import eq_, raises
 
-from goto import goto
+from goto import goto, MissingLabelError, DuplicateLabelError
 
 
 @goto
@@ -28,6 +28,21 @@ def test_loop():
         goto .loop
     visited.append(43)
     eq_(visited, [42, 1, 2, 3, 43])
+
+
+@raises(MissingLabelError)
+def test_missing_label():
+    @goto
+    def f():
+        goto .missing_label
+
+
+@raises(DuplicateLabelError)
+def test_duplicate_label():
+    @goto
+    def f():
+        label .x
+        label .x
 
 
 @goto

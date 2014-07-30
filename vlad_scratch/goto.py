@@ -9,6 +9,10 @@ class MissingLabelError(Exception):
     pass
 
 
+class DuplicateLabelError(Exception):
+    pass
+
+
 def goto(fn):
     """
     A function decorator to add the goto command for a function.
@@ -21,10 +25,10 @@ def goto(fn):
 
     goto .foo
     """
+    assert fn.func_code.co_freevars == (), "don't use for nested functions"
     labels = {}
-    gotos = {}
-    globalName = None
-    index = 0
+    gotos = []
+    global_name = None
     end = len(fn.func_code.co_code)
     i = 0
 
@@ -36,31 +40,35 @@ def goto(fn):
 
         if op > dis.HAVE_ARGUMENT:
             b1 = ord(fn.func_code.co_code[i])
-            b2 = ord(fn.func_code.co_code[i+1])
+            b2 = ord(fn.func_code.co_code[i + 1])
             num = b2 * 256 + b1
 
             if name == 'LOAD_GLOBAL':
-                globalName = fn.func_code.co_names[num]
+                global_name = fn.func_code.co_names[num]
                 index = i - 1
                 i += 2
                 continue
 
             if name == 'LOAD_ATTR':
-                if globalName == 'label':
-                    labels[fn.func_code.co_names[num]] = index
-                elif globalName == 'goto':
-                    gotos[fn.func_code.co_names[num]] = index
+                if global_name == 'label':
+                    label = fn.func_code.co_names[num]
+                    if label in labels:
+                        raise DuplicateLabelError("Duplicate label: %s" % label)
+                    labels[label] = index
+                elif global_name == 'goto':
+                    label = fn.func_code.co_names[num]
+                    gotos.append((label, index))
 
-            name = None
             i += 2
+        global_name = None
 
     # no-op the labels
     ilist = list(fn.func_code.co_code)
-    for label,index in labels.items():
+    for label, index in labels.items():
         ilist[index:index+7] = [chr(dis.opmap['NOP'])]*7
 
     # change gotos to jumps
-    for label,index in gotos.items():
+    for label, index in gotos:
         if label not in labels:
             raise MissingLabelError("Missing label: %s"%label)
 
