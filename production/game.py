@@ -81,6 +81,7 @@ def lambda_man_ai_from_spec(lm_spec):
     from vorber_gcc import VorberGCC
     from yole_gcc import GccMachine as YoleGCC
     from fj_gcc import FjGCC as FjGCC
+    from vlad_gcc import VladGCC
     import lm_ai
     import lm_wave
     import lm_ff

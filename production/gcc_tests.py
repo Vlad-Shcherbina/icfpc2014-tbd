@@ -8,6 +8,9 @@ import yole_gcc
 import vorber_gcc
 from asm_parser import parse_gcc
 
+sys.path.append('../vlad_scratch')
+import vlad_gcc
+
 
 def fj_call(code, args):
     machine = fj_gcc.FjGCC(parse_gcc(code))
@@ -21,8 +24,12 @@ def vorber_call(code, args):
     machine = vorber_gcc.VorberGCC(parse_gcc(code))
     return machine.call(0, args)
 
+def vlad_call(code, args):
+    machine = vlad_gcc.VladGCC(parse_gcc(code))
+    return machine.call(0, args)
+
 # TODO: fix VorberGCC and enable tests for it as well.
-CALLS = [fj_call, yole_call]#, vorber_call]
+CALLS = [fj_call, yole_call, vlad_call]#, vorber_call]
 
 
 def test_add():
@@ -30,6 +37,25 @@ def test_add():
         code = """
         LDC 21
         LDC 21
+        ADD
+        RTN
+        """
+        eq_(call(code, []), 42)
+    for call in CALLS:
+        yield f, call
+
+
+def test_list_ops():
+    def f(call):
+        code = """
+        LDC 41
+        LDC 999
+        CONS
+        CAR
+        LDC 999
+        LDC 1
+        CONS
+        CDR
         ADD
         RTN
         """
