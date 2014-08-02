@@ -78,6 +78,10 @@ class VladGCC(GCCInterface):
             print>>result, '    y = self.pop_int()'
             print>>result, '    x = self.pop_int()'
             print>>result, '    self.data_stack.append(int(x > y))'
+        elif cmd.op == GCC_CMD.CGTE:
+            print>>result, '    y = self.pop_int()'
+            print>>result, '    x = self.pop_int()'
+            print>>result, '    self.data_stack.append(int(x >= y))'
         elif cmd.op == GCC_CMD.CEQ:
             print>>result, '    y = self.pop_int()'
             print>>result, '    x = self.pop_int()'

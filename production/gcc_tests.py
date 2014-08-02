@@ -32,15 +32,67 @@ def vlad_call(code, args):
 CALLS = [fj_call, yole_call, vlad_call]#, vorber_call]
 
 
-def test_add():
+def test_arithmetic():
     def f(call):
         code = """
-        LDC 21
-        LDC 21
+        LDC 40
+        LDC 10
+        SUB
+        LDC 2
+        MUL
+        LDC 7
+        DIV
+        LDC 34
         ADD
         RTN
         """
         eq_(call(code, []), 42)
+    for call in CALLS:
+        yield f, call
+
+
+def test_comparisons():
+    def f(call):
+        code = """
+        LDC 1
+        LDC 2
+        CEQ
+        LDC 2
+        LDC 2
+        CEQ
+        CONS
+
+        LDC 2
+        LDC 2
+        CGT
+        LDC 2
+        LDC 1
+        CGT
+        CONS
+
+        LDC 1
+        LDC 2
+        CGTE
+        LDC 2
+        LDC 2
+        CGTE
+        CONS
+
+        LDC 2
+        LDC 2
+        CONS
+        ATOM
+        LDC 1
+        ATOM
+        CONS
+
+        CONS
+        CONS
+        CONS
+
+        RTN
+        """
+        eq_(call(code, []), ((0, 1), ((0, 1), ((0, 1), (0, 1)))))
     for call in CALLS:
         yield f, call
 
