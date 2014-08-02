@@ -1,6 +1,11 @@
+import sys
 from unittest import TestCase
 
+import nose
+from nose.tools import eq_
+
 from game import *
+from map_loader import load_map
 
 
 class GameTest(TestCase):
@@ -27,6 +32,13 @@ class GameTest(TestCase):
         self.assertEquals(map.move_queue[0], lman)
         self.assertEquals(264, lman.next_move)
 
+    def test_eat_fruit(self):
+        map = load_map('eat_fruit.txt')
+        map.set_ai_specs('py:lm_ai.Oscillating(frequency=5)', ['ghc:miner.ghc'])
+        while not map.game_over():
+            map.step()
+        eq_(map.get_final_score(), 200)
+
     def test_expire_fruits(self):
         # FIXME
         # this test is failing because pacman is not on the map
@@ -44,3 +56,10 @@ class GameTest(TestCase):
         map.step()
         self.assertEquals(EMPTY, map.at(1, 1))
         self.assertEquals(0, len(map.move_queue))
+
+
+if __name__ == '__main__':
+    nose.run_exit(argv=[
+        sys.argv[0], __file__,
+        '--verbose', '--with-doctest', '--logging-level=INFO'
+    ])
