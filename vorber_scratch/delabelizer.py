@@ -10,10 +10,10 @@ import re
 import fileinput
 
 def delabelize(code_lines):
-    label_re = re.compile('^\w*:')
+    label_re = re.compile('^\S*:')
     #remove empty and fully ws lines
     lines = code_lines
-    
+
     command_index = 0
     line_index = 0
     expanded = []
@@ -39,6 +39,7 @@ def delabelize(code_lines):
             for l in labels:
                 if cmd.find(l['name']) != -1:
                     cmd = cmd.replace(l['name'], str(l['ci']), 1) #replace first only
+                    cmd = '{:40}  ; --> {}'.format(cmd, l['name'])
                     break #we don't handle cases when one command references >1 labels
             result.append(cmd)
         else:
@@ -49,7 +50,7 @@ import sys
 
 def main():
     new = delabelize(map(str.rstrip, fileinput.input()))
-    
+
     sys.stdout.write('\n'.join(new))
     pass
 
