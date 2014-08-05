@@ -2,7 +2,7 @@ import sys
 import contextlib
 import inspect
 
-sys.path.append('../vorber_scratch')
+sys.path.append('../production')
 from cfg_builder import CfgBuilder
 from delabelizer import delabelize
 
