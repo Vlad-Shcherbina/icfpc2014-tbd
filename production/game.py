@@ -5,7 +5,7 @@ import collections
 from ghc import GHC
 import ghost_ai
 from asm_parser import parse_gcc
-import ghosthon
+
 
 MAX_TICKS = 3072 * 1000
 MAX_TICKS_INIT = MAX_TICKS * 60
@@ -58,6 +58,9 @@ logger = logging.getLogger(__name__)
 
 
 def ghost_ai_from_spec(ghost_spec):
+    import ghosthon
+    import aghost
+
     type, details = ghost_spec.split(':', 1)
     if type == 'ghc':
         with open(os.path.join('../data/ghosts', details)) as fin:
@@ -67,6 +70,10 @@ def ghost_ai_from_spec(ghost_spec):
         with open(details) as fin:
             code = fin.read()
         return GhostAI(ghosthon.full_compile(code))
+    elif type == 'aghost':
+        with open(details) as fin:
+            code = fin.read()
+        return GhostAI(aghost.py_to_ghc(code))
     elif type == 'py':
         return getattr(ghost_ai, details)()
     elif type == "empty":
