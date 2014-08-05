@@ -1,4 +1,6 @@
 import sys
+import contextlib
+import inspect
 
 sys.path.append('../vorber_scratch')
 from cfg_builder import CfgBuilder
@@ -30,7 +32,7 @@ class AghostBuilder(CfgBuilder):
                 return BinaryOp('DIV', self, other)
             def compare(self, other, op):
                 other = Expression.ensure(other)
-                label = builder.get_simple_label(skip=1)
+                label = builder.get_label()
                 label += '{{{}{}{}}}'.format(self, {'JEQ':'==', 'JLT':'<', 'JGT':'>'}[op],other)
                 builder.branch({None: label + '?'})
                 left = self.materialize()
@@ -49,6 +51,8 @@ class AghostBuilder(CfgBuilder):
                 return not self > other
             def __ge__(self, other):
                 return not self < other
+            def __nonzero__(self):
+                return self != 0
             @staticmethod
             def ensure(x):
                 if isinstance(x, int):
@@ -142,6 +146,25 @@ class AghostBuilder(CfgBuilder):
 
         mem = Mem()
 
+        builder.context_stack = []
+
+        @contextlib.contextmanager
+        def context(data):
+            call_stack = builder.get_stack()
+            while call_stack:
+                f = call_stack.pop(0)
+                if f[1].endswith('contextlib.py'):
+                    break
+            else:
+                assert False, 'contextlib not found in the stack'
+            item = (call_stack, data)
+            builder.context_stack.append(item)
+            try:
+                yield
+            finally:
+                t = builder.context_stack.pop()
+                assert t is item
+
         return dict(
             join=self.join,
             inline=self.inline,
@@ -150,10 +173,22 @@ class AghostBuilder(CfgBuilder):
             get_lm_coords=get_lm_coords,
             get_index=get_index,
             get_ghost_coords=get_ghost_coords,
+            context=context,
         )
 
+    def get_label(self, skip=1):
+        stack = self.get_stack()
+        result = []
+        for i, frame in enumerate(reversed(stack[skip + 1:])):
+            frame_info = inspect.getframeinfo(frame[0])
+            for context_call_stack, context_data in self.context_stack:
+                if len(context_call_stack) == i + 1:
+                    result.append('context({!r})'.format(context_data))
+            result.append('{}:{}'.format(frame_info.function, frame_info.lineno))
+        return '/'.join(result)
+
     def join(self):
-        label = self.get_simple_label(skip=1)
+        label = self.get_label()
         self.branch({None: label})
 
     def inline(self, cmd):
@@ -216,6 +251,7 @@ def main():
                 set_dir(DOWN)
             else:
                 set_dir(UP)
+
         inline('HLT')
 
     builder = AghostBuilder()
