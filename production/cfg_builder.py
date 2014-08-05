@@ -37,7 +37,8 @@ class CfgBuilder(object):
             postorder.append(block)
         rec(self.begin)
         assert len(postorder) == len(self.basic_blocks)
-        assert postorder[0] == self.end
+        # in the presence of loops it's not guaranteed
+        # assert postorder[0] == self.end
         assert postorder[-1] == self.begin
         return postorder[::-1]
 
@@ -70,6 +71,9 @@ class CfgBuilder(object):
         else:
             raise ReachedNewBranchingPoint(alternatives)
 
+    def reset(self):
+        pass
+
     def explore(self, f):
         old_globals = dict(f.func_globals)
         f.func_globals.update(self.faked_globals())
@@ -84,6 +88,8 @@ class CfgBuilder(object):
             self.cur_path = path[:]
             self.current = self.begin
 
+            self.reset()
+
             try:
                 f()
                 self.branch({None: self.END_LABEL})
@@ -91,7 +97,7 @@ class CfgBuilder(object):
                 self.end = self.current
             except ReachedNewBranchingPoint as e:
                 assert not self.current.next
-                for alt, label in e.alternatives.items():
+                for alt, label in sorted(e.alternatives.items()):
                     if label not in self.basic_blocks:
                         self.basic_blocks[label] = BasicBlock(label)
                         work_queue.append(path + [alt])

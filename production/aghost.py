@@ -9,9 +9,11 @@ from delabelizer import delabelize
 class AghostBuilder(CfgBuilder):
     """ Abstract-interpretation-based (sort of) ghost compiler. """
 
+    def reset(self):
+        self.next_temp = 100
+
     def faked_globals(self):
         builder = self
-        builder.next_temp = 100
 
         def make_temp():
             assert builder.next_temp < 200
@@ -29,6 +31,8 @@ class AghostBuilder(CfgBuilder):
                 return BinaryOp('MUL', self, other)
             def __div__(self, other):
                 return BinaryOp('DIV', self, other)
+            def __xor__(self, other):
+                return BinaryOp('XOR', self, other)
             def compare(self, other, instr, op):
                 other = Expression.ensure(other)
                 label = builder.get_label()
@@ -55,7 +59,7 @@ class AghostBuilder(CfgBuilder):
             @staticmethod
             def ensure(x):
                 if isinstance(x, int):
-                    return Atom(x)
+                    return Atom(x % 256)
                 assert isinstance(x, Expression), x
                 return x
 
@@ -143,6 +147,18 @@ class AghostBuilder(CfgBuilder):
             self.inline('INT 5')
             return mem['a'], mem['b']
 
+        def get_ghost_status(index):
+            """ Return pair (vitality, direction). """
+            Expression.ensure(index).materialize(mem['a'])
+            self.inline('INT 6')
+            return mem['a'], mem['b']
+
+        def get_map_square(x, y):
+            Expression.ensure(x).materialize(mem['a'])
+            Expression.ensure(y).materialize(mem['b'])
+            self.inline('INT 7')
+            return mem['a']
+
         mem = Mem()
 
         builder.context_stack = []
@@ -172,6 +188,8 @@ class AghostBuilder(CfgBuilder):
             get_lm_coords=get_lm_coords,
             get_index=get_index,
             get_ghost_coords=get_ghost_coords,
+            get_ghost_status=get_ghost_status,
+            get_map_square=get_map_square,
             context=context,
         )
 
@@ -211,7 +229,7 @@ class AghostBuilder(CfgBuilder):
                     result.append('    JEQ {}, 0, 0'.format(bb.next[False].label))
             elif None in bb.next:
                 assert len(bb.next) == 1
-                if bbs[i + 1] is not bb.next[None]:
+                if i == len(bbs) - 1 or bbs[i + 1] is not bb.next[None]:
                     result.append('    JEQ {}, 0, 0'.format(bb.next[None].label))
             else:
                 assert bb is self.end
