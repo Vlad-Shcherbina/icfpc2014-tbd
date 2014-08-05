@@ -30,21 +30,21 @@ class AghostBuilder(CfgBuilder):
                 return BinaryOp('MUL', self, other)
             def __div__(self, other):
                 return BinaryOp('DIV', self, other)
-            def compare(self, other, op):
+            def compare(self, other, instr, op):
                 other = Expression.ensure(other)
                 label = builder.get_label()
-                label += '{{{}{}{}}}'.format(self, {'JEQ':'==', 'JLT':'<', 'JGT':'>'}[op],other)
+                label += '{{{}{}{}}}'.format(self, op, other)
                 builder.branch({None: label + '?'})
                 left = self.materialize()
                 right = other.materialize()
-                builder.add_statement('{} __jump_dst, {}, {}'.format(op, left, right))
+                builder.add_statement('{} __jump_dst, {}, {}'.format(instr, left, right))
                 return builder.branch({True: label + '-true', False: label + '-false'})
             def __eq__(self, other):
-                return self.compare(other, 'JEQ')
+                return self.compare(other, 'JEQ', '==')
             def __lt__(self, other):
-                return self.compare(other, 'JLT')
+                return self.compare(other, 'JLT', '<')
             def __gt__(self, other):
-                return self.compare(other, 'JGT')
+                return self.compare(other, 'JGT', '>')
             def __ne__(self, other):
                 return not self == other
             def __le__(self, other):
