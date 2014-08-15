@@ -44,7 +44,7 @@ class GccMachine(GCCInterface):
 
     def unmarshal(self, x):
         return x
-    
+
 
     def call(self, address_or_closure, *args, **kwargs):
         assert len(self.data_stack) == 0
@@ -58,6 +58,9 @@ class GccMachine(GCCInterface):
         self.run(kwargs.get('max_ticks'))
         assert len(self.data_stack) == 1
         return deep_unmarshal(self.unmarshal, self.data_stack.pop())
+
+    def brk(self, arg):
+        self.pop()
 
     def ldc(self, arg):
         self.data_stack.append(to_int32(arg))
