@@ -214,8 +214,7 @@ class LambdaMan(Actor):
             self.speed = LAMBDAMAN_SPEED
 
     def eat(self, score):
-        if self.map.at(self.x, self.y) != FRUIT:
-            self.map.clear(self.x, self.y)
+        self.map.clear(self.x, self.y)
         self.score += score
         self.speed = LAMBDAMAN_EATING_SPEED
 
@@ -286,11 +285,13 @@ class FruitSpawnpoint(Actor):
 
     def move(self):
         if self.state == 0 or self.state == 2:
+            self.map.spawn(self.x, self.y, FRUIT)
             lman = self.map.lambdaman
             # what if we spawned on top of the LM
             lman.check_collisions()
             self.speed = FRUIT_EXPIRE_TIMES[self.state/2] - FRUIT_SPAWN_TIMES[self.state/2]
         else:
+            self.map.clear(self.x, self.y)
             if self.state == 3:
                 self.expired = True
             else:
@@ -310,6 +311,9 @@ class Map(object):
         self.fruits_eaten = 0
         self.power_pills_eaten = 0
         self.fright_end = None
+
+        self.fruit_spawn = None
+
         for y, line in enumerate(lines):
             if y == 0:
                 width = len(line)
@@ -334,7 +338,8 @@ class Map(object):
                 elif contents == FRUIT:
                     spawnpoint = FruitSpawnpoint(self, x, y)
                     self.schedule(spawnpoint)
-                    contents = FRUIT
+                    self.fruit_spawn = x, y
+                    contents = EMPTY
                 line_cells.append(contents)
             self.cells.append(line_cells)
 

@@ -101,7 +101,11 @@ class GCCWrapper(object):
 
 
     def encode_map(self, world):
-        return [self.encode_map_row(world, y) for y in range(world.height())]
+        result = [self.encode_map_row(world, y) for y in range(world.height())]
+        if world.fruit_spawn is not None:
+            x, y = world.fruit_spawn
+            result[y][x] = game.FRUIT
+        return result
 
 
     def encode_map_row(self, world, y):
