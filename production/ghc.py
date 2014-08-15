@@ -1,5 +1,8 @@
 import logging
 import pprint
+
+import game
+
 pp = pprint.PrettyPrinter(indent=2)
 
 logger = logging.getLogger(__name__)
@@ -246,7 +249,10 @@ class GHC:
             self.registers[1] = self.gamemap.ghosts[i].direction
         elif which == 7:
             x, y = self.registers[0:2]
-            self.registers[0] = self.gamemap.cells[y][x]
+            if x < self.gamemap.width() and y < self.gamemap.height():
+                self.registers[0] = self.gamemap.cells[y][x]
+            else:
+                self.registers[0] = game.WALL
         elif which == 8:
             logger.debug('ghost %s outputting registers: %s %s', self.index, int(self.registers[PC]),
                 map(int, self.registers[:-1]))
@@ -269,7 +275,7 @@ class GHC:
         self.halted = False
         self.new_direction = None
         while not self.halted and (cycles < 1024):
-            assert cycles < 1000  # just in case
+            # assert cycles < 1000  # just in case
             pc = self.registers[PC]
             self.execute(self.code[pc])
             if self.registers[PC] == pc:
